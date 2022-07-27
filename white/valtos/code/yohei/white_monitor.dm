@@ -14,7 +14,7 @@
 	if(protected_guy != DEAD)
 		to_chat(owner, span_warning ("Мой наниматель ещё жив и Y corp отправила мне плату за мою работу"))
 		for(var/mob/living/carbon/human/H in white_action_guys)
-			inc_metabalance(H, current_task.prize, reason = "Оплата от Y corp.")
+			inc_metabalance(H, 200, reason = "Оплата от Y corp.")
 			var/obj/item/card/id/cardid = H.get_idcard(FALSE)
 			cardid?.registered_account?.adjust_money(rand(2500, 5000))
 			var/obj/item/armament_points_card/APC = locate() in H.get_all_gear()
@@ -22,4 +22,4 @@
 				APC.points += 5
 				APC.update_maptext() //до тех пор, пока задания не придумаем, тут будет чисто это
 
-addtimer(CALLBACK(src, .proc/white_payment), 5 MINUTES)
+addtimer(CALLBACK(src, .proc/white_payment), 10 MINUTES)
