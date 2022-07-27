@@ -299,7 +299,10 @@
 
 /obj/item/card/id/yohei/attackby(obj/item/W, mob/user, params)
 	. = ..()
-
+	if(HAS_TRAIT(user, TRAIT_YOHEI))
+		var/obj/lab_monitor/yohei/LM = GLOB.yohei_main_controller
+		if(LM)
+			LM.internal_radio.talk_into(LM, "ВНИМАНИЕ: [user.name] пытался провернуть аферу с наймом внутри фирмы. Сломайте ему колени.", FREQ_YOHEI)
 	if(!isidcard(W) || istype(W, /obj/item/card/id/yohei))
 		return
 
@@ -505,3 +508,7 @@
 		H.adjustStaminaLoss(100)
 		to_chat(user, span_notice("Вот я и на месте!"))
 	return
+
+/obj/item/defibrillator/compact/loaded/yohei
+	combat = TRUE
+	safety = FALSE

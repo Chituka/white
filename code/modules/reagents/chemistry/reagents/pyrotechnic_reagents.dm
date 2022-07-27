@@ -260,7 +260,7 @@
 	consumer.color = COLOR_WHITE
 
 //Pauses decay! Does do something, I promise.
-/datum/reagent/cryostylane/on_mob_dead(mob/living/carbon/consumer)
+/datum/reagent/cryostylane/on_mob_dead(mob/living/carbon/consumer, delta_time)
 	. = ..()
 	metabolization_rate = 0.05 * REM //slower consumption when dead
 
@@ -378,7 +378,7 @@
 		return
 
 	if(reac_volume >= 1)
-		var/obj/effect/particle_effect/foam/firefighting/foam = (locate(/obj/effect/particle_effect/foam) in exposed_turf)
+		var/obj/effect/particle_effect/fluid/foam/firefighting/foam = (locate(/obj/effect/particle_effect/fluid/foam) in exposed_turf)
 		if(!foam)
 			foam = new(exposed_turf)
 		else if(istype(foam))

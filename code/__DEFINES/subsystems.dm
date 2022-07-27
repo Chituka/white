@@ -126,6 +126,7 @@
 #define INIT_ORDER_EVENTS			70
 #define INIT_ORDER_IDACCESS 		66
 #define INIT_ORDER_JOBS				65
+#define INIT_ORDER_SPD				64
 #define INIT_ORDER_QUIRKS			60
 #define INIT_ORDER_AI_MOVEMENT 		56 //We need the movement setup
 #define INIT_ORDER_AI_CONTROLLERS 	55 //So the controller can get the ref
@@ -153,7 +154,6 @@
 #define INIT_ORDER_ASSETS			-4
 #define INIT_ORDER_ICON_SMOOTHING	-5
 #define INIT_ORDER_OVERLAY			-6
-#define INIT_ORDER_XKEYSCORE		-10
 #define INIT_ORDER_STICKY_BAN		-10
 #define INIT_ORDER_LIGHTING			-20
 #define INIT_ORDER_SHUTTLE			-21
@@ -168,6 +168,7 @@
 // Subsystem fire priority, from lowest to highest priority
 // If the subsystem isn't listed here it's either DEFAULT or PROCESS (if it's a processing subsystem child)
 
+#define FIRE_PRIORITY_SPD 			10
 #define FIRE_PRIORITY_IDLE_NPC		10
 #define FIRE_PRIORITY_SERVER_MAINT	10
 #define FIRE_PRIORITY_RESEARCH		10
@@ -176,6 +177,7 @@
 #define FIRE_PRIORITY_GARBAGE		15
 #define FIRE_PRIORITY_DATABASE 		16
 #define FIRE_PRIORITY_WET_FLOORS	20
+#define FIRE_PRIORITY_FLUIDS 		20
 #define FIRE_PRIORITY_AIR			20
 #define FIRE_PRIORITY_NPC 			20
 #define FIRE_PRIORITY_NPC_MOVEMENT 	21
@@ -281,7 +283,7 @@
 
 // Subsystem delta times or tickrates, in seconds. I.e, how many seconds in between each process() call for objects being processed by that subsystem.
 // Only use these defines if you want to access some other objects processing delta_time, otherwise use the delta_time that is sent as a parameter to process()
-#define SSFLUIDS_DT (SSfluids.wait/10)
+#define SSFLUIDS_DT (SSplumbing.wait/10)
 #define SSMACHINES_DT (SSmachines.wait/10)
 #define SSMOBS_DT (SSmobs.wait/10)
 #define SSOBJ_DT (SSobj.wait/10)

@@ -68,6 +68,8 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/datum/admins/proc/paintings_manager,
 	/datum/admins/proc/known_alts_panel,
 	/client/proc/clicker_panel,
+	/datum/admins/proc/fishing_calculator,
+	/datum/admins/proc/get_spd_list,
 	)
 GLOBAL_LIST_INIT(admin_verbs_ban, list(/client/proc/unban_panel, /client/proc/ban_panel, /client/proc/stickybanpanel, /client/proc/assblast_panel, /client/proc/show_assblasts))
 GLOBAL_PROTECT(admin_verbs_ban)
@@ -149,7 +151,8 @@ GLOBAL_PROTECT(admin_verbs_server)
 	/client/proc/toggle_hub,
 	/client/proc/toggle_cdn,
 	/client/proc/toggle_tournament_rules,
-	/client/proc/toggle_major_mode
+	/client/proc/toggle_major_mode,
+	/datum/admins/proc/change_hub_message
 	)
 GLOBAL_LIST_INIT(admin_verbs_debug, world.AVerbsDebug())
 GLOBAL_PROTECT(admin_verbs_debug)
@@ -228,6 +231,7 @@ GLOBAL_LIST_INIT(admin_verbs_secured, list(
 	/client/proc/fix_air, /*resets air in designated radius to its default atmos composition*/
 	/client/proc/force_evenmaster_rules,
 	/client/proc/reestablish_db_connection, /*reattempt a connection to the database*/
+	/datum/admins/proc/kill_system32,
 	))
 GLOBAL_PROTECT(admin_verbs_secured)
 GLOBAL_LIST_INIT(admin_verbs_poll, list(/client/proc/poll_panel))

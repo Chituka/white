@@ -41,10 +41,6 @@ GLOBAL_VAR(restart_counter)
 
 	GLOB.config_error_log = GLOB.world_manifest_log = GLOB.world_pda_log = GLOB.world_job_debug_log = GLOB.sql_error_log = GLOB.world_href_log = GLOB.world_runtime_log = GLOB.world_attack_log = GLOB.world_game_log = GLOB.world_econ_log = GLOB.world_shuttle_log = "data/logs/config_error.[GUID()].log" //temporary file used to record errors with loading config, moved to log directory once logging is set bl
 
-	GLOB.revdata = new
-
-	InitTgs()
-
 	config.Load(params[OVERRIDE_CONFIG_DIRECTORY_PARAMETER])
 
 	load_admins()
@@ -60,9 +56,6 @@ GLOBAL_VAR(restart_counter)
 
 #ifndef USE_CUSTOM_ERROR_HANDLER
 	world.log = file("[GLOB.log_directory]/dd.log")
-#else
-	if (TgsAvailable())
-		world.log = file("[GLOB.log_directory]/dd.log") //not all runtimes trigger world/Error, so this is the only way to ensure we can see all of them.
 #endif
 
 	LoadVerbs(/datum/verbs/menu)
@@ -89,10 +82,6 @@ GLOBAL_VAR(restart_counter)
 	#ifdef AUTOWIKI
 	setup_autowiki()
 	#endif
-
-/world/proc/InitTgs()
-	TgsNew(new /datum/tgs_event_handler/impl, TGS_SECURITY_TRUSTED)
-	GLOB.revdata.load_tgs_info()
 
 /world/proc/HandleTestRun()
 	//trigger things to run the whole process
@@ -177,7 +166,7 @@ GLOBAL_VAR(restart_counter)
 	start_log(GLOB.world_mechcomp_log)
 	start_log(GLOB.world_exrp_log)
 
-	GLOB.changelog_hash = md5('html/changelog.html') //for telling if the changelog has changed recently
+	GLOB.changelog_hash = md5("data/changelog.json") //for telling if the changelog has changed recently
 	if(fexists(GLOB.config_error_log))
 		fcopy(GLOB.config_error_log, "[GLOB.log_directory]/config_error.log")
 		fdel(GLOB.config_error_log)
@@ -185,14 +174,7 @@ GLOBAL_VAR(restart_counter)
 	if(GLOB.round_id)
 		log_game("Round ID: [GLOB.round_id]")
 
-	// This was printed early in startup to the world log and config_error.log,
-	// but those are both private, so let's put the commit info in the runtime
-	// log which is ultimately public.
-	log_runtime(GLOB.revdata.get_log_message())
-
 /world/Topic(T, addr, master, key)
-	TGS_TOPIC	//redirect to server tools if necessary
-
 	var/static/list/topic_handlers = TopicHandlers()
 
 	var/list/input = params2list(T)
@@ -261,30 +243,8 @@ GLOBAL_VAR(restart_counter)
 	return
 	#endif
 
-	if(TgsAvailable())
-		var/do_hard_reboot
-		// check the hard reboot counter
-		var/ruhr = CONFIG_GET(number/rounds_until_hard_restart)
-		switch(ruhr)
-			if(-1)
-				do_hard_reboot = FALSE
-			if(0)
-				do_hard_reboot = TRUE
-			else
-				if(GLOB.restart_counter >= ruhr)
-					do_hard_reboot = TRUE
-				else
-					text2file("[++GLOB.restart_counter]", RESTART_COUNTER_PATH)
-					do_hard_reboot = FALSE
-
-		if(do_hard_reboot)
-			log_world("World hard rebooted at [time_stamp()]")
-			shutdown_logging() // See comment below.
-			TgsEndProcess()
-
 	log_world("World rebooted at [time_stamp()]")
 
-	TgsReboot()
 	shutdown_logging() // Past this point, no logging procs can be used, at risk of data loss.
 	if(CONFIG_GET(flag/this_shit_is_stable))
 		shelleo("curl -X POST http://localhost:3636/hard-reboot-white")
@@ -359,41 +319,42 @@ ooo++++++++ooymyosh/`````````````````````````````````````````````````..-:/oyddys
 ``:ooo+////////////+s.:/::::::::::::::::::::::::::::::::::::hhsshdyssyyyhdhyssssssyyys///sysdmmNmmmmshmNNNdhhmdNNdNNdsoh
 */
 
-GLOBAL_VAR_INIT(hub_mimic, FALSE)
-GLOBAL_VAR_INIT(hub_mimic_desc, "GO! GO! GO!")
+GLOBAL_VAR_INIT(status_for_mentally_ill_amoeba_users, TRUE)
+GLOBAL_VAR_INIT(custom_status_text, "- Пoлный пepeвoд нa рyccкий\n - Уникaльныe peжимы\n - Без лагов\n - Выcoкий уpoвeнь oтыгpышa\n\[<b>Мы тeбя ЖДЁМ</b>")
 
 /world/proc/update_status()
 
 	var/s = ""
 
-	if(!GLOB.hub_mimic)
-		s += "SS13.SU\] <big><b>FDev: White Dream: RU</b></big> <a href=\"http://station13.ru\">SITE</a> | <a href=\"https://discord.gg/2WAsvv5B5v\">DISCORD</a>\n\n"
-		switch(rand(1, 7))
-			if(1)
-				s += "<img src='https://assets.station13.ru/l/w7.png'>\n\n"
-				s += "\[<big>CLASSIC STATION</big>"
-			if(2)
-				s += "<img src='https://assets.station13.ru/l/w6.png'>\n\n"
-				s += "\[<big>ANIME HENTAI</big>"
-			if(3)
-				s += "<img src='https://assets.station13.ru/l/w5.png'>\n\n"
-				s += "\[<big>GRIMDARK EDITION</big>"
-			if(4)
-				s += "<img src='https://assets.station13.ru/l/w4.png'>\n\n"
-				s += "\[<big>CYBERPUNK EDITION</big>"
-			if(5)
-				s += "<img src='https://assets.station13.ru/l/w8.png'>\n\n"
-				s += "\[<big>REMOVE KEBAB</big>"
-			if(6)
-				s += "<img src='https://assets.station13.ru/l/w9.png'>\n\n"
-				s += "\[<big>PROBABLY NOT HARAM</big>"
-			if(7)
-				s += "<img src='https://assets.station13.ru/l/wz.png'>\n\n"
-				s += "\[<big>ZA POBEDU!</big>"
-	else
-		s += "<big><b>[GLOB.hub_mimic]: RU</b></big>\] <a href=\"http://station13.ru\">SITE</a> | <a href=\"https://discord.gg/2WAsvv5B5v\">DISCORD</a>\n\n"
-		s += "<img src='https://assets.station13.ru/l/w[rand(4, 8)].gif'>\n\n"
-		s += "\[<big>[GLOB.hub_mimic_desc]</big>"
+	if(GLOB.status_for_mentally_ill_amoeba_users)
+		s = "SS13.SU\] <b>[prob(1) ? "Чёpнaя Peaльнocть" : "Бeлaя Мeчтa"]:</b> <a href=\"https://discord.gg/2WAsvv5B5v\">DISCORD</a>\n" // length 87
+
+		s += GLOB.custom_status_text // 168 max
+
+		status = s
+		return
+
+	s = "SS13.SU\] <big><b>FDev: White Dream: RU</b></big> <a href=\"http://station13.ru\">SITE</a> | <a href=\"https://discord.gg/2WAsvv5B5v\">DISCORD</a>\n"
+
+	switch(rand(1, 6))
+		if(1)
+			s += "<img src='https://assets.station13.ru/l/w7.png'>\n"
+			s += "\[<big>CLASSIC STATION</big>"
+		if(2)
+			s += "<img src='https://assets.station13.ru/l/w6.png'>\n"
+			s += "\[<big>ANIME HENTAI</big>"
+		if(3)
+			s += "<img src='https://assets.station13.ru/l/w5.png'>\n"
+			s += "\[<big>GRIMDARK EDITION</big>"
+		if(4)
+			s += "<img src='https://assets.station13.ru/l/w4.png'>\n"
+			s += "\[<big>CYBERPUNK EDITION</big>"
+		if(5)
+			s += "<img src='https://assets.station13.ru/l/w8.png'>\n"
+			s += "\[<big>REMOVE KEBAB</big>"
+		if(6)
+			s += "<img src='https://assets.station13.ru/l/w9.png'>\n"
+			s += "\[<big>PROBABLY NOT HARAM</big>"
 
 	status = s
 

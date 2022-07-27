@@ -18,6 +18,7 @@
 	see_in_dark = 8
 	lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_INVISIBLE
 	initial_language_holder = /datum/language_holder/empty
+	retreat_distance = null //! retreat doesn't obey pass_flags, so won't work on blob mobs.
 	var/mob/camera/blob/overmind = null
 	var/obj/structure/blob/special/factory = null
 	var/independent = FALSE
@@ -70,6 +71,18 @@
 	. = ..()
 	if(istype(mover, /obj/structure/blob))
 		return TRUE
+
+///override to use astar/JPS instead of walk_to so we can take our blob pass_flags into account.
+/mob/living/simple_animal/hostile/blob/Goto(target, delay, minimum_distance)
+	if(prevent_goto_movement)
+		return FALSE
+	if(target == src.target)
+		approaching_target = TRUE
+	else
+		approaching_target = FALSE
+
+	SSmove_manager.jps_move(moving = src, chasing = target, delay = delay, repath_delay = 2 SECONDS, minimum_distance = minimum_distance, simulated_only = FALSE, skip_first = TRUE, timeout = 5 SECONDS, flags = MOVEMENT_LOOP_IGNORE_GLIDE)
+	return TRUE
 
 /mob/living/simple_animal/hostile/blob/Process_Spacemove(movement_dir = 0)
 	for(var/obj/structure/blob/B in range(1, src))
@@ -194,7 +207,7 @@
 
 /mob/living/simple_animal/hostile/blob/blobspore/death(gibbed)
 	// On death, create a small smoke of harmful gas (s-Acid)
-	var/datum/effect_system/smoke_spread/chem/S = new
+	var/datum/effect_system/fluid_spread/smoke/chem/S = new
 	var/turf/location = get_turf(src)
 
 	// Create the reagents to put into the air
@@ -209,7 +222,7 @@
 
 	// Attach the smoke spreader and setup/start it.
 	S.attach(location)
-	S.set_up(reagents, death_cloud_size, location, silent = TRUE)
+	S.set_up(death_cloud_size, carry = reagents, location = location, silent = TRUE)
 	S.start()
 	if(factory)
 		factory.spore_delay = world.time + factory.spore_cooldown //put the factory on cooldown
