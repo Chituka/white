@@ -338,6 +338,8 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_SPARRING "sparring"
 /// This person is blushing
 #define TRAIT_BLUSHING "blushing"
+/// Someone can safely be attacked with honorbound with ONLY a combat mode check, the trait is assuring holding a weapon and hitting won't hurt them..
+#define TRAIT_ALLOWED_HONORBOUND_ATTACK "allowed_honorbound_attack"
 
 #define TRAIT_NOBLEED "nobleed" //This carbon doesn't bleed
 /// This atom can ignore the "is on a turf" check for simple AI datum attacks, allowing them to attack from bags or lockers as long as any other conditions are met
@@ -626,7 +628,10 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 ///generic atom traits
 /// Trait from [/datum/element/rust]. Its rusty and should be applying a special overlay to denote this.
 #define TRAIT_RUSTY "rust_trait"
+///stops someone from splashing their reagent_container on an object with this trait
 #define DO_NOT_SPLASH "do_not_splash"
+/// Marks an atom when the cleaning of it is first started, so that the cleaning overlay doesn't get removed prematurely
+#define CURRENTLY_CLEANING "currently_cleaning"
 
 // unique trait sources, still defines
 #define CLONING_POD_TRAIT "cloning-pod"

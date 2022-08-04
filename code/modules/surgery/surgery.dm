@@ -21,6 +21,7 @@
 	var/self_operable = FALSE									//Can the surgery be performed on yourself.
 	var/requires_tech = FALSE									//handles techweb-oriented surgeries, previously restricted to the /advanced subtype (You still need to add designs)
 	var/replaced_by												//type; doesn't show up if this type exists. Set to /datum/surgery if you want to hide a "base" surgery (useful for typing parents IE healing.dm just make sure to null it out again)
+	var/requires_op = FALSE
 
 /datum/surgery/New(surgery_target, surgery_location, surgery_bodypart)
 	..()
@@ -92,9 +93,10 @@
 			opcomputer = the_stasis_bed.op_computer
 
 	if(!opcomputer)
-		return
+		if(requires_op)
+			return FALSE
 	if(opcomputer.machine_stat & (NOPOWER|BROKEN))
-		return .
+		return FALSE
 	if(replaced_by in opcomputer.advanced_surgeries)
 		return FALSE
 	if(type in opcomputer.advanced_surgeries)
@@ -134,6 +136,22 @@
 /datum/surgery/proc/complete()
 	SSblackbox.record_feedback("tally", "surgeries_completed", 1, type)
 	qdel(src)
+
+/// Returns a nearby operating computer linked to an operating table
+/datum/surgery/proc/locate_operating_computer(turf/patient_turf)
+	if (isnull(patient_turf))
+		return null
+
+	var/obj/structure/table/optable/operating_table = locate(/obj/structure/table/optable, patient_turf)
+	var/obj/machinery/computer/operating/operating_computer = operating_table?.computer
+
+	if (isnull(operating_computer))
+		return null
+
+	if(operating_computer.machine_stat & (NOPOWER|BROKEN))
+		return null
+
+	return operating_computer
 
 /datum/surgery/advanced
 	name = "Продвинутая хирургия"

@@ -46,6 +46,7 @@
 #define ui_back "CENTER-2:14,BOTTOM:5"
 #define ui_storage1 "CENTER+1:18,BOTTOM:5"
 #define ui_storage2 "CENTER+2:20,BOTTOM:5"
+#define ui_combo "CENTER+4:24,BOTTOM+1:7" //combo meter for martial arts
 
 //Lower right, persistent menu
 #define ui_drop_throw "RIGHT-1:28,BOTTOM+1:7"
@@ -189,3 +190,6 @@
 
 //Ruination
 #define ui_station_height "BOTTOM, RIGHT"
+
+/// The filter name for the hover outline
+#define HOVER_OUTLINE_FILTER "hover_outline"

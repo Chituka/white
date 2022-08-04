@@ -57,8 +57,8 @@
 /datum/interaction/dancor
 	command = "danceass"
 	description = "Пробить шоколадницу"
-	write_log_user = "valerad"
-	write_log_target = "was valerad by"
+	write_log_user = "tested"
+	write_log_target = "was tested by"
 	write_log_user = "ass-danced"
 	write_log_target = "was ass-danced by"
 	require_user_naked = TRUE
@@ -68,7 +68,7 @@
 	require_user_dancer = TRUE
 	max_distance = 0
 
-/datum/interaction/dance/dancor/display_interaction(mob/living/carbon/human/user, mob/living/carbon/human/target)
+/datum/interaction/dancor/display_interaction(mob/living/carbon/human/user, mob/living/carbon/human/target)
 	. = ..()
 	user.do_dance(target, "do_dancor")
 

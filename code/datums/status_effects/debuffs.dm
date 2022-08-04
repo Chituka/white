@@ -207,7 +207,7 @@
 		var/delta = world.time - last_dead_time
 		var/new_timeofdeath = owner.timeofdeath + delta
 		owner.timeofdeath = new_timeofdeath
-		owner.tod = station_time_timestamp(wtime=new_timeofdeath)
+		owner.tod = SSday_night.get_twentyfourhour_timestamp()
 		last_dead_time = null
 	if(owner.stat == DEAD)
 		last_dead_time = world.time
@@ -847,6 +847,37 @@
 	addtimer(CALLBACK(C, /mob/living/carbon.proc/gain_trauma, /datum/brain_trauma/hypnosis, TRAUMA_RESILIENCE_SURGERY, hearing_args[HEARING_RAW_MESSAGE]), 10)
 	addtimer(CALLBACK(C, /mob/living.proc/Stun, 60, TRUE, TRUE), 15) //Take some time to think about it
 	qdel(src)
+
+/datum/status_effect/hypertrance
+	id = "hypertrance"
+	status_type = STATUS_EFFECT_UNIQUE
+	duration = 300000
+	tick_interval = 1000
+	examine_text = span_warning("SUBJECTPRONOUN повторяет фразы.")
+	alert_type = /atom/movable/screen/alert/status_effect/hypertrance
+
+/atom/movable/screen/alert/status_effect/hypertrance
+	name = "гипертранс"
+	desc = "БУДУ ПОВТОРЯТЬ!"
+	icon_state = "high"
+
+/datum/status_effect/hypertrance/on_apply()
+	if(!iscarbon(owner))
+		return FALSE
+	RegisterSignal(owner, COMSIG_MOVABLE_HEAR, .proc/repeat_shit)
+	return TRUE
+
+/datum/status_effect/hypertrance/on_remove()
+	UnregisterSignal(owner, COMSIG_MOVABLE_HEAR)
+
+/datum/status_effect/hypertrance/proc/repeat_shit(datum/source, list/hearing_args)
+	SIGNAL_HANDLER
+
+	if(!owner.can_hear())
+		return
+	if(hearing_args[HEARING_SPEAKER] == owner)
+		return
+	INVOKE_ASYNC(owner, /atom/movable.proc/say, hearing_args[HEARING_RAW_MESSAGE])
 
 /datum/status_effect/spasms
 	id = "spasms"

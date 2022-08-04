@@ -308,14 +308,12 @@
 	sound_environment = SOUND_ENVIRONMENT_PLAIN
 	env_temp_relative = -10
 
-/area/partyhard/Entered(atom/movable/AM)
+/area/partyhard/Entered(atom/movable/AM, oldloc)
 	. = ..()
-	if(ismob(AM))
-		var/mob/M = AM
-		if(ishuman(M))
-			var/mob/living/carbon/human/H = M
-			if(!H.GetComponent(/datum/component/realtemp))
-				H.AddComponent(/datum/component/realtemp)
+	if(ishuman(AM))
+		var/mob/living/carbon/human/H = AM
+		if(!H.GetComponent(/datum/component/realtemp))
+			H.AddComponent(/datum/component/realtemp)
 
 /area/partyhard/indoors
 	icon_state = "5f"
@@ -371,7 +369,7 @@
 	requires_power = TRUE
 	ambientsounds = RUINS
 	outdoors = TRUE
-	base_lighting_alpha = 255
+	base_lighting_alpha = 0
 	static_lighting = TRUE
 	env_temp_relative = -25
 	luminosity = 1

@@ -2,6 +2,8 @@
 #define OCCLUSION_DISTANCE 20
 #define PANEL_Y_OFFSET 13
 #define PANEL_EDGE_Y_OFFSET (PANEL_Y_OFFSET - 2)
+#define SOLAR_ALPHA_MINIMUM_TO_GENERATE_POWER 100
+#define SOLAR_ALPHA_MAXIMUM_TO_GENERATE_POWER 200
 
 /obj/machinery/power/solar
 	name = "солнечная панель"
@@ -29,20 +31,57 @@
 	var/needs_to_update_solar_exposure = TRUE
 	var/obj/effect/overlay/panel
 	var/obj/effect/overlay/panel_edge
+	/// Is the current light level too low to generate power?
+	var/light_level_too_low = FALSE
+
+	var/power_multi = 1
+	var/solar_panel_state = "solar_panel_t1"
+
+/obj/machinery/power/solar/t2_armored
+	name = "укрепленная солнечная панель"
+	desc = "Генерирует энергию при контакте со светом. Данная модель вдвое производительнее обычной."
+	max_integrity = 300
+	power_multi = 2
+	solar_panel_state = "solar_panel_t2"
+
+/obj/machinery/power/solar/t3_plasma
+	name = "солнечная плазменная панель"
+	desc = "Генерирует энергию при контакте со светом. Данная модель в четыре раза производительнее обычной."
+	max_integrity = 450
+	power_multi = 4
+	solar_panel_state = "solar_panel_t3"
+
+/obj/machinery/power/solar/t4_plastitaniumglass
+	name = "солнечная пластитановая панель"
+	desc = "Генерирует энергию при контакте со светом. Данная модель в восемь раз производительнее обычной."
+	max_integrity = 600
+	power_multi = 8
+	solar_panel_state = "solar_panel_t4"
 
 /obj/machinery/power/solar/Initialize(mapload, obj/item/solar_assembly/S)
 	. = ..()
 
 	panel_edge = add_panel_overlay("solar_panel_edge", PANEL_EDGE_Y_OFFSET)
-	panel = add_panel_overlay("solar_panel", PANEL_Y_OFFSET)
+	panel = add_panel_overlay(solar_panel_state, PANEL_Y_OFFSET)
 
 	Make(S)
 	connect_to_network()
 	RegisterSignal(SSsun, COMSIG_SUN_MOVED, .proc/queue_update_solar_exposure)
+	var/level_controller = SSday_night.get_controller(z)
+	if(level_controller)
+		RegisterSignal(level_controller, COMSIG_DAY_NIGHT_CONTROLLER_LIGHT_UPDATE, .proc/update_day_night_exposure)
 
 /obj/machinery/power/solar/Destroy()
 	unset_control() //remove from control computer
 	return ..()
+
+/obj/machinery/power/solar/proc/update_day_night_exposure(datum/source, light_color, light_alpha)
+	SIGNAL_HANDLER
+
+	if(light_alpha < SOLAR_ALPHA_MINIMUM_TO_GENERATE_POWER)
+		light_level_too_low = TRUE
+	else
+		light_level_too_low = FALSE
 
 /obj/machinery/power/solar/proc/add_panel_overlay(icon_state, y_offset)
 	var/obj/effect/overlay/overlay = new()
@@ -127,7 +166,7 @@
 
 /obj/machinery/power/solar/update_overlays()
 	. = ..()
-	panel.icon_state = "solar_panel[(machine_stat & BROKEN) ? "-b" : null]"
+	panel.icon_state = "[(machine_stat & BROKEN) ? "solar_panel-b" : solar_panel_state]"
 	panel_edge.icon_state = "solar_panel[(machine_stat & BROKEN) ? "-b" : "_edge"]"
 
 /obj/machinery/power/solar/proc/queue_turn(azimuth)
@@ -233,8 +272,10 @@
 		update_solar_exposure()
 	if(sunfrac <= 0)
 		return
+	if(light_level_too_low)
+		return
 
-	var/sgen = SOLAR_GEN_RATE * sunfrac
+	var/sgen = SOLAR_GEN_RATE * sunfrac * power_multi
 	add_avail(sgen)
 	if(control)
 		control.gen += sgen
@@ -253,7 +294,7 @@
 
 /obj/item/solar_assembly
 	name = "основание солнечной панели"
-	desc = "Даёт возможность создания солнечной панели, или с помощью платы отслеживания a солнечный отслеживатель."
+	desc = "Рама для создания солнечной панели. При подключении к ней платы отслеживания так же выполняет функцию солнечного отслеживателя."
 	icon = 'icons/obj/solar.dmi'
 	icon_state = "sp_base"
 	inhand_icon_state = "electropack"
@@ -305,7 +346,7 @@
 		W.play_tool_sound(src, 75)
 		return TRUE
 
-	if(istype(W, /obj/item/stack/sheet/glass) || istype(W, /obj/item/stack/sheet/rglass))
+	if(istype(W, /obj/item/stack/sheet/glass) || istype(W, /obj/item/stack/sheet/rglass) || istype(W, /obj/item/stack/sheet/plasmaglass) || istype(W, /obj/item/stack/sheet/plasmarglass) || istype(W, /obj/item/stack/sheet/plastitaniumglass))
 		if(!anchored)
 			to_chat(user, span_warning("Мне нужно прикрутить основание прежде чем добавлять туда стекло."))
 			return
@@ -321,7 +362,14 @@
 			if(tracker)
 				new /obj/machinery/power/tracker(get_turf(src), src)
 			else
-				new /obj/machinery/power/solar(get_turf(src), src)
+				if (istype(W, /obj/item/stack/sheet/glass))
+					new /obj/machinery/power/solar(get_turf(src), src)
+				if (istype(W, /obj/item/stack/sheet/rglass))
+					new /obj/machinery/power/solar/t2_armored(get_turf(src), src)
+				if (istype(W, /obj/item/stack/sheet/plasmaglass) || istype(W, /obj/item/stack/sheet/plasmarglass))
+					new /obj/machinery/power/solar/t3_plasma(get_turf(src), src)
+				if (istype(W, /obj/item/stack/sheet/plastitaniumglass))
+					new /obj/machinery/power/solar/t4_plastitaniumglass(get_turf(src), src)
 		else
 			to_chat(user, span_warning("Мне нужно иметь два листа стекла прежде чем вставлять их в основание!"))
 			return
@@ -551,3 +599,4 @@
 #undef OCCLUSION_DISTANCE
 #undef PANEL_Y_OFFSET
 #undef PANEL_EDGE_Y_OFFSET
+#undef SOLAR_ALPHA_MINIMUM_TO_GENERATE_POWER

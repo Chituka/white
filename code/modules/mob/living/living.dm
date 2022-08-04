@@ -832,6 +832,7 @@
 	losebreath = 0
 	radiation = 0
 	set_nutrition(NUTRITION_LEVEL_FED + 50)
+	hydration = HYDRATION_LEVEL_START_MAX
 	bodytemperature = get_body_temp_normal(apply_change=FALSE)
 	set_blindness(0)
 	set_blurriness(0)
@@ -1328,7 +1329,7 @@ GLOBAL_LIST_EMPTY(fire_appearances)
 
 /mob/living/proc/ignite_mob()
 	if(fire_stacks <= 0)
-		return TRUE
+		return FALSE
 
 	var/datum/status_effect/fire_handler/fire_stacks/fire_status = has_status_effect(/datum/status_effect/fire_handler/fire_stacks)
 	if(!fire_status || fire_status.on_fire)

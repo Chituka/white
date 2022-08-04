@@ -1192,12 +1192,12 @@
 			else
 				gender_description = span_red("<b>[M.gender]</b>")
 
-		to_chat(src.owner, "<b>Info about [M.name]:</b> ")
-		to_chat(src.owner, "Mob type = [M.type]; Gender = [gender_description] Damage = [health_description]")
-		to_chat(src.owner, "Name = <b>[M.name]</b>; Real_name = [M.real_name]; Mind_name = [M.mind?"[M.mind.name]":""]; Key = <b>[M.key]</b>;")
-		to_chat(src.owner, "Location = [location_description];")
-		to_chat(src.owner, "[special_role_description]")
-		to_chat(src.owner, ADMIN_FULLMONTY_NONAME(M))
+		to_chat(src.owner, span_admin("<b>Info about [M.name]:</b> "))
+		to_chat(src.owner, span_admin("Mob type = [M.type]; Gender = [gender_description] Damage = [health_description]"))
+		to_chat(src.owner, span_admin("Name = <b>[M.name]</b>; Real_name = [M.real_name]; Mind_name = [M.mind?"[M.mind.name]":""]; Key = <b>[M.key]</b>;"))
+		to_chat(src.owner, span_admin("Location = [location_description];"))
+		to_chat(src.owner, span_admin("[special_role_description]"))
+		to_chat(src.owner, span_admin(ADMIN_FULLMONTY_NONAME(M)))
 
 	else if(href_list["addjobslot"])
 		if(!check_rights(R_ADMIN))
@@ -2312,6 +2312,33 @@
 		if(!check_rights(R_ADMIN))
 			return
 		GLOB.interviews.ui_interact(usr)
+
+	else if(href_list["mark_datum"])
+		if(!check_rights(R_ADMIN))
+			return
+		var/datum/datum_to_mark = locate(href_list["mark_datum"])
+		if(!datum_to_mark)
+			return
+		return usr.client?.mark_datum(datum_to_mark)
+
+	else if(href_list["lua_state"])
+		if(!check_rights(R_DEBUG))
+			return
+		var/datum/lua_state/state_to_view = locate(href_list["lua_state"])
+		if(!state_to_view)
+			return
+		var/datum/lua_editor/editor = new(state_to_view)
+		var/log_index = href_list["log_index"]
+		if(log_index)
+			log_index = text2num(log_index)
+		if(log_index <= state_to_view.log.len)
+			var/list/log_entry = state_to_view.log[log_index]
+			if(log_entry["chunk"])
+				LAZYINITLIST(editor.tgui_shared_states)
+				editor.tgui_shared_states["viewedChunk"] = json_encode(log_entry["chunk"])
+				editor.tgui_shared_states["modal"] = json_encode("viewChunk")
+		editor.ui_interact(usr)
+		editor.tgui_shared_states = null
 
 /datum/admins/proc/HandleCMode()
 	if(!check_rights(R_ADMIN))

@@ -131,21 +131,13 @@
 
 /turf/open/floor/grass/Initialize(mapload)
 	. = ..()
+	AddElement(/datum/element/diggable, ore_type, 2, "вскапываю", "вскапывает")
 	if(nospawn)
 		return
 	spawniconchange()
 
 /turf/open/floor/grass/proc/spawniconchange()
 	icon_state = "grass[rand(0,3)]"
-
-/turf/open/floor/grass/attackby(obj/item/C, mob/user, params)
-	if((C.tool_behaviour == TOOL_SHOVEL) && params)
-		new ore_type(src, 2)
-		user.visible_message(span_notice("[user] вскапывает [src].") , span_notice("[turfverb] [src]."))
-		playsound(src, 'sound/effects/shovel_dig.ogg', 50, TRUE)
-		make_plating()
-	if(..())
-		return
 
 /turf/open/floor/grass/fairy //like grass but fae-er
 	name = "сказочный пласт"
@@ -204,12 +196,12 @@
 
 /turf/open/floor/grass/snow/safe
 	slowdown = 1.5
+	initial_temperature = T20C
 	initial_gas_mix = OPENTURF_DEFAULT_ATMOS
-	planetary_atmos = FALSE
 
 /turf/open/floor/grass/snow/actually_safe
 	slowdown = 0
-	planetary_atmos = FALSE
+	initial_temperature = T20C
 	initial_gas_mix = OPENTURF_DEFAULT_ATMOS
 
 

@@ -1778,6 +1778,11 @@
 	if(filter_data && filter_data[name])
 		return filters[filter_data.Find(name)]
 
+/// Returns the indice in filters of the given filter name.
+/// If it is not found, returns null.
+/atom/proc/get_filter_index(name)
+	return filter_data?.Find(name)
+
 /atom/proc/remove_filter(name_or_names)
 	if(!filter_data)
 		return
@@ -2093,28 +2098,6 @@
 	if(ispath(ai_controller))
 		ai_controller = new ai_controller(src)
 
-/**
- * Point at an atom
- *
- * Intended to enable and standardise the pointing animation for all atoms
- *
- * Not intended as a replacement for the mob verb
- */
-/atom/movable/proc/point_at(atom/A)
-	if(!isturf(loc))
-		return FALSE
-
-	var/turf/tile = get_turf(A)
-	if (!tile)
-		return FALSE
-
-	var/turf/our_tile = get_turf(src)
-	var/obj/visual = new /obj/effect/temp_visual/point(our_tile, invisibility)
-
-	animate(visual, pixel_x = (tile.x - our_tile.x) * world.icon_size + A.pixel_x, pixel_y = (tile.y - our_tile.y) * world.icon_size + A.pixel_y, time = 1.7, easing = EASE_OUT)
-
-	return TRUE
-
 /atom/MouseEntered(location, control, params)
 	if(flags_1 & INITIALIZED_1)
 		usr.MouseEnteredOn(src, location, control, params)
@@ -2167,3 +2150,16 @@
 	if(caller && (caller.pass_flags & pass_flags_self))
 		return TRUE
 	. = !density
+
+/**
+ * Starts cleaning something by sending the COMSIG_START_CLEANING signal.
+ * This signal is received by the [cleaner component](code/datums/components/cleaner.html).
+ *
+ * Arguments
+ * * source the datum to send the signal from
+ * * target the thing being cleaned
+ * * user the person doing the cleaning
+ * * clean_target set this to false if the target should not be washed and if experience should not be awarded to the user
+ */
+/atom/proc/start_cleaning(datum/source, atom/target, mob/living/user, clean_target = TRUE)
+	SEND_SIGNAL(source, COMSIG_START_CLEANING, target, user, clean_target)

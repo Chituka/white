@@ -14,8 +14,8 @@
 	protected_roles = list("Prisoner", "Russian Officer", "Trader", "Hacker", "Veteran", "Security Officer", "Warden", "Detective", "Head of Security", "Captain", "Field Medic", "Exploration Crew")
 	restricted_roles = list("Cyborg")
 	required_candidates = 1
-	weight = 5
-	cost = 8	// Avoid raising traitor threat above 10, as it is the default low cost ruleset.
+	weight = 6
+	cost = 4	// Avoid raising traitor threat above 10, as it is the default low cost ruleset.
 	scaling_cost = 9
 	requirements = list(10,10,10,10,10,10,10,10,10,10)
 	antag_cap = list("denominator" = 24)
@@ -104,7 +104,7 @@
 	restricted_roles = list("AI", "Cyborg")
 	required_candidates = 1
 	weight = 3
-	cost = 16
+	cost = 8
 	scaling_cost = 10
 	requirements = list(70,70,60,50,40,20,20,10,10,10)
 	antag_cap = list("denominator" = 29)
@@ -141,7 +141,7 @@
 	restricted_roles = list("AI", "Cyborg")
 	required_candidates = 1
 	weight = 3
-	cost = 15
+	cost = 7
 	scaling_cost = 9
 	requirements = list(50,45,45,40,35,20,20,15,10,10)
 	antag_cap = list("denominator" = 24)
@@ -186,7 +186,7 @@
 	restricted_roles = list("Head of Security", "Captain") // Just to be sure that a wizard getting picked won't ever imply a Captain or HoS not getting drafted
 	required_candidates = 1
 	weight = 2
-	cost = 20
+	cost = 12
 	requirements = list(90,90,70,40,30,20,10,10,10,10)
 	var/list/roundstart_wizards = list()
 
@@ -229,7 +229,7 @@
 	restricted_roles = list("AI", "Cyborg", "Prisoner", "Trader", "Russian Officer", "Hacker", "Veteran", "Security Officer", "Warden", "Detective", "Head of Security", "Captain", "Chaplain", "Head of Personnel", "Field Medic")
 	required_candidates = 2
 	weight = 3
-	cost = 20
+	cost = 15
 	requirements = list(100,90,80,60,40,30,10,10,10,10)
 	flags = HIGH_IMPACT_RULESET
 	antag_cap = list("denominator" = 20, "offset" = 1)
@@ -287,7 +287,7 @@
 	restricted_roles = list("Head of Security", "Captain") // Just to be sure that a nukie getting picked won't ever imply a Captain or HoS not getting drafted
 	required_candidates = 5
 	weight = 3
-	cost = 20
+	cost = 15
 	requirements = list(90,90,90,80,60,40,30,20,10,10)
 	flags = HIGH_IMPACT_RULESET
 	antag_cap = list("denominator" = 18, "offset" = 1)
@@ -373,7 +373,7 @@
 	required_candidates = 3
 	weight = 3
 	delay = 7 MINUTES
-	cost = 20
+	cost = 15
 	requirements = list(101,101,70,40,30,20,10,10,10,10)
 	antag_cap = 3
 	flags = HIGH_IMPACT_RULESET
@@ -740,3 +740,43 @@
 	else
 		SSticker.news_report = CULT_FAILURE
 		SSticker.mode_result = "loss - servants failed their objective (summon ratvar)"
+
+//////////////////////////////////////////////
+//                                          //
+//              BLOODSUCKERS                //
+//                                          //
+//////////////////////////////////////////////
+/datum/dynamic_ruleset/roundstart/bloodsucker
+	name = "Bloodsuckers"
+	antag_flag = ROLE_BLOODSUCKER
+	antag_datum = /datum/antagonist/bloodsucker
+	restricted_roles = list("AI", "Cyborg")
+	protected_roles = list(
+		"Captain", "Head of Personnel", "Head of Security",
+		"Research Director", "Chief Engineer", "Chief Medical Officer", "Curator",
+		"Warden", "Security Officer", "Detective", "Field Medic", "Exploration Crew",
+	)
+	required_candidates = 1
+	weight = 5
+	cost = 12
+	scaling_cost = 10
+	requirements = list(40,30,20,10,10,10,10,10,10,10)
+	antag_cap = list("denominator" = 29)
+
+/datum/dynamic_ruleset/roundstart/bloodsucker/pre_execute(population)
+	. = ..()
+	var/num_bloodsuckers = get_antag_cap(population) * (scaled_times + 1)
+	for (var/i = 1 to num_bloodsuckers)
+		var/mob/M = pick_n_take(candidates)
+		assigned += M.mind
+		M.mind.restricted_roles = restricted_roles
+		M.mind.special_role = ROLE_BLOODSUCKER
+		GLOB.pre_setup_antags += M.mind
+	return TRUE
+
+/datum/dynamic_ruleset/roundstart/bloodsucker/execute()
+	for(var/datum/mind/bloodsucker in assigned)
+		var/datum/antagonist/bloodsucker/new_antag = new antag_datum()
+		bloodsucker.add_antag_datum(new_antag)
+		GLOB.pre_setup_antags -= bloodsucker
+	return TRUE

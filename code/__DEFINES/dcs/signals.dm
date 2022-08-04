@@ -375,6 +375,8 @@
 #define COMSIG_ENTER_AREA "enter_area"
 ///from base of area/Exited(): (/area). Sent to "area-sensitive" movables, see __DEFINES/traits.dm for info.
 #define COMSIG_EXIT_AREA "exit_area"
+/// Sent when a shuttle leaves this area
+#define COMSIG_AREA_AFTER_SHUTTLE_MOVE "area_after_shuttle_move"
 ///from base of atom/Click(): (location, control, params, mob/user)
 #define COMSIG_CLICK "atom_click"
 ///from base of atom/ShiftClick(): (/mob)
@@ -1157,6 +1159,8 @@
 	///Returned by cleanable components when they are cleaned.
 	#define COMPONENT_CLEANED (1<<0)
 
+///Called from a cleaning tool to start cleaning something.
+#define COMSIG_START_CLEANING "start_cleaning"
 
 //Creamed
 

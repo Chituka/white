@@ -235,6 +235,7 @@
 
 /datum/action/item_action/hev_toggle/Trigger(trigger_flags)
 	var/obj/item/clothing/suit/space/hev_suit/my_suit = target
+
 	if(my_suit.activated)
 		my_suit.deactivate()
 	else
@@ -328,7 +329,7 @@
 	send_message("ACTIVATING SYSTEMS")
 	activating = TRUE
 
-	if(first_use)
+	if(first_use && !GLOB.violence_mode_activated)
 		var/sound/song = sound(activation_song, volume = 50)
 		SEND_SOUND(current_user, song)
 		first_use = FALSE

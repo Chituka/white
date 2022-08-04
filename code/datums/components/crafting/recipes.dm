@@ -73,7 +73,7 @@
 	subcategory = CAT_WEAPON
 
 /datum/crafting_recipe/strobeshield
-	name = "Strobe Shield"
+	name = "Ослепляющий щит"
 	result = /obj/item/shield/riot/flash
 	reqs = list(/obj/item/wallframe/flasher = 1,
 				/obj/item/assembly/flash/handheld = 1,
@@ -135,6 +135,14 @@
 	time = 40
 	category= CAT_WEAPONRY
 	subcategory = CAT_WEAPON
+
+/datum/crafting_recipe/potato_cell
+	name = "Батарейка из картошки"
+	result = /obj/item/stock_parts/cell/potato
+	reqs = list(/obj/item/food/grown/potato = 1,
+				/obj/item/stack/cable_coil = 10)
+	time = 25
+	category = CAT_MISC
 
 /datum/crafting_recipe/tailclub
 	name = "Tail Club"

@@ -11580,11 +11580,11 @@
 	},
 /obj/effect/turf_decal/bot,
 /obj/effect/decal/cleanable/dirt,
-/obj/item/gun/energy/e_gun/dragnet{
-	pixel_x = -4;
-	pixel_y = 4
-	},
-/obj/item/gun/energy/e_gun/dragnet,
+/obj/item/full_armor_upgrade,
+/obj/item/stack/sheet/armor_plate/plasteel/three,
+/obj/item/stack/sheet/armor_plate/ceramic/three,
+/obj/item/stack/sheet/armor_plate/ablative/three,
+/obj/item/full_armor_upgrade,
 /turf/open/floor/plasteel/dark,
 /area/ai_monitored/security/armory)
 "bdN" = (
@@ -24704,6 +24704,7 @@
 	req_access_txt = "3"
 	},
 /obj/machinery/power/apc/auto_name/south,
+/obj/effect/spawner/lootdrop/armory_contraband/metastation,
 /turf/open/floor/plasteel/dark,
 /area/ai_monitored/security/armory)
 "cBD" = (
@@ -40105,6 +40106,7 @@
 /obj/machinery/status_display/shuttle{
 	pixel_y = -32
 	},
+/obj/effect/spawner/lootdrop/techstorage/ai,
 /turf/open/floor/circuit/green{
 	luminosity = 2
 	},
@@ -40895,6 +40897,7 @@
 	},
 /obj/effect/turf_decal/bot,
 /obj/item/radio/intercom/directional/north,
+/obj/effect/spawner/lootdrop/techstorage/medical,
 /turf/open/floor/plasteel/dark,
 /area/engineering/storage/tech)
 "ixF" = (
@@ -52721,6 +52724,7 @@
 	},
 /obj/effect/turf_decal/bot,
 /obj/machinery/firealarm/directional/east,
+/obj/effect/spawner/lootdrop/techstorage/service,
 /turf/open/floor/plasteel/dark,
 /area/engineering/storage/tech)
 "mNL" = (
@@ -53155,6 +53159,7 @@
 /obj/structure/sign/warning/securearea{
 	pixel_x = 32
 	},
+/obj/effect/spawner/lootdrop/techstorage/rnd,
 /turf/open/floor/plasteel/dark,
 /area/engineering/storage/tech)
 "mUC" = (
@@ -56007,6 +56012,7 @@
 /obj/effect/turf_decal/bot,
 /obj/structure/extinguisher_cabinet/directional/north,
 /obj/machinery/light/directional/north,
+/obj/effect/spawner/lootdrop/techstorage/tcomms,
 /turf/open/floor/plasteel/dark,
 /area/engineering/storage/tech)
 "ohU" = (
@@ -59248,6 +59254,8 @@
 /obj/effect/decal/cleanable/cobweb,
 /obj/machinery/airalarm/directional/west,
 /obj/structure/table,
+/obj/item/gun/energy/e_gun/dragnet,
+/obj/item/gun/energy/e_gun/dragnet,
 /turf/open/floor/plasteel/dark,
 /area/ai_monitored/security/armory)
 "psB" = (
@@ -60083,6 +60091,7 @@
 	network = list("ss13","engine")
 	},
 /obj/effect/turf_decal/stripes/corner,
+/obj/effect/spawner/lootdrop/techstorage/security,
 /turf/open/floor/plasteel/dark,
 /area/engineering/storage/tech)
 "pGW" = (
@@ -61057,6 +61066,7 @@
 /obj/effect/turf_decal/tile/purple{
 	dir = 8
 	},
+/obj/item/binoculars,
 /turf/open/floor/plasteel/dark,
 /area/cargo/exploration_dock)
 "pZk" = (
@@ -64451,6 +64461,7 @@
 /area/engineering/main)
 "rlW" = (
 /obj/structure/rack,
+/obj/effect/spawner/lootdrop/techstorage/rnd_secure,
 /turf/open/floor/circuit/green{
 	luminosity = 2
 	},
@@ -67558,6 +67569,7 @@
 "sqO" = (
 /obj/structure/rack,
 /obj/machinery/firealarm/directional/south,
+/obj/effect/spawner/lootdrop/techstorage/command,
 /turf/open/floor/circuit/green{
 	luminosity = 2
 	},
@@ -71471,6 +71483,7 @@
 	},
 /obj/effect/turf_decal/bot,
 /obj/machinery/status_display/ai/directional/north,
+/obj/effect/spawner/lootdrop/techstorage/engineering,
 /turf/open/floor/plasteel/dark,
 /area/engineering/storage/tech)
 "tUU" = (

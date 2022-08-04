@@ -7,7 +7,7 @@
 // Themes
 import './styles/main.scss';
 import './styles/themes/light.scss';
-import './styles/themes/cyber.scss';
+import './styles/themes/gruvbox.scss';
 
 import { perf } from 'common/perf';
 import { combineReducers } from 'common/redux';
@@ -23,7 +23,6 @@ import { setupPanelFocusHacks } from './panelFocus';
 import { pingMiddleware, pingReducer } from './ping';
 import { settingsMiddleware, settingsReducer } from './settings';
 import { telemetryMiddleware } from './telemetry';
-import { Window } from 'tgui/layouts';
 
 perf.mark('inception', window.performance?.timing?.navigationStart);
 perf.mark('init');
@@ -88,24 +87,27 @@ const setupApp = () => {
   });
 
   Byond.winset('browseroutput', {
-    'size': '0x'+(window.innerHeight-28),
+    'size': '0x' + (window.innerHeight - 28),
   });
 
   // Enable hot module reloading
   if (module.hot) {
     setupHotReloading();
-    module.hot.accept([
-      './audio',
-      './chat',
-      './game',
-      './Notifications',
-      './Panel',
-      './ping',
-      './settings',
-      './telemetry',
-    ], () => {
-      renderApp();
-    });
+    module.hot.accept(
+      [
+        './audio',
+        './chat',
+        './game',
+        './Notifications',
+        './Panel',
+        './ping',
+        './settings',
+        './telemetry',
+      ],
+      () => {
+        renderApp();
+      }
+    );
   }
 };
 
