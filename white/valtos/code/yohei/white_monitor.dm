@@ -9,6 +9,18 @@
 	var/list/possible_tasks = list()
 	var/list/white_action_guys = list()
 	var/mission_mode = null
+	GLOB.white_yohei_main_controller = src
+
+	internal_radio = new /obj/item/radio(src)
+	internal_radio.set_listening(FALSE)
+	internal_radio.independent = TRUE
+	internal_radio.set_frequency(FREQ_YOHEI)
+
+	/obj/lab_monitor/yohei_white/Destroy(force)
+	. = ..()
+	QDEL_NULL(internal_radio)
+	GLOB.yohei_main_controller = null
+	STOP_PROCESSING(SSobj, src)
 
 /datum/antagonist/yohei/proc/white_payment()
 	if(protected_guy != DEAD)
@@ -23,3 +35,9 @@
 				APC.update_maptext() //до тех пор, пока задания не придумаем, тут будет чисто это
 
 addtimer(CALLBACK(src, .proc/white_payment), 10 MINUTES)
+
+/obj/lab_monitor/yohei_white/proc/add_to_white_action_guys(mob/living/user)
+	if((user in action_guys))
+		action_guys -= user
+	else
+		white_action_guys += user

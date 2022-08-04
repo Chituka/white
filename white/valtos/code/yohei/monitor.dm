@@ -6,6 +6,7 @@
 	var/datum/yohei_task/current_task = null
 	var/list/possible_tasks = list()
 	var/list/action_guys = list()
+	var/list/white_action_guys = list()
 	var/mission_mode = null
 
 /obj/lab_monitor/yohei/Initialize(mapload)
@@ -107,6 +108,7 @@
 		action_guys -= user
 		internal_radio.talk_into(src, "[user.real_name] был вычеркнут из исполнителей в связи с работой по протоколу 'WhiteHat'.", FREQ_YOHEI)
 	else
+		white_action_guys += user
 		internal_radio.talk_into(src, "[user.real_name] начинает работу по протоколу 'WhiteHat'.", FREQ_YOHEI)
 
 /obj/lab_monitor/yohei/AltClick(mob/user)
