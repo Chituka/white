@@ -108,8 +108,10 @@
 		action_guys -= user
 		internal_radio.talk_into(src, "[user.real_name] был вычеркнут из исполнителей в связи с работой по протоколу 'WhiteHat'.", FREQ_YOHEI)
 	else
-		white_action_guys += user
 		internal_radio.talk_into(src, "[user.real_name] начинает работу по протоколу 'WhiteHat'.", FREQ_YOHEI)
+	var/obj/lab_monitor/yohei_white/WM = GLOB.white_yohei_main_controller
+	if(!(user in WM.white_action_guys))
+	WM.white_action_guys += user
 
 /obj/lab_monitor/yohei/AltClick(mob/user)
 	. = ..()

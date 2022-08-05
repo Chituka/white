@@ -1,4 +1,5 @@
 GLOBAL_VAR(yohei_main_controller)
+GLOBAL_VAR(white_yohei_main_controller)
 GLOBAL_VAR_INIT(is_tournament_rules, FALSE)
 GLOBAL_VAR_INIT(major_mode_active, FALSE)
 

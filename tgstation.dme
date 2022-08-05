@@ -4770,6 +4770,7 @@
 #include "white\valtos\code\yohei\outfits.dm"
 #include "white\valtos\code\yohei\shuttle.dm"
 #include "white\valtos\code\yohei\tasks.dm"
+#include "white\valtos\code\yohei\white_monitor.dm"
 #include "white\valtos\code\yohei\yohei.dm"
 #include "white\valtos\code\yohei\armaments\_armament_defines.dm"
 #include "white\valtos\code\yohei\armaments\explosives.dm"

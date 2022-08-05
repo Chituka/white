@@ -299,7 +299,7 @@
 
 /obj/item/card/id/yohei/attackby(obj/item/W, mob/user, params)
 	. = ..()
-	if(HAS_TRAIT(user, TRAIT_YOHEI))
+	if(HAS_TRAIT(user, TRAIT_YOHEI) && isidcard(W))
 		var/obj/lab_monitor/yohei/LM = GLOB.yohei_main_controller
 		if(LM)
 			LM.internal_radio.talk_into(LM, "ВНИМАНИЕ: [user.name] пытался провернуть аферу с наймом внутри фирмы. Сломайте ему колени.", FREQ_YOHEI)
@@ -352,6 +352,10 @@
 				LM.internal_radio.set_frequency(FREQ_SECURITY)
 				LM.internal_radio.talk_into(LM, "ВНИМАНИЕ: Один из наших наёмников по имени [assigned_to.name] был нанят членом вашего экипажа. Досье на него было передано вам. Пожалуйста, обращайтесь с ним бережно, иначе мы применим штрафы согласно пунктам договора о взаимном сотрудничестве 3.1.5 и 4.12.1.", FREQ_SECURITY)
 				LM.internal_radio.set_frequency(FREQ_YOHEI)
+			var/obj/lab_monitor/yohei_white/WM = GLOB.white_yohei_main_controller
+			if(WM)
+				WM
+
 		else
 			to_chat(user, span_danger("Карта неисправна. Самоутилизация активирована."))
 			qdel(W)
