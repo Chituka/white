@@ -177,7 +177,7 @@
 "cl" = (
 /obj/structure/closet/crate,
 /obj/effect/turf_decal/bot,
-/obj/machinery/power/apc/auto_name/west,
+/obj/machinery/power/apc/auto_name/directional/west,
 /obj/structure/cable,
 /turf/open/floor/plasteel/cult,
 /area/security/prison/garden)
@@ -486,7 +486,7 @@
 "gs" = (
 /obj/structure/cable,
 /obj/machinery/light/directional/south,
-/obj/machinery/power/apc/auto_name/south,
+/obj/machinery/power/apc/auto_name/directional/south,
 /turf/open/floor/plasteel/dark,
 /area/cargo/office)
 "gA" = (
@@ -588,7 +588,7 @@
 	},
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
 /obj/structure/cable,
-/obj/machinery/power/apc/auto_name/north,
+/obj/machinery/power/apc/auto_name/directional/north,
 /obj/effect/turf_decal/tile/red,
 /obj/effect/turf_decal/tile/red{
 	dir = 1
@@ -822,7 +822,7 @@
 /turf/open/floor/carpet/royalblue,
 /area/command/heads_quarters/captain)
 "kg" = (
-/obj/machinery/power/apc/auto_name/north,
+/obj/machinery/power/apc/auto_name/directional/north,
 /obj/structure/cable,
 /obj/machinery/light/directional/west,
 /turf/open/floor/resin,
@@ -911,7 +911,7 @@
 	dir = 8
 	},
 /obj/effect/turf_decal/tile/red,
-/obj/machinery/power/apc/auto_name/south,
+/obj/machinery/power/apc/auto_name/directional/south,
 /turf/open/floor/plasteel/white,
 /area/medical/morgue)
 "lz" = (
@@ -1091,7 +1091,7 @@
 "nH" = (
 /obj/structure/cable,
 /obj/machinery/camera/autoname/directional/south,
-/obj/machinery/power/apc/auto_name/north,
+/obj/machinery/power/apc/auto_name/directional/north,
 /obj/effect/turf_decal/tile/brown,
 /obj/effect/turf_decal/tile/brown{
 	dir = 8
@@ -1463,7 +1463,7 @@
 /area/engineering/main)
 "rE" = (
 /obj/structure/cable,
-/obj/machinery/power/apc/auto_name/west,
+/obj/machinery/power/apc/auto_name/directional/west,
 /obj/machinery/light/directional/south,
 /obj/machinery/camera/autoname/directional/east,
 /turf/open/floor/plasteel/checker,
@@ -1711,7 +1711,7 @@
 /area/cargo/office)
 "tR" = (
 /obj/structure/cable,
-/obj/machinery/power/apc/auto_name/north,
+/obj/machinery/power/apc/auto_name/directional/north,
 /turf/open/floor/plasteel/white,
 /area/science/lab)
 "tU" = (
@@ -1991,7 +1991,7 @@
 "wD" = (
 /obj/structure/bed,
 /obj/item/bedsheet/red,
-/obj/machinery/power/apc/auto_name/north,
+/obj/machinery/power/apc/auto_name/directional/north,
 /obj/structure/cable,
 /obj/effect/turf_decal/tile/red{
 	dir = 1
@@ -2419,7 +2419,7 @@
 /turf/open/floor/plasteel/dark,
 /area/engineering/main)
 "Cm" = (
-/obj/machinery/power/apc/auto_name/west,
+/obj/machinery/power/apc/auto_name/directional/west,
 /obj/structure/cable,
 /obj/machinery/light/directional/south,
 /turf/open/floor/resin,
@@ -2434,7 +2434,7 @@
 /turf/open/floor/plasteel/dark,
 /area/cargo/office)
 "Cw" = (
-/obj/machinery/power/apc/auto_name/east,
+/obj/machinery/power/apc/auto_name/directional/east,
 /obj/structure/cable,
 /turf/open/floor/resin,
 /area/security/prison/safe)
@@ -2444,7 +2444,7 @@
 /area/medical/morgue)
 "CO" = (
 /obj/machinery/modular_computer/console/preset/id,
-/obj/machinery/power/apc/auto_name/north,
+/obj/machinery/power/apc/auto_name/directional/north,
 /obj/structure/cable,
 /obj/effect/turf_decal/tile/blue,
 /obj/effect/turf_decal/tile/blue{
@@ -2822,7 +2822,7 @@
 /obj/structure/cable,
 /obj/machinery/light/directional/north,
 /obj/machinery/atmospherics/components/unary/vent_pump/on/layer4,
-/obj/machinery/power/apc/auto_name/north,
+/obj/machinery/power/apc/auto_name/directional/north,
 /turf/open/floor/plasteel/dark,
 /area/engineering/main)
 "HV" = (
@@ -2833,7 +2833,7 @@
 /obj/effect/turf_decal/stripes/corner{
 	dir = 4
 	},
-/obj/machinery/power/apc/auto_name/west,
+/obj/machinery/power/apc/auto_name/directional/west,
 /obj/structure/cable,
 /turf/open/floor/plasteel/dark,
 /area/hallway/primary/central)
@@ -2935,7 +2935,7 @@
 /turf/open/floor/plasteel/white,
 /area/medical/morgue)
 "IS" = (
-/obj/machinery/power/apc/auto_name/south,
+/obj/machinery/power/apc/auto_name/directional/south,
 /obj/structure/cable,
 /obj/machinery/light/directional/east,
 /turf/open/floor/resin,
@@ -3253,7 +3253,7 @@
 /turf/open/floor/plasteel/dark,
 /area/engineering/main)
 "Ms" = (
-/obj/machinery/power/apc/auto_name/east{
+/obj/machinery/power/apc/auto_name/directional/east{
 	cell_type = /obj/item/stock_parts/cell/bluespace
 	},
 /obj/structure/cable,
@@ -3360,7 +3360,7 @@
 "Nn" = (
 /obj/machinery/suit_storage_unit/security,
 /obj/machinery/camera/motion/directional/south,
-/obj/machinery/power/apc/auto_name/north,
+/obj/machinery/power/apc/auto_name/directional/north,
 /obj/structure/cable,
 /turf/open/floor/plasteel/dark,
 /area/ai_monitored/security/armory/upper)
@@ -3507,7 +3507,7 @@
 /area/ai_monitored/security/armory/upper)
 "ON" = (
 /obj/structure/cable,
-/obj/machinery/power/apc/auto_name/south,
+/obj/machinery/power/apc/auto_name/directional/south,
 /turf/open/floor/plasteel/cafeteria,
 /area/security/prison/mess)
 "OO" = (
@@ -4464,7 +4464,7 @@
 /turf/open/floor/plasteel/white,
 /area/science/lab)
 "Yo" = (
-/obj/machinery/power/apc/auto_name/north,
+/obj/machinery/power/apc/auto_name/directional/north,
 /obj/structure/cable,
 /obj/item/radio/intercom{
 	desc = "A station intercom. It looks like it has been modified to not broadcast.";

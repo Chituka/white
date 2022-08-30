@@ -3,6 +3,8 @@
 	var/list/turf_types = list(/turf/open/floor/plating = 90, /turf/open/floor/plasteel = 1, /turf/open/floor/plasteel/dark = 1, /turf/closed/wall = 1)
 	var/list/garbage_types = list(
 		/obj/effect/spawner/lootdrop/grille_or_trash = 50,
+		/obj/effect/mapping_helpers/broken_floor = 90,
+		/obj/effect/mapping_helpers/burnt_floor = 60,
 		/obj/structure/grille = 80,
 		/obj/structure/girder = 5,
 		/obj/structure/grille/broken = 10,
@@ -27,7 +29,7 @@
 		/obj/effect/gibspawner/generic = 1,
 		/obj/effect/spawner/structure/window/hollow = 5,
 		/obj/effect/spawner/lootdrop/gross_decal_spawner = 25,
-		/mob/living/simple_animal/hostile/poison/giant_spider = 1,
+		/mob/living/simple_animal/hostile/giant_spider = 1,
 		/mob/living/simple_animal/hostile/cockroach = 1,
 		/obj/effect/decal/cleanable/cum = 1,
 		/obj/effect/spawner/lootdrop/space/languagebook = 1,
@@ -89,12 +91,12 @@
 
 		var/garbage_turf = text2num(string_gen[world.maxx * (gen_turf.y - 1) + gen_turf.x])
 
-		var/turf/new_turf = pickweight(turf_types)
+		var/turf/new_turf = pick_weight(turf_types)
 
 		new_turf = gen_turf.ChangeTurf(new_turf, initial(new_turf.baseturfs), CHANGETURF_DEFER_CHANGE)
 
 		if(garbage_turf)
-			var/atom/picked_garbage = pickweight(garbage_types)
+			var/atom/picked_garbage = pick_weight(garbage_types)
 			new picked_garbage(new_turf)
 
 		CHECK_TICK

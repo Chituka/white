@@ -12,9 +12,15 @@ SUBSYSTEM_DEF(job)
 	var/list/prioritized_jobs = list()
 	var/list/latejoin_trackers = list()	//Don't read this list, use GetLateJoinTurfs() instead
 
-	var/overflow_role = "Assistant"
+	var/overflow_role = JOB_ASSISTANT
 
 	var/list/level_order = list(JP_HIGH,JP_MEDIUM,JP_LOW)
+
+	/// Lazylist of mob:occupation_string pairs.
+	var/list/dynamic_forced_occupations
+
+	/// List of all joinable departments indexed by their typepath, sorted by their own display order.
+	var/list/datum/job_department/joinable_departments_by_type = list()
 
 	/// A list of all jobs associated with the station. These jobs also have various icons associated with them including sechud and card trims.
 	var/list/station_jobs
@@ -31,16 +37,16 @@ SUBSYSTEM_DEF(job)
 	 * See [/datum/controller/subsystem/ticker/proc/equip_characters]
 	 */
 	var/list/chain_of_command = list(
-		"Captain" = 1,
-		"Head of Personnel" = 2,
-		"Head of Security" = 3,
-		"Research Director" = 4,
-		"Chief Engineer" = 5,
-		"Chief Medical Officer" = 6)
+		JOB_CAPTAIN = 1,
+		JOB_HEAD_OF_PERSONNEL = 2,
+		JOB_HEAD_OF_SECURITY = 3,
+		JOB_RESEARCH_DIRECTOR = 4,
+		JOB_CHIEF_ENGINEER = 5,
+		JOB_CHIEF_MEDICAL_OFFICER = 6)
 
 	/// If TRUE, some player has been assigned Captaincy or Acting Captaincy at some point during the shift and has been given the spare ID safe code.
 	var/assigned_captain = FALSE
-	/// If TRUE, the "Captain" job will always be given the code to the spare ID safe and always have a "Captain on deck!" announcement.
+	/// If TRUE, the JOB_CAPTAIN job will always be given the code to the spare ID safe and always have a "Captain on deck!" announcement.
 	var/always_promote_captain_job = TRUE
 	// :^)
 	var/forced_name = null
@@ -80,6 +86,8 @@ SUBSYSTEM_DEF(job)
 		to_chat(world, span_boldannounce("Error setting up jobs, no job datums found"))
 		return FALSE
 
+	var/list/new_joinable_departments_by_type = list()
+
 	for(var/J in all_jobs)
 		var/datum/job/job = new J()
 		if(!job)
@@ -94,6 +102,25 @@ SUBSYSTEM_DEF(job)
 		occupations += job
 		name_occupations[job.title] = job
 		type_occupations[J] = job
+		joinable_departments_by_type[J] = job.departments_list
+
+		if(!LAZYLEN(job.departments_list))
+			var/datum/job_department/department = joinable_departments_by_type[/datum/job_department/undefined]
+			if(!department)
+				department = new
+				new_joinable_departments_by_type[/datum/job_department/undefined] = department
+			department.add_job(job)
+			continue
+		for(var/department_type in job.departments_list)
+			var/datum/job_department/department = new_joinable_departments_by_type[department_type]
+			if(!department)
+				department = new department_type()
+				new_joinable_departments_by_type[department_type] = department
+			department.add_job(job)
+
+	sortTim(new_joinable_departments_by_type, /proc/cmp_department_display_asc, associative = TRUE)
+
+	joinable_departments_by_type = new_joinable_departments_by_type
 
 	return TRUE
 
@@ -107,6 +134,11 @@ SUBSYSTEM_DEF(job)
 	if(!occupations.len)
 		SetupOccupations()
 	return type_occupations[jobtype]
+
+/datum/controller/subsystem/job/proc/get_department_type(department_type)
+	if(!occupations.len)
+		SetupOccupations()
+	return joinable_departments_by_type[department_type]
 
 /datum/controller/subsystem/job/proc/AssignRole(mob/dead/new_player/player, rank, latejoin = FALSE)
 	JobDebug("Running AR, Player: [player], Rank: [rank], LJ: [latejoin]")
@@ -260,7 +292,7 @@ SUBSYSTEM_DEF(job)
 
 /datum/controller/subsystem/job/proc/FillAIPosition()
 	var/ai_selected = FALSE
-	var/datum/job/job = GetJob("AI")
+	var/datum/job/job = GetJob(JOB_AI)
 	if(!job)
 		return FALSE
 	for(var/i = job.total_positions, i > 0, i--)
@@ -269,7 +301,7 @@ SUBSYSTEM_DEF(job)
 			candidates = FindOccupationCandidates(job, level)
 			if(candidates.len)
 				var/mob/dead/new_player/candidate = pick(candidates)
-				if(AssignRole(candidate, "AI"))
+				if(AssignRole(candidate, JOB_AI))
 					ai_selected++
 					break
 	if(ai_selected)
@@ -551,7 +583,7 @@ SUBSYSTEM_DEF(job)
 		return C.holder.auto_deadmin()
 
 /datum/controller/subsystem/job/proc/setup_officer_positions()
-	var/datum/job/J = SSjob.GetJob("Security Officer")
+	var/datum/job/J = SSjob.GetJob(JOB_SECURITY_OFFICER)
 	if(!J)
 		CRASH("setup_officer_positions(): Security officer job is missing")
 
@@ -768,19 +800,19 @@ SUBSYSTEM_DEF(job)
 
 /// Builds various lists of jobs based on station, centcom and additional jobs with icons associated with them.
 /datum/controller/subsystem/job/proc/setup_job_lists()
-	station_jobs = list("Assistant", "Captain", "Head of Personnel", "Bartender", "Cook", "Botanist", "Quartermaster", "Cargo Technician", \
-		"Shaft Miner", "Hunter", "Clown", "Mime", "Janitor", "Curator", "Lawyer", "Chaplain", "Chief Engineer", "Station Engineer", \
-		"Atmospheric Technician", "Chief Medical Officer", "Medical Doctor", "Paramedic", "Chemist", "Geneticist", "Virologist", "Psychologist", \
-		"Research Director", "Scientist", "Roboticist", "Head of Security", "Warden", "Detective", "Security Officer", "Russian Officer", \
-		"Veteran", "Field Medic", "Mechanic", "Bomj", "Prisoner", "Exploration Crew")
+	station_jobs = list(JOB_ASSISTANT, JOB_CAPTAIN, JOB_HEAD_OF_PERSONNEL, JOB_BARTENDER, JOB_COOK, JOB_BOTANIST, JOB_QUARTERMASTER, JOB_CARGO_TECHNICIAN, \
+		JOB_SHAFT_MINER, JOB_HUNTER, JOB_CLOWN, JOB_MIME, JOB_JANITOR, JOB_CURATOR, JOB_LAWYER, JOB_CHAPLAIN, JOB_CHIEF_ENGINEER, JOB_STATION_ENGINEER, \
+		JOB_ATMOSPHERIC_TECHNICIAN, JOB_CHIEF_MEDICAL_OFFICER, JOB_MEDICAL_DOCTOR, JOB_PARAMEDIC, JOB_CHEMIST, JOB_GENETICIST, JOB_VIROLOGIST, JOB_PSYCHOLOGIST, \
+		JOB_RESEARCH_DIRECTOR, JOB_SCIENTIST, JOB_ROBOTICIST, JOB_HEAD_OF_SECURITY, JOB_WARDEN, JOB_DETECTIVE, JOB_SECURITY_OFFICER, JOB_RUSSIAN_OFFICER, \
+		JOB_VETERAN, JOB_FIELD_MEDIC, JOB_MECHANIC, JOB_BOMJ, JOB_PRISONER, JOB_RANGER)
 
-	additional_jobs_with_icons = list("Emergency Response Team Commander", "Security Response Officer", "Engineering Response Officer", "Medical Response Officer", \
-		"Entertainment Response Officer", "Religious Response Officer", "Janitorial Response Officer", "Death Commando", \
-		"SOBR","SOBR Leader", "Security Officer (Cargo)", "Security Officer (Medical)", "Security Officer (Science)", "Security Officer (Engineering)", "Yohei", \
+	additional_jobs_with_icons = list(JOB_ERT_COMMANDER, JOB_ERT_OFFICER, JOB_ERT_ENGINEER, JOB_ERT_MEDICAL_DOCTOR, \
+		JOB_ERT_CLOWN, JOB_ERT_CHAPLAIN, JOB_ERT_JANITOR, JOB_ERT_DEATHSQUAD, \
+		"SOBR","SOBR Leader", JOB_SECURITY_OFFICER_SUPPLY, JOB_SECURITY_OFFICER_MEDICAL, JOB_SECURITY_OFFICER_SCIENCE, JOB_SECURITY_OFFICER_ENGINEERING, "Yohei", \
 		"red", "blue", "yellow", "green", "white")
 
-	centcom_jobs = list("Central Command","VIP Guest","Custodian","Thunderdome Overseer","CentCom Official","Medical Officer","Research Officer", \
-		"Special Ops Officer","Admiral","CentCom Commander","CentCom Bartender","Private Security Force")
+	centcom_jobs = list(JOB_CENTCOM,JOB_CENTCOM_VIP,JOB_CENTCOM_CUSTODIAN,JOB_CENTCOM_THUNDERDOME_OVERSEER,JOB_CENTCOM_OFFICIAL,JOB_CENTCOM_MEDICAL_DOCTOR,JOB_CENTCOM_RESEARCH_OFFICER, \
+		JOB_CENTCOM_SPECIAL_OFFICER,JOB_CENTCOM_ADMIRAL,JOB_CENTCOM_COMMANDER,JOB_CENTCOM_BARTENDER,JOB_CENTCOM_PRIVATE_SECURITY)
 
 /obj/item/paper/fluff/spare_id_safe_code
 	name = "Запасные коды от сейфа"

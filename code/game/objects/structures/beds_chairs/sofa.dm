@@ -4,6 +4,7 @@
 	icon = 'icons/obj/sofa.dmi'
 	buildstackamount = 1
 	item_chair = null
+	color = rgb(141,70,0)
 	var/mutable_appearance/armrest
 
 /obj/structure/chair/sofa/Initialize(mapload)
@@ -47,6 +48,7 @@
 /obj/structure/chair/sofa/corp
 	name = "диван"
 	desc = "Мягкий и удобный."
+	color = null
 	icon_state = "corp_sofamiddle"
 
 /obj/structure/chair/sofa/corp/left
@@ -63,6 +65,7 @@
 /obj/structure/chair/sofa/bench
 	name = "скамейка"
 	desc = "Идеальная конструкция, на которой удобно сидеть и чертовски неудобно спать."
+	color = null
 	icon_state = "bench_middle"
 	greyscale_config = /datum/greyscale_config/bench_middle
 	greyscale_colors = "#00B7EF"
@@ -86,6 +89,7 @@
 /obj/structure/chair/sofa/bamboo
 	name = "бамбуковая скамья"
 	desc = "Самодельная, хы."
+	color = null
 	icon_state = "bamboo_sofamiddle"
 	resistance_flags = FLAMMABLE
 	max_integrity = 60
@@ -97,3 +101,17 @@
 
 /obj/structure/chair/sofa/bamboo/right
 	icon_state = "bamboo_sofaend_right"
+
+/obj/structure/chair/iron_bench
+	name = "скамейка"
+	desc = "На этом можно сидеть, но не долго."
+	icon = 'icons/obj/sofa.dmi'
+	max_integrity = 250
+	integrity_failure = 0.1
+	icon_state = "iron_bench_center"
+
+/obj/structure/chair/iron_bench/left
+	icon_state = "iron_bench_left"
+
+/obj/structure/chair/iron_bench/right
+	icon_state = "iron_bench_right"

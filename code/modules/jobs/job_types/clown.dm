@@ -1,7 +1,7 @@
 /datum/job/clown
-	title = "Clown"
+	title = JOB_CLOWN
 	ru_title = "Клоун"
-	department_head = list("Head of Personnel")
+	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
@@ -25,6 +25,10 @@
 		/obj/item/reagent_containers/spray/waterflower/superlube = 1 // Superlube, good lord.
 	)
 
+	departments_list = list(
+		/datum/job_department/service,
+	)
+
 	rpg_title = "Jester"
 	rpg_title_ru = "Плут"
 
@@ -33,7 +37,7 @@
 	H.apply_pref_name("clown", M.client)
 
 /datum/outfit/job/clown
-	name = "Clown"
+	name = JOB_CLOWN
 	jobtype = /datum/job/clown
 
 	belt = /obj/item/modular_computer/tablet/pda/clown
@@ -65,6 +69,11 @@
 	. = ..()
 	if(HAS_TRAIT(SSstation, STATION_TRAIT_BANANIUM_SHIPMENTS))
 		backpack_contents[/obj/item/stack/sheet/mineral/bananium] = 10
+
+/datum/outfit/job/clown/get_types_to_preload()
+	. = ..()
+	if(HAS_TRAIT(SSstation, STATION_TRAIT_BANANIUM_SHIPMENTS))
+		. += /obj/item/stack/sheet/mineral/bananium/ten
 
 /datum/outfit/job/clown/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
 	..()

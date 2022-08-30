@@ -38,7 +38,7 @@
 	if(prob(probability))
 		zone = check_zone(zone)
 	else
-		zone = pickweight(list(BODY_ZONE_HEAD = 1, BODY_ZONE_CHEST = 1, BODY_ZONE_L_ARM = 4, BODY_ZONE_R_ARM = 4, BODY_ZONE_L_LEG = 4, BODY_ZONE_R_LEG = 4))
+		zone = pick_weight(list(BODY_ZONE_HEAD = 1, BODY_ZONE_CHEST = 1, BODY_ZONE_L_ARM = 4, BODY_ZONE_R_ARM = 4, BODY_ZONE_L_LEG = 4, BODY_ZONE_R_LEG = 4))
 	return zone
 
 ///Would this zone be above the neck
@@ -139,18 +139,18 @@
 
 ///Convert a message to derpy speak
 /proc/derpspeech(message, stuttering)
-	message = replacetext(message, "ты", "-")
-	message = replacetext(message, "голова", "ТЫКОВКА")
-	message = replacetext(message, "ноги", "ПАЛОЧКИ")
-	message = replacetext(message, "помоги", "посмотри")
-	message = replacetext(message, "убивают", "любят")
-	message = replacetext(message, "убивает", "любит")
-	message = replacetext(message, "космос", "дырочк")
-	message = replacetext(message, "техи", "попа")
-	message = replacetext(message, "техах", "попу")
-	message = replacetext(message, "стволы", "дерьмо")
-	message = replacetext(message, "пушки", "говно")
-	message = replacetext(message, "руки", "КУЛЬТЯПКИ")
+	message = replacetext_char(message, "ты", "-")
+	message = replacetext_char(message, "голова", "ТЫКОВКА")
+	message = replacetext_char(message, "ноги", "ПАЛОЧКИ")
+	message = replacetext_char(message, "помоги", "посмотри")
+	message = replacetext_char(message, "убивают", "любят")
+	message = replacetext_char(message, "убивает", "любит")
+	message = replacetext_char(message, "космос", "дырочк")
+	message = replacetext_char(message, "техи", "попа")
+	message = replacetext_char(message, "техах", "попу")
+	message = replacetext_char(message, "стволы", "дерьмо")
+	message = replacetext_char(message, "пушки", "говно")
+	message = replacetext_char(message, "руки", "КУЛЬТЯПКИ")
 	if(prob(50))
 		message = uppertext(message)
 		message += "[r_stutter(pick("!", "!!", "!!!"))]"
@@ -494,7 +494,7 @@
 		return
 
 	// Cannot use the list as a map if the key is a number, so we stringify it (thank you BYOND)
-	var/smessage_type = num2text(message_type)
+	var/smessage_type = num2text(message_type, MAX_BITFLAG_DIGITS)
 
 	if(client)
 		if(!islist(client.player_details.logging[smessage_type]))
@@ -560,8 +560,59 @@
 
 ///Can the mob see reagents inside of containers?
 /mob/proc/can_see_reagents()
-	return stat == DEAD || has_unlimited_silicon_privilege //Dead guys and silicons can always see reagents
+	return stat == DEAD || has_unlimited_silicon_privilege || HAS_TRAIT(src, TRAIT_REAGENT_SCANNER) //Dead guys and silicons can always see reagents
 
 ///Can this mob hold items
 /mob/proc/can_hold_items(obj/item/I)
 	return length(held_items)
+
+/// Returns a generic path of the object based on the slot
+/proc/get_path_by_slot(slot_id)
+	switch(slot_id)
+		if(ITEM_SLOT_BACK)
+			return /obj/item/storage/backpack
+		if(ITEM_SLOT_MASK)
+			return /obj/item/clothing/mask
+		if(ITEM_SLOT_NECK)
+			return /obj/item/clothing/neck
+		if(ITEM_SLOT_HANDCUFFED)
+			return /obj/item/restraints/handcuffs
+		if(ITEM_SLOT_LEGCUFFED)
+			return /obj/item/restraints/legcuffs
+		if(ITEM_SLOT_BELT)
+			return /obj/item/storage/belt
+		if(ITEM_SLOT_ID)
+			return /obj/item/card/id/advanced
+		if(ITEM_SLOT_EARS)
+			return /obj/item/clothing/ears
+		if(ITEM_SLOT_EYES)
+			return /obj/item/clothing/glasses
+		if(ITEM_SLOT_GLOVES)
+			return /obj/item/clothing/gloves
+		if(ITEM_SLOT_HEAD)
+			return /obj/item/clothing/head
+		if(ITEM_SLOT_FEET)
+			return /obj/item/clothing/shoes
+		if(ITEM_SLOT_OCLOTHING)
+			return /obj/item/clothing/suit
+		if(ITEM_SLOT_ICLOTHING)
+			return /obj/item/clothing/under
+		if(ITEM_SLOT_LPOCKET)
+			return /obj/item
+		if(ITEM_SLOT_RPOCKET)
+			return /obj/item
+		if(ITEM_SLOT_SUITSTORE)
+			return /obj/item
+	return null
+
+/// Returns a client from a mob, mind or client
+/proc/get_player_client(player)
+	if(ismob(player))
+		var/mob/player_mob = player
+		player = player_mob.client
+	else if(istype(player, /datum/mind))
+		var/datum/mind/player_mind = player
+		player = player_mind.current.client
+	if(!istype(player, /client))
+		return
+	return player

@@ -255,7 +255,7 @@
 				return
 
 			var/mob/living/brain/B = M.brainmob
-			if(is_banned_from(B.ckey, "Cyborg") || QDELETED(src) || QDELETED(B) || QDELETED(user) || QDELETED(M) || !Adjacent(user))
+			if(is_banned_from(B.ckey, JOB_CYBORG) || QDELETED(src) || QDELETED(B) || QDELETED(user) || QDELETED(M) || !Adjacent(user))
 				if(!QDELETED(M))
 					to_chat(user, span_warning("Кажется [M.name] не подходит для установки! Видимо сами цифровые боги против этого..."))
 				return
@@ -347,7 +347,7 @@
 			chest.cell.forceMove(O)
 			chest.cell = null
 			O.locked = panel_locked
-			O.job = "Cyborg"
+			O.job = JOB_CYBORG
 			forceMove(O)
 			O.robot_suit = src
 			if(!locomotion)
@@ -373,7 +373,7 @@
 /obj/item/robot_suit/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)
-		ui = new(user, src, "Отладка", "Производится отладка киборга")
+		ui = new(user, src, "CyborgBootDebug", "Производится отладка киборга")
 		ui.open()
 
 /obj/item/robot_suit/ui_data(mob/user)

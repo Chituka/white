@@ -906,6 +906,14 @@
 	build_path = /obj/item/circuitboard/machine/accounting
 	category = list ("Различное оборудование")
 
+/datum/design/board/fax
+	name = "Факс"
+	desc = "Плата для факса."
+	id = "fax"
+	build_path = /obj/item/circuitboard/machine/fax
+	category = list ("Различное оборудование")
+	departmental_flags = DEPARTMENT_BITFLAG_ENGINEERING | DEPARTMENT_BITFLAG_SCIENCE | DEPARTMENT_BITFLAG_SERVICE
+
 //Hypertorus fusion reactor designs
 /datum/design/board/HFR_core
 	name = "Термоядерный реактор - Ядро"
@@ -1035,8 +1043,8 @@
 	build_path = /obj/item/circuitboard/machine/shuttle/engine/plasma
 	build_type = IMPRINTER | MECHFAB
 	construction_time = 40
-	category = list("Спейсподы и шатлостроение")
-	sub_category = list("Шатлостроение")
+	category = list("Спейсподы и шаттлостроение")
+	sub_category = list("шаттлостроение")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE
 
 /datum/design/board/shuttle/engine/void
@@ -1046,8 +1054,8 @@
 	build_path = /obj/item/circuitboard/machine/shuttle/engine/void
 	build_type = IMPRINTER | MECHFAB
 	construction_time = 40
-	category = list("Спейсподы и шатлостроение")
-	sub_category = list("Шатлостроение")
+	category = list("Спейсподы и шаттлостроение")
+	sub_category = list("шаттлостроение")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE
 
 /datum/design/board/shuttle/engine/heater
@@ -1057,6 +1065,6 @@
 	build_path = /obj/item/circuitboard/machine/shuttle/heater
 	build_type = IMPRINTER | MECHFAB
 	construction_time = 40
-	category = list("Спейсподы и шатлостроение")
-	sub_category = list("Шатлостроение")
+	category = list("Спейсподы и шаттлостроение")
+	sub_category = list("шаттлостроение")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING | DEPARTMENTAL_FLAG_SCIENCE

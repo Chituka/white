@@ -684,9 +684,9 @@
 /mob/living/carbon/human/singularity_act()
 	. = 20
 	if(mind)
-		if((mind.assigned_role == "Station Engineer") || (mind.assigned_role == "Chief Engineer"))
+		if((mind.assigned_role == JOB_STATION_ENGINEER) || (mind.assigned_role == JOB_CHIEF_ENGINEER))
 			. = 100
-		if(mind.assigned_role == "Clown")
+		if(mind.assigned_role == JOB_CLOWN)
 			. = rand(-1000, 1000)
 	..() //Called afterwards because getting the mind after getting gibbed is sketchy
 
@@ -792,7 +792,7 @@
 					if(WOUND_SEVERITY_SEVERE, WOUND_SEVERITY_CRITICAL)
 						partmsg += "\[<span class='red'><b>[uppertext(W.name)]</b></span>\] "
 
-			if(body_part.get_bleed_rate())
+			if(body_part.get_part_bleed_rate())
 				partmsg += "\[<span class='red'>КРОВОТЕЧЕНИЕ</span>\] "
 
 			for(var/obj/item/I in body_part.embedded_objects)

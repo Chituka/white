@@ -195,15 +195,18 @@
 		return FIRELOCK_ALARM_TYPE_COLD
 	return
 
-/obj/machinery/door/firedoor/proc/process_results(datum/source)
+/obj/machinery/door/firedoor/proc/process_results(turf/location, datum/gas_mixture/environment, exposed_temperature)
 	SIGNAL_HANDLER
 
 	for(var/area/place in affecting_areas)
 		if(!place.fire_detect) //if any area is set to disable detection
 			return
 
-	var/turf/checked_turf = source
+	var/turf/checked_turf = location
 	var/result = check_atmos(checked_turf)
+
+	if(checked_turf == get_turf(src))
+		return
 
 	if(result && TURF_SHARES(checked_turf))
 		issue_turfs |= checked_turf
@@ -234,7 +237,7 @@
 	if(active)
 		return //We're already active
 	var/datum/merger/merge_group = GetMergeGroup(merger_id, merger_typecache)
-	for(var/obj/machinery/door/firedoor/buddylock as anything in merge_group.members)
+	for(var/obj/machinery/door/firedoor/buddylock as anything in merge_group?.members)
 		buddylock.activate(code)
 /**
  * Begins deactivation process of us and our neighbors.
@@ -244,7 +247,7 @@
  */
 /obj/machinery/door/firedoor/proc/start_deactivation_process()
 	var/datum/merger/merge_group = GetMergeGroup(merger_id, merger_typecache)
-	for(var/obj/machinery/door/firedoor/buddylock as anything in merge_group.members)
+	for(var/obj/machinery/door/firedoor/buddylock as anything in merge_group?.members)
 		buddylock.reset()
 
 /**
@@ -590,9 +593,9 @@
 			new /obj/item/electronics/firelock (targetloc)
 	qdel(src)
 
-/obj/machinery/door/firedoor/Moved(atom/oldloc)
+/obj/machinery/door/firedoor/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
-	unregister_adjacent_turfs(oldloc)
+	unregister_adjacent_turfs(old_loc)
 	register_adjacent_turfs()
 
 /obj/machinery/door/firedoor/closed
@@ -604,7 +607,7 @@
 	icon = 'icons/obj/doors/edge_Doorfire.dmi'
 	can_crush = FALSE
 	flags_1 = ON_BORDER_1
-	CanAtmosPass = ATMOS_PASS_PROC
+	can_atmos_pass = ATMOS_PASS_PROC
 
 /obj/machinery/door/firedoor/border_only/closed
 	icon_state = "door_closed"
@@ -634,7 +637,7 @@
 			light_xoffset = -2
 	update_icon()
 
-/obj/machinery/door/firedoor/border_only/Moved()
+/obj/machinery/door/firedoor/border_only/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	adjust_lights_starting_offset()
 
@@ -657,7 +660,7 @@
 		leaving.Bump(src)
 		return COMPONENT_ATOM_BLOCK_EXIT
 
-/obj/machinery/door/firedoor/border_only/CanAtmosPass(turf/T)
+/obj/machinery/door/firedoor/border_only/can_atmos_pass(turf/T)
 	if(get_dir(loc, T) == dir)
 		return !density
 	else

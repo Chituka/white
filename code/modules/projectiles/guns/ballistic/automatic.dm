@@ -54,7 +54,7 @@
 	update_icon()
 	for(var/X in actions)
 		var/datum/action/A = X
-		A.UpdateButtonIcon()
+		A.UpdateButtons()
 
 /obj/item/gun/ballistic/automatic/proto
 	name = "\improper Nanotrasen Saber SMG"
@@ -397,7 +397,8 @@
 	w_class = WEIGHT_CLASS_BULKY
 	inhand_icon_state = "arg"
 	mag_type = /obj/item/ammo_box/magazine/recharge
-	mag_display_ammo = TRUE
+	mag_display_ammo = FALSE
+	mag_display = TRUE
 	fire_delay = 2
 	can_suppress = FALSE
 	burst_size = 0

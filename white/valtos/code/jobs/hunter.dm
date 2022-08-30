@@ -1,5 +1,5 @@
 /datum/job/hunter
-	title = "Hunter"
+	title = JOB_HUNTER
 	ru_title = "Охотник"
 	department_head = list()
 	faction = "Station"
@@ -19,13 +19,17 @@
 	display_order = JOB_DISPLAY_ORDER_SHAFT_MINER
 	bounty_types = CIV_JOB_MINE
 
+	departments_list = list(
+		/datum/job_department/cargo,
+	)
+
 	rpg_title = "Bosshunter"
 	rpg_title_ru = "Боссхантер"
 
 	metalocked = TRUE
 
 /datum/outfit/job/hunter
-	name = "Hunter"
+	name = JOB_HUNTER
 	jobtype = /datum/job/hunter
 
 	belt = /obj/item/energylance
@@ -40,10 +44,11 @@
 	l_pocket = /obj/item/reagent_containers/hypospray/medipen/survival/luxury
 	r_pocket = /obj/item/modular_computer/tablet/pda/hunter
 	backpack_contents = list(
-		/obj/item/flashlight/seclite=1,\
-		/obj/item/mining_voucher=1,\
-		/obj/item/t_scanner/adv_mining_scanner=1,\
-		/obj/item/gun/energy/kinetic_accelerator/super_kinetic_accelerator=1)
+		/obj/item/flashlight/seclite = 1,
+		/obj/item/mining_voucher = 1,
+		/obj/item/t_scanner/adv_mining_scanner = 1,
+		/obj/item/gun/energy/kinetic_accelerator/super_kinetic_accelerator = 1,
+	)
 
 	backpack = /obj/item/storage/backpack/explorer
 	satchel = /obj/item/storage/backpack/satchel/explorer
@@ -65,7 +70,7 @@
 			ID.mining_points = 2000
 
 /datum/id_trim/job/hunter
-	assignment = "Hunter"
+	assignment = JOB_HUNTER
 	trim_state = "trim_hunter"
 	full_access = list(ACCESS_MAINT_TUNNELS, ACCESS_MAILSORTING, ACCESS_CARGO, ACCESS_QM, ACCESS_MINING, ACCESS_MECH_MINING, ACCESS_MINING_STATION, ACCESS_MINERAL_STOREROOM, ACCESS_AUX_BASE, ACCESS_GATEWAY)
 	minimal_access = list(ACCESS_MINING, ACCESS_MECH_MINING, ACCESS_MINING_STATION, ACCESS_MAILSORTING, ACCESS_MINERAL_STOREROOM, ACCESS_AUX_BASE, ACCESS_GATEWAY)

@@ -23,6 +23,35 @@
 /atom/movable/screen/lobby/proc/SlowInit()
 	return
 
+/atom/movable/screen/lobby/round_info
+	screen_loc = "BOTTOM+2,LEFT:16"
+	maptext_height = 256
+	maptext_width = 256
+
+/atom/movable/screen/lobby/round_info/Initialize(mapload)
+	. = ..()
+	RegisterSignal(SStitle, COMSIG_TITLE_UPDATE_INFO, .proc/update_info)
+
+/atom/movable/screen/lobby/round_info/proc/update_info()
+	SIGNAL_HANDLER
+
+	var/generated_maptext = MAPTEXT_REALLYBIG_COLOR("Место действия: <b>[SSmapping.config?.map_name || "Загрузка..."]</b></br>", "#9842cd")
+	generated_maptext += MAPTEXT_REALLYBIG_COLOR("Номер события: <b>[GLOB.round_id ? GLOB.round_id : "NULL"]</b></br>", "#bc1ee0")
+	if(!SSticker.HasRoundStarted())
+		var/time_remaining = SSticker.GetTimeLeft()
+		if(time_remaining > 0)
+			time_remaining = "[round(time_remaining/10)]с"
+		else if(time_remaining == -10)
+			time_remaining = "ОТЛОЖЕНО"
+		else
+			time_remaining = "СЕЙЧАС"
+		generated_maptext += MAPTEXT_REALLYBIG_COLOR("До начала: <b>[time_remaining]</b></br>", "#c625cf")
+		generated_maptext += MAPTEXT_REALLYBIG_COLOR("Готовы: <b>[SSticker.totalPlayersReady]/[LAZYLEN(GLOB.clients) + GLOB.whitelist.len]</b></br></br>", "#d60aaa")
+	else
+		generated_maptext += MAPTEXT_REALLYBIG_COLOR("В действии: <b>[LAZYLEN(GLOB.joined_player_list)] человек</b></br></br>", "#ac3cc2")
+	generated_maptext += MAPTEXT_REALLYBIG_COLOR("Режим: <b>[SSticker.hide_mode ? "СЕКРЕТ" : "[capitalize(GLOB.master_mode)]"]</b>", "#ff4444")
+	maptext = generated_maptext
+
 /atom/movable/screen/lobby/button
 	///Is the button currently enabled?
 	var/enabled = TRUE

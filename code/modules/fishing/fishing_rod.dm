@@ -40,6 +40,26 @@
 
 	var/default_line_color = "gray"
 
+/obj/item/fishing_rod/Initialize(mapload)
+	. = ..()
+	register_context()
+	register_item_context()
+
+/obj/item/fishing_rod/add_context(atom/source, list/context, obj/item/held_item, mob/user)
+	if(src == held_item)
+		if(currently_hooked_item)
+			context[SCREENTIP_CONTEXT_LMB] = "Намотать"
+		context[SCREENTIP_CONTEXT_RMB] = "Модифицировать"
+		return CONTEXTUAL_SCREENTIP_SET
+	return NONE
+
+/obj/item/fishing_rod/add_item_context(obj/item/source, list/context, atom/target, mob/living/user)
+	. = ..()
+	if(currently_hooked_item)
+		context[SCREENTIP_CONTEXT_LMB] = "Намотать"
+		return CONTEXTUAL_SCREENTIP_SET
+	return NONE
+
 /obj/item/fishing_rod/Destroy(force)
 	. = ..()
 	//Remove any leftover fishing lines
@@ -341,6 +361,20 @@
 		line = null
 	if(gone == hook)
 		hook = null
+
+/obj/item/fishing_rod/bone
+	name = "bone fishing rod"
+	desc = "A humble rod, made with whatever happened to be on hand."
+	icon_state = "fishing_rod_bone"
+
+/datum/crafting_recipe/bone_rod
+	name = "Bone Fishing Rod"
+	result = /obj/item/fishing_rod/bone
+	time = 5 SECONDS
+	reqs = list(/obj/item/stack/sheet/leather = 1,
+				/obj/item/stack/sheet/sinew = 2,
+				/obj/item/stack/sheet/bone = 2)
+	category = CAT_PRIMAL
 
 /obj/item/fishing_rod/master
 	name = "master fishing rod"

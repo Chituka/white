@@ -11,8 +11,8 @@
 #define HEV_ARMOR_POWEROFF list(20, 20, 20, 20, 30, 40, 40, 40, 40, 10)
 #define PCV_ARMOR_POWEROFF list(30, 30, 30, 30, 30, 30, 20, 20, 20, 10)
 
-#define HEV_ARMOR_POWERON list(50, 50, 50, 50, 90, 100, 100, 100, 100, 30)
-#define PCV_ARMOR_POWERON list(40, 40, 40, 40, 60, 75, 50, 50, 50, 40)
+#define HEV_ARMOR_POWERON list(80, 80, 80, 80, 100, 100, 100, 100, 100, 60)
+#define PCV_ARMOR_POWERON list(60, 60, 60, 60, 80, 80, 70, 70, 70, 50)
 
 #define HEV_POWERUSE_AIRTANK 2
 
@@ -231,7 +231,7 @@
 
 	playsound(my_suit, 'white/valtos/sounds/black_mesa/hev/blip.ogg', 50)
 
-	UpdateButtonIcon()
+	UpdateButtons()
 
 /datum/action/item_action/hev_toggle/Trigger(trigger_flags)
 	var/obj/item/clothing/suit/space/hev_suit/my_suit = target
@@ -250,7 +250,7 @@
 
 	playsound(my_suit, 'white/valtos/sounds/black_mesa/hev/blip.ogg', 50)
 
-	UpdateButtonIcon()
+	UpdateButtons()
 
 /obj/item/clothing/suit/space/hev_suit/proc/send_message(message, color = HEV_COLOR_ORANGE)
 	if(send_notifications != HEV_NOTIFICATION_TEXT_AND_VOICE && send_notifications != HEV_NOTIFICATION_TEXT)

@@ -40,7 +40,7 @@
 	name = "Component ( NULL ENTRY )"
 	desc = "Компонент, входящий в интегральную схему."
 	build_type = IMPRINTER | COMPONENT_PRINTER | MECHFAB
-	construction_time = 40
+	construction_time = 20
 	materials = list(/datum/material/glass = 1000)
 	departmental_flags = DEPARTMENTAL_FLAG_SCIENCE
 	category = list("Схемотехника", "Компоненты", "Интегральные схемы")
@@ -77,6 +77,16 @@
 	id = "comp_delay"
 	build_path = /obj/item/circuit_component/delay
 
+/datum/design/component/format
+	name = "Format List Component"
+	id = "comp_format"
+	build_path = /obj/item/circuit_component/format
+
+/datum/design/component/format_assoc
+	name = "Format Associative List Component"
+	id = "comp_format_assoc"
+	build_path = /obj/item/circuit_component/format/assoc
+
 /datum/design/component/index
 	name = "Индексатор"
 	id = "comp_index"
@@ -106,6 +116,16 @@
 	name = "Генератор случайных чисел"
 	id = "comp_random"
 	build_path = /obj/item/circuit_component/random
+
+/datum/design/component/binary_conversion
+	name = "Binary Conversion Component"
+	id = "comp_binary_convert"
+	build_path = /obj/item/circuit_component/binary_conversion
+
+/datum/design/component/decimal_conversion
+	name = "Decimal Conversion Component"
+	id = "comp_decimal_convert"
+	build_path = /obj/item/circuit_component/decimal_conversion
 
 /datum/design/component/species
 	name = "Генетический сканер"
@@ -182,10 +202,20 @@
 	id = "comp_direction"
 	build_path = /obj/item/circuit_component/direction
 
+/datum/design/component/reagentscanner
+	name = "Reagents Scanner"
+	id = "comp_reagents"
+	build_path = /obj/item/circuit_component/reagentscanner
+
 /datum/design/component/health
 	name = "Мед сканер"
 	id = "comp_health"
 	build_path = /obj/item/circuit_component/health
+
+/datum/design/component/matscanner
+	name = "Material Scanner"
+	id = "comp_matscanner"
+	build_path = /obj/item/circuit_component/matscanner
 
 /datum/design/component/split
 	name = "Разделитель"
@@ -232,6 +262,26 @@
 	id = "comp_concat_list"
 	build_path = /obj/item/circuit_component/concat_list
 
+/datum/design/component/list_add
+	name = "List Add"
+	id = "comp_list_add"
+	build_path = /obj/item/circuit_component/variable/list/listadd
+
+/datum/design/component/list_remove
+	name = "List Remove"
+	id = "comp_list_remove"
+	build_path = /obj/item/circuit_component/variable/list/listremove
+
+/datum/design/component/list_clear
+	name = "List Clear"
+	id = "comp_list_clear"
+	build_path = /obj/item/circuit_component/variable/list/listclear
+
+/datum/design/component/element_find
+	name = "Element Find"
+	id = "comp_element_find"
+	build_path = /obj/item/circuit_component/listin
+
 /datum/design/component/select_query
 	name = "Селектор"
 	id = "comp_select_query"
@@ -272,6 +322,11 @@
 	id = "comp_list_literal"
 	build_path = /obj/item/circuit_component/list_literal
 
+/datum/design/component/list_assoc_literal
+	name = "Associative List Literal"
+	id = "comp_list_assoc_literal"
+	build_path = /obj/item/circuit_component/assoc_literal
+
 /datum/design/component/typecast
 	name = "Классификация"
 	id = "comp_typecast"
@@ -301,6 +356,16 @@
 	id = "comp_bar_overlay"
 	build_path = /obj/item/circuit_component/object_overlay/bar
 
+/datum/design/component/bci/vox
+	name = "VOX Announcement Component"
+	id = "comp_vox"
+	build_path = /obj/item/circuit_component/vox
+
+/datum/design/component/bci/thought_listener
+	name = "Thought Listener Component"
+	id = "comp_thought_listener"
+	build_path = /obj/item/circuit_component/thought_listener
+
 /datum/design/component/bci/target_intercept
 	name = "ИЧМ целеуказатель"
 	id = "comp_target_intercept"
@@ -319,8 +384,42 @@
 /datum/design/component/filter_list
 	name = "Filter List Component"
 	id = "comp_filter_list"
-	build_path = /obj/item/circuit_component/foreach
+	build_path = /obj/item/circuit_component/filter_list
 
+/datum/design/component/mod_action
+	name = "MOD Action Component"
+	id = "comp_mod_action"
+	build_path = /obj/item/circuit_component/equipment_action/mod
+
+/datum/design/component/id_getter
+	name = "ID Getter Component"
+	id = "comp_id_getter"
+	build_path = /obj/item/circuit_component/id_getter
+
+/datum/design/component/id_info_reader
+	name = "ID Info Reader Component"
+	id = "comp_id_info_reader"
+	build_path = /obj/item/circuit_component/id_info_reader
+
+/datum/design/component/id_access_reader
+	name = "ID Access Reader Component"
+	id = "comp_id_access_reader"
+	build_path = /obj/item/circuit_component/id_access_reader
+
+/datum/design/component/setter_trigger
+	name = "Set Variable Trigger"
+	id = "comp_set_variable_trigger"
+	build_path = /obj/item/circuit_component/variable/setter/trigger
+
+/datum/design/component/view_sensor
+	name = "View Sensor Component"
+	id = "comp_view_sensor"
+	build_path = /obj/item/circuit_component/view_sensor
+
+/datum/design/component/access_checker
+	name = "Access Checker Component"
+	id = "comp_access_checker"
+	build_path = /obj/item/circuit_component/compare/access
 
 /datum/design/compact_remote_shell
 	name = "Пульт"
@@ -441,7 +540,7 @@
 		/datum/material/iron = 15000,
 	)
 	build_path = /obj/item/shell/dispenser
-	build_type = PROTOLATHE | COMPONENT_PRINTER
+	build_type = PROTOLATHE | COMPONENT_PRINTER | MECHFAB
 	category = list("Схемотехника", "Оболочки")
 
 /datum/design/bci_shell
@@ -488,55 +587,5 @@
 	id = "assembly_shell"
 	materials = list(/datum/material/glass = 2000, /datum/material/iron = 5000)
 	build_path = /obj/item/assembly/wiremod
-	build_type = PROTOLATHE | COMPONENT_PRINTER
+	build_type = PROTOLATHE | COMPONENT_PRINTER | MECHFAB
 	category = list("Схемотехника", "Оболочки")
-
-// Circuit Spellbook designs - necessary to be printable in the debug component printer
-/datum/design/circuit_spellbook
-	name = "Circuit Spellbook (Generic)"
-	desc = "A spellbook shell that allows the behavior of the granted spell to be programmed using a circuit."
-	id = "circuit_spellbook_generic"
-	materials = list(/datum/material/iron = 1)
-	build_type = COMPONENT_PRINTER
-	build_path = /obj/item/book/granter/spell/circuit
-	category = list("Админ", "Оболочки")
-
-/datum/design/circuit_spellbook/targeted
-	name = "Circuit Spellbook (Targeted)"
-	id = "circuit_spellbook_targeted"
-	build_path = /obj/item/book/granter/spell/circuit/targeted
-
-/datum/design/circuit_spellbook/aoe_turf
-	name = "Circuit Spellbook (AoE)"
-	id = "circuit_spellbook_aoe"
-	build_path = /obj/item/book/granter/spell/circuit/aoe_turf
-
-/datum/design/circuit_spellbook/self
-	name = "Circuit Spellbook (Self)"
-	id = "circuit_spellbook_self"
-	build_path = /obj/item/book/granter/spell/circuit/self
-
-/datum/design/circuit_spellbook/pointed
-	name = "Circuit Spellbook (Pointed)"
-	id = "circuit_spellbook_pointed"
-	build_path = /obj/item/book/granter/spell/circuit/pointed
-
-/datum/design/circuit_spellbook/aimed
-	name = "Circuit Spellbook (Aimed)"
-	id = "circuit_spellbook_aimed"
-	build_path = /obj/item/book/granter/spell/circuit/aimed
-
-/datum/design/circuit_spellbook/cone
-	name = "Circuit Spellbook (Cone)"
-	id = "circuit_spellbook_cone"
-	build_path = /obj/item/book/granter/spell/circuit/cone
-
-/datum/design/circuit_spellbook/cone/staggered
-	name = "Circuit Spellbook (Staggered Cone)"
-	id = "circuit_spellbook_cone_staggered"
-	build_path = /obj/item/book/granter/spell/circuit/cone/staggered
-
-/datum/design/circuit_spellbook/touch
-	name = "Circuit Spellbook (Touch)"
-	id = "circuit_spellbook_touch"
-	build_path = /obj/item/book/granter/spell/circuit/touch

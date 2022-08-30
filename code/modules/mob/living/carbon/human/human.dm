@@ -657,7 +657,7 @@
 	cut_overlay(MA)
 
 /mob/living/carbon/human/resist_restraints()
-	if(wear_suit?.breakoutchance)
+	if(wear_suit?.breakouttime)
 		changeNext_move(CLICK_CD_BREAKOUT)
 		last_special = world.time + CLICK_CD_BREAKOUT
 		cuff_resist(wear_suit)
@@ -750,11 +750,6 @@
 	coretemperature = get_body_temp_normal(apply_change=FALSE)
 	heat_exposure_stacks = 0
 	return ..()
-
-/mob/living/carbon/human/check_weakness(obj/item/weapon, mob/living/attacker)
-	. = ..()
-	if (dna && dna.species)
-		. *= dna.species.check_species_weakness(weapon, attacker)
 
 /mob/living/carbon/human/is_literate()
 	return TRUE

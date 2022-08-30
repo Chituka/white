@@ -4,7 +4,6 @@
 	icon = 'icons/mob/slimes.dmi'
 	icon_state = "grey baby slime"
 	pass_flags = PASSTABLE | PASSGRILLE
-	ventcrawler = VENTCRAWLER_ALWAYS
 	gender = NEUTER
 	var/is_adult = 0
 	var/docile = 0
@@ -85,7 +84,7 @@
 
 	discovery_points = 1000
 
-/mob/living/simple_animal/slime/Initialize(mapload, new_colour="grey", new_is_adult=FALSE)
+/mob/living/simple_animal/slime/Initialize(mapload, new_colour=colour, new_is_adult=FALSE)
 	var/datum/action/innate/slime/feed/F = new
 	F.Grant(src)
 	ADD_TRAIT(src, TRAIT_CANT_RIDE, INNATE_TRAIT)
@@ -107,6 +106,7 @@
 	AddElement(/datum/element/footstep, FOOTSTEP_MOB_SLIME, 0)
 	add_cell_sample()
 	AddElement(/datum/element/soft_landing)
+	ADD_TRAIT(src, TRAIT_VENTCRAWLER_ALWAYS, INNATE_TRAIT)
 
 /mob/living/simple_animal/slime/Destroy()
 	for (var/A in actions)
@@ -220,7 +220,7 @@
 						Atkcool = TRUE
 						addtimer(VARSET_CALLBACK(src, Atkcool, FALSE), 4.5 SECONDS)
 
-/mob/living/simple_animal/slime/Process_Spacemove(movement_dir = 0)
+/mob/living/simple_animal/slime/Process_Spacemove(movement_dir = 0, continuous_move = FALSE)
 	return 2
 
 /mob/living/simple_animal/slime/get_status_tab_items()

@@ -63,7 +63,7 @@ Difficulty: Hard
 	achievement_type = /datum/award/achievement/boss/bubblegum_kill
 	crusher_achievement_type = /datum/award/achievement/boss/bubblegum_crusher
 	score_achievement_type = /datum/award/score/bubblegum_score
-	deathmessage = "sinks into a pool of blood, fleeing the battle. You've won, for now... "
+	death_message = "sinks into a pool of blood, fleeing the battle. You've won, for now... "
 	deathsound = 'sound/magic/enter_blood.ogg'
 	small_sprite_type = /datum/action/small_sprite/megafauna/bubblegum
 	faction = list("mining", "boss", "hell")
@@ -300,7 +300,7 @@ Difficulty: Hard
 	update_approach()
 	. = ..()
 
-/mob/living/simple_animal/hostile/megafauna/bubblegum/Moved(atom/OldLoc, Dir, Forced = FALSE)
+/mob/living/simple_animal/hostile/megafauna/bubblegum/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	if(spawn_blood)
 		new /obj/effect/decal/cleanable/blood/bubblegum(src.loc)
@@ -317,7 +317,7 @@ Difficulty: Hard
 	achievement_type = null
 	crusher_achievement_type = null
 	score_achievement_type = null
-	deathmessage = "Explodes into a pool of blood!"
+	death_message = "Explodes into a pool of blood!"
 	deathsound = 'sound/effects/splat.ogg'
 	true_spawn = FALSE
 	var/move_through_mob

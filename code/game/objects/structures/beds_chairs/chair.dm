@@ -1,7 +1,7 @@
 /obj/structure/chair
 	name = "стул"
 	desc = "На нём можно сидеть."
-	icon = 'white/valtos/icons/chairs.dmi'
+	icon = 'icons/obj/chairs.dmi'
 	icon_state = "chair"
 	anchored = TRUE
 	can_buckle = TRUE
@@ -245,7 +245,7 @@
 	icon_state = "officechair_dark"
 
 
-/obj/structure/chair/office/Moved()
+/obj/structure/chair/office/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	if(has_gravity())
 		playsound(src, 'sound/effects/roll.ogg', 100, TRUE)
@@ -267,6 +267,8 @@
 	can_buckle = FALSE
 	buildstackamount = 1
 	item_chair = /obj/item/chair/stool
+
+MAPPING_DIRECTIONAL_HELPERS(/obj/structure/chair/stool, 0)
 
 /obj/structure/chair/stool/narsie_act()
 	return
@@ -291,9 +293,11 @@
 /obj/structure/chair/stool/bar
 	name = "барный стул"
 	desc = "На нем есть какие-то неприятные пятна ..."
-	icon = 'white/valtos/icons/chairs.dmi'
+	icon = 'icons/obj/chairs.dmi'
 	icon_state = "bar"
 	item_chair = /obj/item/chair/stool/bar
+
+MAPPING_DIRECTIONAL_HELPERS(/obj/structure/chair/stool/bar, 0)
 
 /obj/structure/chair/stool/bamboo
 	name = "бамбуковый стул"
@@ -308,7 +312,7 @@
 /obj/item/chair
 	name = "стул"
 	desc = "Особенность потасовок в баре."
-	icon = 'white/valtos/icons/chairs.dmi'
+	icon = 'icons/obj/chairs.dmi'
 	icon_state = "chair_toppled"
 	inhand_icon_state = "chair"
 	lefthand_file = 'icons/mob/inhands/misc/chairs_lefthand.dmi'
@@ -396,7 +400,7 @@
 
 /obj/item/chair/stool
 	name = "табуретка"
-	icon = 'white/valtos/icons/chairs.dmi'
+	icon = 'icons/obj/chairs.dmi'
 	icon_state = "stool_toppled"
 	inhand_icon_state = "stool"
 	origin_type = /obj/structure/chair/stool
@@ -412,7 +416,7 @@
 
 /obj/item/chair/stool/bar
 	name = "барный стул"
-	icon = 'white/valtos/icons/chairs.dmi'
+	icon = 'icons/obj/chairs.dmi'
 	icon_state = "bar_toppled"
 	inhand_icon_state = "stool_bar"
 	origin_type = /obj/structure/chair/stool/bar
@@ -477,7 +481,7 @@
 	if(turns >= 8)
 		STOP_PROCESSING(SSfastprocess, src)
 
-/obj/structure/chair/bronze/Moved()
+/obj/structure/chair/bronze/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	if(has_gravity())
 		playsound(src, 'sound/machines/clockcult/integration_cog_install.ogg', 50, TRUE)

@@ -2833,12 +2833,11 @@
 /turf/open/floor/mineral/uranium,
 /area/awaymission/academy/academycellar)
 "lj" = (
-/mob/living/simple_animal/hostile/poison/giant_spider/hunter,
+/mob/living/simple_animal/hostile/giant_spider/hunter,
 /turf/open/floor/engine/cult,
 /area/awaymission/academy/academycellar)
 "lk" = (
 /obj/structure/safe/floor,
-/obj/item/voodoo,
 /obj/item/gun/magic/wand/fireball,
 /obj/item/clothing/suit/space/hardsuit/wizard,
 /turf/open/floor/wood,
@@ -3056,7 +3055,7 @@
 /area/awaymission/academy/academyengine)
 "mj" = (
 /obj/structure/rack,
-/obj/item/book/granter/spell/summonitem,
+/obj/item/book/granter/action/spell/random,
 /obj/item/pen/fourcolor,
 /turf/open/floor/vault,
 /area/awaymission/academy/academyengine)

@@ -406,7 +406,7 @@
 	var/obj/item/toy/plush/narplush/clash_target
 	gender = MALE	//he's a boy, right?
 
-/obj/item/toy/plush/ratplush/Moved()
+/obj/item/toy/plush/ratplush/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	if(clash_target)
 		return
@@ -493,7 +493,7 @@
 	var/clashing
 	gender = FEMALE	//it's canon if the toy is
 
-/obj/item/toy/plush/narplush/Moved()
+/obj/item/toy/plush/narplush/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	var/obj/item/toy/plush/ratplush/P = locate() in range(1, src)
 	if(P && istype(P.loc, /turf/open) && !P.clash_target && !clashing)
@@ -502,10 +502,25 @@
 /obj/item/toy/plush/lizardplushie
 	name = "плюшевый ящер"
 	desc = "Очаровательная мягкая игрушка, похожая на ящерицу."
-	icon_state = "plushie_lizard"
-	inhand_icon_state = "plushie_lizard"
+	icon_state = "map_plushie_lizard"
+	greyscale_config = /datum/greyscale_config/plush_lizard
 	attack_verb_continuous = list("рвёт когтишками", "шипит", "шлёпает хвостиком")
 	attack_verb_simple = list("рвёт когтишками", "шипит", "шлёпает хвостиком")
+	squeak_override = list('sound/weapons/slash.ogg' = 1)
+
+// Preset lizard plushie that uses the original lizard plush green. (Or close to it)
+/obj/item/toy/plush/lizard_plushie/green
+	desc = "An adorable stuffed toy that resembles a green lizardperson. This one fills you with nostalgia and soul."
+	greyscale_colors = "#66ff33#000000"
+
+/obj/item/toy/plush/space_lizard_plushie
+	name = "space lizard plushie"
+	desc = "An adorable stuffed toy that resembles a very determined spacefaring lizardperson. To infinity and beyond, little guy."
+	icon_state = "plushie_spacelizard"
+	inhand_icon_state = "plushie_spacelizard"
+	// space lizards can't hit people with their tail, it's stuck in their suit
+	attack_verb_continuous = list("claws", "hisses", "bops")
+	attack_verb_simple = list("claw", "hiss", "bops")
 	squeak_override = list('sound/weapons/slash.ogg' = 1)
 
 /obj/item/toy/plush/lizardplushie/space
@@ -576,6 +591,58 @@
 	icon_state = "goat"
 	desc = "Несмотря на свой милый вид и плюшевый характер, он все равно будет вас бить. Козы никогда не меняются."
 	squeak_override = list('sound/weapons/punch1.ogg'=1)
+	/// Whether or not this goat is currently taking in a monsterous doink
+	var/going_hard = FALSE
+	/// Whether or not this goat has been flattened like a funny pancake
+	var/splat = FALSE
+
+/obj/item/toy/plush/goatplushie/Initialize(mapload)
+	. = ..()
+	var/static/list/loc_connections = list(
+		COMSIG_TURF_INDUSTRIAL_LIFT_ENTER = .proc/splat,
+	)
+	AddElement(/datum/element/connect_loc, loc_connections)
+
+/obj/item/toy/plush/goatplushie/attackby(obj/item/clothing/mask/cigarette/rollie/fat_dart, mob/user, params)
+	if(!istype(fat_dart))
+		return ..()
+	if(splat)
+		to_chat(user, span_notice("[src] doesn't seem to be able to go hard right now."))
+		return
+	if(going_hard)
+		to_chat(user, span_notice("[src] is already going too hard!"))
+		return
+	if(!fat_dart.lit)
+		to_chat(user, span_notice("You'll have to light that first!"))
+		return
+	to_chat(user, span_notice("You put [fat_dart] into [src]'s mouth."))
+	qdel(fat_dart)
+	going_hard = TRUE
+	update_icon(UPDATE_OVERLAYS)
+
+/obj/item/toy/plush/goatplushie/proc/splat(datum/source)
+	SIGNAL_HANDLER
+	if(splat)
+		return
+	if(going_hard)
+		going_hard = FALSE
+		update_icon(UPDATE_OVERLAYS)
+	icon_state = "goat_splat"
+	playsound(src, SFX_DESECRATION, 50, TRUE)
+	visible_message(span_danger("[src] gets absolutely flattened!"))
+	splat = TRUE
+
+/obj/item/toy/plush/goatplushie/examine()
+	. = ..()
+	if(splat)
+		. += span_notice("[src] might need medical attention.")
+	if(going_hard)
+		. += span_notice("[src] is going so hard, feel free to take a picture.")
+
+/obj/item/toy/plush/goatplushie/update_overlays()
+	. = ..()
+	if(going_hard)
+		. += "goat_dart"
 
 /obj/item/toy/plush/moth
 	name = "плюшевая моль"

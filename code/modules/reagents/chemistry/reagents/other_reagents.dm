@@ -574,11 +574,13 @@
 	metabolization_rate = 0.5 * REAGENTS_METABOLISM //metabolizes to prevent micro-dosage
 	taste_description = "слайм"
 	var/race = /datum/species/human
-	var/list/mutationtexts = list( "You don't feel very well." = MUT_MSG_IMMEDIATE,
-									"Your skin feels a bit abnormal." = MUT_MSG_IMMEDIATE,
-									"Your limbs begin to take on a different shape." = MUT_MSG_EXTENDED,
-									"Your appendages begin morphing." = MUT_MSG_EXTENDED,
-									"You feel as though you're about to change at any moment!" = MUT_MSG_ABOUT2TURN)
+	var/list/mutationtexts = list(
+		"You don't feel very well." = MUT_MSG_IMMEDIATE,
+		"Your skin feels a bit abnormal." = MUT_MSG_IMMEDIATE,
+		"Your limbs begin to take on a different shape." = MUT_MSG_EXTENDED,
+		"Your appendages begin morphing." = MUT_MSG_EXTENDED,
+		"You feel as though you're about to change at any moment!" = MUT_MSG_ABOUT2TURN
+	)
 	var/cycles_to_turn = 20 //the current_cycle threshold / iterations needed before one can transform
 	hydration_factor = DRINK_HYDRATION_FACTOR_SALTY
 
@@ -1100,8 +1102,6 @@
 
 /datum/reagent/iron/expose_mob(mob/living/exposed_mob, methods=TOUCH, reac_volume)
 	. = ..()
-	if(!exposed_mob.has_bane(BANE_IRON)) //If the target is weak to cold iron, then poison them.
-		return
 	if(!holder || (holder.chem_temp >= 100)) // COLD iron.
 		return
 
@@ -1128,12 +1128,6 @@
 	taste_description = "дорогой, но разумный металл"
 	material = /datum/material/silver
 	chemical_flags = REAGENT_CAN_BE_SYNTHESIZED
-
-/datum/reagent/silver/expose_mob(mob/living/exposed_mob, methods=TOUCH, reac_volume)
-	. = ..()
-	if(exposed_mob.has_bane(BANE_SILVER))
-		exposed_mob.reagents.add_reagent(/datum/reagent/toxin, reac_volume)
-
 
 /datum/reagent/uranium
 	name ="Uranium"

@@ -1,7 +1,7 @@
 /datum/job/quartermaster
-	title = "Quartermaster"
+	title = JOB_QUARTERMASTER
 	ru_title = "Квартирмейстер"
-	department_head = list("Head of Personnel")
+	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
@@ -26,6 +26,11 @@
 		/obj/item/circuitboard/machine/emitter = 3
 	)
 
+	departments_list = list(
+		/datum/job_department/cargo,
+		/datum/job_department/command,
+	)
+
 	rpg_title = "Steward"
 	rpg_title_ru = "Завхоз"
 
@@ -35,7 +40,7 @@
 		SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, .proc/minor_announce, "Учитывая нехватку экипажа, текущим капитаном станции теперь является [H.real_name]!"))
 
 /datum/outfit/job/quartermaster
-	name = "Quartermaster"
+	name = JOB_QUARTERMASTER
 	jobtype = /datum/job/quartermaster
 
 	belt = /obj/item/modular_computer/tablet/pda/quartermaster

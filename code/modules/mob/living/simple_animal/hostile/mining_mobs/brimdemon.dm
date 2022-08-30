@@ -33,7 +33,7 @@
 	loot = list()
 	robust_searching = TRUE
 	footstep_type = FOOTSTEP_MOB_CLAW
-	deathmessage = "wails as infernal energy escapes from its wounds, leaving it an empty husk."
+	death_message = "wails as infernal energy escapes from its wounds, leaving it an empty husk."
 	deathsound = 'sound/magic/demon_dies.ogg'
 	light_color = LIGHT_COLOR_BLOOD_MAGIC
 	light_power = 5
@@ -95,7 +95,7 @@
 	addtimer(CALLBACK(src, .proc/fire_laser), 1 SECONDS)
 	COOLDOWN_START(src, ranged_cooldown, ranged_cooldown_time)
 
-/mob/living/simple_animal/hostile/asteroid/brimdemon/Moved()
+/mob/living/simple_animal/hostile/asteroid/brimdemon/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	check_fire()
 

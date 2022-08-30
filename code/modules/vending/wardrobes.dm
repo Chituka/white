@@ -47,28 +47,33 @@
 	icon_state = "medidrobe"
 	product_ads = "Сделайте эти пятна крови модными!!!"
 	vend_reply = "Спасибо за использование MediDrobe!"
-	products = list(/obj/item/clothing/accessory/pocketprotector = 4,
-					/obj/item/storage/backpack/duffelbag/med = 4,
-					/obj/item/storage/backpack/medic = 4,
-					/obj/item/storage/backpack/satchel/med = 4,
-					/obj/item/clothing/suit/hooded/wintercoat/medical = 4,
-					/obj/item/clothing/under/rank/medical/paramedic = 4,
-					/obj/item/clothing/under/rank/medical/paramedic/skirt = 4,
-					/obj/item/clothing/under/rank/medical/doctor/nurse = 4,
-					/obj/item/clothing/head/nursehat = 4,
-					/obj/item/clothing/head/beret/medical = 4,
-					/obj/item/clothing/under/rank/medical/doctor/skirt= 4,
-					/obj/item/clothing/under/rank/medical/doctor/blue = 4,
-					/obj/item/clothing/under/rank/medical/doctor/green = 4,
-					/obj/item/clothing/under/rank/medical/doctor/purple = 4,
-					/obj/item/clothing/under/rank/medical/doctor = 4,
-					/obj/item/clothing/suit/toggle/labcoat = 4,
-					/obj/item/clothing/suit/toggle/labcoat/paramedic = 4,
-					/obj/item/clothing/shoes/sneakers/white = 4,
-					/obj/item/clothing/head/beret/medical/paramedic = 4,
-					/obj/item/clothing/head/soft/paramedic = 4,
-					/obj/item/clothing/suit/apron/surgical = 4,
-					/obj/item/clothing/mask/surgical = 4)
+	products = list(
+		/obj/item/clothing/accessory/pocketprotector = 4,
+		/obj/item/storage/backpack/duffelbag/med = 4,
+		/obj/item/storage/backpack/medic = 4,
+		/obj/item/storage/backpack/satchel/med = 4,
+		/obj/item/clothing/suit/hooded/wintercoat/medical = 4,
+		/obj/item/clothing/under/rank/medical/paramedic = 4,
+		/obj/item/clothing/under/rank/medical/paramedic/skirt = 4,
+		/obj/item/clothing/under/rank/medical/doctor/nurse = 4,
+		/obj/item/clothing/head/nursehat = 4,
+		/obj/item/clothing/head/beret/medical = 4,
+		/obj/item/clothing/head/surgerycap = 4,
+		/obj/item/clothing/head/surgerycap/purple = 4,
+		/obj/item/clothing/head/surgerycap/green = 4,
+		/obj/item/clothing/under/rank/medical/doctor/skirt= 4,
+		/obj/item/clothing/under/rank/medical/doctor/blue = 4,
+		/obj/item/clothing/under/rank/medical/doctor/green = 4,
+		/obj/item/clothing/under/rank/medical/doctor/purple = 4,
+		/obj/item/clothing/under/rank/medical/doctor = 4,
+		/obj/item/clothing/suit/toggle/labcoat = 4,
+		/obj/item/clothing/suit/toggle/labcoat/paramedic = 4,
+		/obj/item/clothing/shoes/sneakers/white = 4,
+		/obj/item/clothing/head/beret/medical/paramedic = 4,
+		/obj/item/clothing/head/soft/paramedic = 4,
+		/obj/item/clothing/suit/apron/surgical = 4,
+		/obj/item/clothing/mask/surgical = 4
+	)
 	refill_canister = /obj/item/vending_refill/wardrobe/medi_wardrobe
 	payment_department = ACCOUNT_MED
 
@@ -388,7 +393,7 @@
 					/obj/item/clothing/head/taqiyahwhite = 1,
 					/obj/item/clothing/head/taqiyahred = 3,
 					/obj/item/clothing/suit/chaplainsuit/monkrobeeast = 1,
-					/obj/item/clothing/head/beanie/rasta = 1)
+					/obj/item/clothing/head/rasta = 1)
 	contraband = list(/obj/item/toy/plush/ratplush = 1,
 					/obj/item/toy/plush/narplush = 1,
 					/obj/item/clothing/head/medievaljewhat = 3,

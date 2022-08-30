@@ -61,6 +61,8 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 /// Can players recolor this in-game via vendors (and maybe more if support is added)?
 #define IS_PLAYER_COLORABLE_1 (1<<21)
 #define KEEP_ON_ARENA_1 (1<<22)
+/// Whether or not this atom has contextual screentips when hovered OVER
+#define HAS_CONTEXTUAL_SCREENTIPS_1 (1<<23)
 
 // Update flags for [/atom/proc/update_appearance]
 /// Update the atom's name
@@ -236,9 +238,6 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 #define SKILLCHIP_ALLOWS_MULTIPLE (1<<0)
 // This skillchip is incompatible with other skillchips from the incompatible_category list.
 #define SKILLCHIP_RESTRICTED_CATEGORIES (1<<1)
-// This skillchip is incompatible with the Chameleon skillchip and cannot be copied.
-// If you want to blacklist an abstract path such a /obj/item/skillchip/job then look at the blacklist in /datum/action/item_action/chameleon/change/skillchip
-#define SKILLCHIP_CHAMELEON_INCOMPATIBLE (1<<2)
 
 //dir macros
 ///Returns true if the dir is diagonal, false otherwise
@@ -253,6 +252,8 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 #define EWDIRFLIP(d)     (d^(EAST|WEST))
 ///Turns the dir by 180 degrees
 #define DIRFLIP(d)       turn(d, 180)
+
+#define MAX_BITFIELD_SIZE 24
 
 /// 33554431 (2^24 - 1) is the maximum value our bitflags can reach.
 #define MAX_BITFLAG_DIGITS 8

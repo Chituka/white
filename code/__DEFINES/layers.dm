@@ -56,6 +56,7 @@
 #define GAS_PIPE_VISIBLE_LAYER 2.47 //layer = initial(layer) + piping_layer / 1000 in atmospherics/update_icon() to determine order of pipe overlap
 #define GAS_FILTER_LAYER 2.48
 #define GAS_PUMP_LAYER 2.49
+#define PLUMBING_PIPE_VISIBILE_LAYER 2.495//layer = initial(layer) + ducting_layer / 3333 in atmospherics/handle_layer() to determine order of duct overlap
 #define LOW_OBJ_LAYER 2.5
 ///catwalk overlay of /turf/open/floor/plating/catwalk_floor
 #define CATWALK_LAYER 2.51
@@ -168,6 +169,9 @@
 
 ///---------------- MISC -----------------------
 
+///Pipecrawling images
+#define PIPECRAWL_IMAGES_PLANE 180
+
 ///AI Camera Static
 #define CAMERA_STATIC_PLANE 200
 
@@ -195,12 +199,6 @@
 /// Bubble for typing indicators
 #define TYPING_LAYER 500
 
-//-------------------- Rendering ---------------------
-#define RENDER_PLANE_GAME 990
-#define RENDER_PLANE_ABOVE_GAME 991
-#define RENDER_PLANE_NON_GAME 995
-#define RENDER_PLANE_MASTER 999
-
 //-------------------- HUD ---------------------
 //HUD layer defines
 #define HUD_PLANE 1000
@@ -212,9 +210,18 @@
 
 #define ADMIN_POPUP_LAYER 1
 
+///Layer for tooltips
+#define TOOLTIP_LAYER 4
 
-///Plane of the "splash" icon used that shows on the lobby screen. Nothing should ever be above this.
-#define SPLASHSCREEN_PLANE 9999
+///Plane of the "splash" icon used that shows on the lobby screen. only render plate planes should be above this
+#define SPLASHSCREEN_PLANE 9900
+
+//-------------------- Rendering ---------------------
+#define RENDER_PLANE_GAME 9990
+#define RENDER_PLANE_ABOVE_GAME 9991
+#define RENDER_PLANE_NON_GAME 9995
+#define RENDER_PLANE_MASTER 9999
+//----------------------------------------------------
 
 #define LOBBY_BACKGROUND_LAYER 3
 #define LOBBY_BUTTON_LAYER 4
@@ -224,3 +231,4 @@
 
 ///Plane master controller keys
 #define PLANE_MASTERS_GAME "plane_masters_game"
+#define PLANE_MASTERS_COLORBLIND "plane_masters_colorblind"

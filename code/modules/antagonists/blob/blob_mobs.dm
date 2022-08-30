@@ -84,7 +84,7 @@
 	SSmove_manager.jps_move(moving = src, chasing = target, delay = delay, repath_delay = 2 SECONDS, minimum_distance = minimum_distance, simulated_only = FALSE, skip_first = TRUE, timeout = 5 SECONDS, flags = MOVEMENT_LOOP_IGNORE_GLIDE)
 	return TRUE
 
-/mob/living/simple_animal/hostile/blob/Process_Spacemove(movement_dir = 0)
+/mob/living/simple_animal/hostile/blob/Process_Spacemove(movement_dir = 0, continuous_move = FALSE)
 	for(var/obj/structure/blob/B in range(1, src))
 		return 1
 	return ..()
@@ -124,7 +124,7 @@
 	attack_verb_simple = "бьёт"
 	attack_sound = 'sound/weapons/genhit1.ogg'
 	del_on_death = TRUE
-	deathmessage = "взрывается!"
+	death_message = "взрывается!"
 	gold_core_spawnable = NO_SPAWN //gold slime cores should only spawn the independent subtype
 	var/death_cloud_size = 1 //size of cloud produced from a dying spore
 	var/mob/living/carbon/human/oldguy

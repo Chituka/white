@@ -243,6 +243,21 @@ GLOBAL_DATUM_INIT(acid_overlay, /mutable_appearance, mutable_appearance('icons/e
 			var/mob/living/buckled_mob = m
 			buckled_mob.electrocute_act((clamp(round(strength/400), 10, 90) + rand(-5, 5)), src, flags = SHOCK_TESLA)
 
+/**
+ * Sets the [SHOCKED_1] flag on this mob.
+ */
+/mob/living/proc/set_shocked()
+	flags_1 |= SHOCKED_1
+
+/**
+ * Unsets the [SHOCKED_1] flag on this mob.
+ */
+/mob/living/proc/reset_shocked()
+	flags_1 &= ~SHOCKED_1
+
+/**
+ * Unsets the [BEING_SHOCKED] flag on this obj.
+ */
 /obj/proc/reset_shocked()
 	obj_flags &= ~BEING_SHOCKED
 
@@ -268,6 +283,8 @@ GLOBAL_DATUM_INIT(acid_overlay, /mutable_appearance, mutable_appearance('icons/e
 		burn()
 	else
 		deconstruct(FALSE)
+
+	SEND_SIGNAL(src, COMSIG_OBJ_DESTRUCTION, damage_flag)
 
 ///changes max_integrity while retaining current health percentage, returns TRUE if the obj got broken.
 /obj/proc/modify_max_integrity(new_max, can_break = TRUE, damage_type = BRUTE)

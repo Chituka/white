@@ -362,7 +362,7 @@
 /datum/round_aspect/battled/run_aspect()
 	SSbtension.forced_tension = TRUE
 	spawn(5 SECONDS)
-		rightandwrong(SUMMON_GUNS, survivor_probability = 10)
+		summon_guns(survivor_probability = 10)
 	..()
 
 /datum/round_aspect/tts
@@ -573,7 +573,7 @@
 		if(!is_station_level(P.z))
 			continue
 		if(prob(5))
-			var/pickedtrash = pickweight(pickweight(GLOB.trash_loot))
+			var/pickedtrash = pick_weight(pick_weight(GLOB.trash_loot))
 			new pickedtrash(P)
 		CHECK_TICK
 	..()

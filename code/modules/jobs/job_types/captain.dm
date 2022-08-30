@@ -1,5 +1,5 @@
 /datum/job/captain
-	title = "Captain"
+	title = JOB_CAPTAIN
 	ru_title = "Капитан"
 	auto_deadmin_role_flags = DEADMIN_POSITION_HEAD|DEADMIN_POSITION_SECURITY
 	department_head = list("CentCom")
@@ -32,6 +32,10 @@
 		/obj/item/reagent_containers/food/drinks/bottle/champagne = 10
 	)
 
+	departments_list = list(
+		/datum/job_department/command,
+	)
+
 	rpg_title = "Star Duke"
 	rpg_title_ru = "Звездный герцог"
 
@@ -41,7 +45,7 @@
 		SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, .proc/minor_announce, "Капитан [H.real_name] на палубе!"))
 
 /datum/outfit/job/captain
-	name = "Captain"
+	name = JOB_CAPTAIN
 	jobtype = /datum/job/captain
 
 	id = /obj/item/card/id/advanced/gold

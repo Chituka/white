@@ -1,7 +1,7 @@
 /datum/job/doctor
-	title = "Medical Doctor"
+	title = JOB_MEDICAL_DOCTOR
 	ru_title = "Врач"
-	department_head = list("Chief Medical Officer")
+	department_head = list(JOB_CHIEF_MEDICAL_OFFICER)
 	faction = "Station"
 	total_positions = 5
 	spawn_positions = 3
@@ -34,15 +34,20 @@
 		/obj/effect/spawner/lootdrop/memeorgans = 1
 	)
 
+	departments_list = list(
+		/datum/job_department/medical,
+	)
+
 	rpg_title = "Cleric"
 	rpg_title_ru = "Клерик"
 
 /datum/outfit/job/doctor
-	name = "Medical Doctor"
+	name = JOB_MEDICAL_DOCTOR
 	jobtype = /datum/job/doctor
 
 	belt = /obj/item/modular_computer/tablet/pda/medical
 	ears = /obj/item/radio/headset/headset_med
+	head = /obj/item/clothing/head/surgerycap
 	uniform = /obj/item/clothing/under/rank/medical/doctor
 	shoes = /obj/item/clothing/shoes/sneakers/white
 	suit =  /obj/item/clothing/suit/toggle/labcoat

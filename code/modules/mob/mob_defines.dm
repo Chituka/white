@@ -26,6 +26,8 @@
 	/// HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 	var/client/canon_client
 
+	var/hide_client_absence = FALSE
+
 	var/shift_to_open_context_menu = TRUE
 
 	///when this be added to vis_contents of something it inherit something.plane, important for visualisation of mob in openspace.
@@ -153,8 +155,6 @@
 	var/datum/component/storage/active_storage
 	/// Active hud
 	var/datum/hud/hud_used = null
-	/// I have no idea tbh
-	var/research_scanner = FALSE
 
 	/// Is the mob throw intent on
 	var/throw_mode = THROW_MODE_DISABLED

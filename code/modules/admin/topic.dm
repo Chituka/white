@@ -769,13 +769,7 @@
 				SSticker.save_mode(href_list["c_mode2"])
 			HandleCMode()
 			return
-		if(SSticker.gamemode_hotswap_disabled)
-			alert("A gamemode has already loaded maps and cannot be changed!")
-			HandleCMode()
-			return
 		GLOB.master_mode = href_list["c_mode2"]
-		//Disable presetup so their gamemode gets loaded.
-		SSticker.pre_setup_completed = FALSE
 		log_admin("[key_name(usr)] set the mode as [GLOB.master_mode].")
 		message_admins(span_adminnotice("[key_name_admin(usr)] set the mode as [GLOB.master_mode]."))
 		to_chat(world, span_adminnotice("<b>Режим: [GLOB.master_mode]</b>"))
@@ -1127,13 +1121,6 @@
 			return
 		output_ai_laws()
 
-	else if(href_list["admincheckdevilinfo"])
-		if(!check_rights(R_ADMIN))
-			return
-		var/mob/M = locate(href_list["admincheckdevilinfo"])
-		output_devil_info(M)
-
-
 	else if(href_list["adminmoreinfo"])
 		var/mob/M = locate(href_list["adminmoreinfo"]) in GLOB.mob_list
 		if(!ismob(M))
@@ -1304,6 +1291,22 @@
 		SSblackbox.record_feedback("amount", "admin_cookies_spawned", 1)
 		to_chat(H, span_adminnotice("Your prayers have been answered!! You received the <b>best [new_item.name]!</b>"))
 		SEND_SOUND(H, sound('sound/effects/pray_chaplain.ogg'))
+
+	else if (href_list["adminpopup"])
+		if (!check_rights(R_ADMIN))
+			return
+
+		var/message = input(owner, "As well as a popup, they'll also be sent a message to reply to. What do you want that to be?", "Message") as text|null
+		if (!message)
+			to_chat(owner, span_notice("Popup cancelled."))
+			return
+
+		var/client/target = locate(href_list["adminpopup"])
+		if (!istype(target))
+			to_chat(owner, span_notice("The mob doesn't exist anymore!"))
+			return
+
+		give_admin_popup(target, owner, message)
 
 	else if(href_list["adminsmite"])
 		if(!check_rights(R_ADMIN|R_FUN))
@@ -2334,11 +2337,9 @@
 		if(log_index <= state_to_view.log.len)
 			var/list/log_entry = state_to_view.log[log_index]
 			if(log_entry["chunk"])
-				LAZYINITLIST(editor.tgui_shared_states)
-				editor.tgui_shared_states["viewedChunk"] = json_encode(log_entry["chunk"])
-				editor.tgui_shared_states["modal"] = json_encode("viewChunk")
+				editor.force_view_chunk = log_entry["chunk"]
+				editor.force_modal = "viewChunk"
 		editor.ui_interact(usr)
-		editor.tgui_shared_states = null
 
 /datum/admins/proc/HandleCMode()
 	if(!check_rights(R_ADMIN))

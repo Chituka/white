@@ -32,17 +32,17 @@
 	var/hacked_price = 50
 
 	var/list/categories = list(
-							"Инструменты",
-							"Электроника",
-							"Конструкции",
-							"Телекомы",
-							"Безопасность",
-							"Оборудование",
-							"Медицина",
-							"Разное",
-							"Кухня",
-							"Импорт"
-							)
+		"Инструменты",
+		"Электроника",
+		"Конструкции",
+		"Телекомы",
+		"Безопасность",
+		"Оборудование",
+		"Медицина",
+		"Разное",
+		"Кухня",
+		"Импорт"
+	)
 
 /obj/machinery/autolathe/Initialize(mapload)
 	AddComponent(/datum/component/material_container, SSmaterials.materials_by_category[MAT_CATEGORY_ITEM_MATERIAL], 0, MATCONTAINER_EXAMINE, _after_insert = CALLBACK(src, .proc/AfterMaterialInsert))
@@ -175,7 +175,7 @@
 				return
 
 			var/multiplier = text2num(params["multiplier"])
-			if(!multiplier)
+			if(!multiplier || !isnum(multiplier) || ISNAN(multiplier))
 				to_chat(usr, "<span class=\"alert\">[capitalize(src.name)] принимает только циферки!</span>")
 				return
 			var/is_stack = ispath(being_built.build_path, /obj/item/stack)

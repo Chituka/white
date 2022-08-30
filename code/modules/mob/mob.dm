@@ -345,6 +345,14 @@
 /mob/proc/get_item_by_slot(slot_id)
 	return null
 
+/// Gets what slot the item on the mob is held in.
+/// Returns null if the item isn't in any slots on our mob.
+/// Does not check if the passed item is null, which may result in unexpected outcoms.
+/mob/proc/get_slot_by_item(obj/item/looking_for)
+	if(looking_for in held_items)
+		return ITEM_SLOT_HANDS
+
+	return null
 
 ///Is the mob incapacitated
 /mob/proc/incapacitated(flags)
@@ -742,6 +750,10 @@
 	if(pd <= 0 && (CONFIG_GET(flag/norespawn) && (!check_rights_for(usr.client, R_ADMIN) || tgui_alert(usr, "Хуй сосал?", "Respawn", list("Да", "Нет")) != "Да")))
 		return
 
+	if(!COOLDOWN_FINISHED(client, respawn_delay))
+		to_chat(usr, span_boldnotice("Перерождение будет доступно через [DisplayTimeText(COOLDOWN_TIMELEFT(client, respawn_delay))]."))
+		return
+
 	if((stat != DEAD || !( SSticker )))
 		to_chat(usr, span_boldnotice("Живу!"))
 		return
@@ -856,30 +868,33 @@
 /mob/proc/get_status_tab_items()
 	. = list()
 
-/// Gets all relevant proc holders for the browser statpenl
-/mob/proc/get_proc_holders()
-	. = list()
-	if(mind)
-		. += get_spells_for_statpanel(mind.spell_list)
-	. += get_spells_for_statpanel(mob_spell_list)
-
 /**
  * Convert a list of spells into a displyable list for the statpanel
  *
  * Shows charge and other important info
  */
-/mob/proc/get_spells_for_statpanel(list/spells)
-	var/list/L = list()
-	for(var/obj/effect/proc_holder/spell/S in spells)
-		if(S.can_be_cast_by(src))
-			switch(S.charge_type)
-				if("recharge")
-					L[++L.len] = list("[S.panel]", "[S.charge_counter/10.0]/[S.charge_max/10]", S.name, REF(S))
-				if("charges")
-					L[++L.len] = list("[S.panel]", "[S.charge_counter]/[S.charge_max]", S.name, REF(S))
-				if("holdervar")
-					L[++L.len] = list("[S.panel]", "[S.holder_var_type] [S.holder_var_amount]", S.name, REF(S))
-	return L
+/mob/proc/get_actions_for_statpanel()
+	var/list/data = list()
+	for(var/datum/action/cooldown/action in actions)
+		var/list/action_data = action.set_statpanel_format()
+		if(!length(action_data))
+			return
+
+		data += list(list(
+			// the panel the action gets displayed to
+			// in the future, this could probably be replaced with subtabs (a la admin tabs)
+			action_data[PANEL_DISPLAY_PANEL],
+			// the status of the action, - cooldown, charges, whatever
+			action_data[PANEL_DISPLAY_STATUS],
+			// the name of the action
+			action_data[PANEL_DISPLAY_NAME],
+			// a ref to the action button of this action for this mob
+			// it's a ref to the button specifically, instead of the action itself,
+			// because statpanel href calls click(), which the action button (not the action itself) handles
+			REF(action.viewers[hud_used]),
+		))
+
+	return data
 
 #define MOB_FACE_DIRECTION_DELAY 1
 
@@ -983,23 +998,18 @@
 		ghost.notify_cloning(message, sound, source, flashwindow)
 		return ghost
 
-///Add a spell to the mobs spell list
-/mob/proc/AddSpell(obj/effect/proc_holder/spell/S)
-	LAZYADD(mob_spell_list, S)
-	if(S?.action)
-		S.action.Grant(src)
+/**
+ * Checks to see if the mob can cast normal magic spells.
+ *
+ * args:
+ * * magic_flags (optional) A bitfield with the type of magic being cast (see flags at: /datum/component/anti_magic)
+**/
+/mob/proc/can_cast_magic(magic_flags = MAGIC_RESISTANCE)
+	if(magic_flags == NONE) // magic with the NONE flag can always be cast
+		return TRUE
 
-///Remove a spell from the mobs spell list
-/mob/proc/RemoveSpell(obj/effect/proc_holder/spell/spell)
-	if(!spell)
-		return
-	for(var/X in mob_spell_list)
-		var/obj/effect/proc_holder/spell/S = X
-		if(istype(S, spell))
-			LAZYREMOVE(mob_spell_list, S)
-			qdel(S)
-	if(client)
-		client.stat_panel.send_message("check_spells")
+	var/restrict_magic_flags = SEND_SIGNAL(src, COMSIG_MOB_RESTRICT_MAGIC, magic_flags)
+	return restrict_magic_flags == NONE
 
 /**
  * Checks to see if the mob can block magic
@@ -1246,6 +1256,49 @@
 	return FALSE
 
 /**
+ * Proc that returns TRUE if the mob can write using the writing_instrument, FALSE otherwise.
+ *
+ * This proc a side effect, outputting a message to the mob's chat with a reason if it returns FALSE.
+ */
+/mob/proc/can_write(obj/item/writing_instrument)
+	if(!istype(writing_instrument))
+		to_chat(src, span_warning("You can't write with the [writing_instrument]!"))
+		return FALSE
+
+	if(!is_literate())
+		to_chat(src, span_warning("You try to write, but don't know how to spell anything!"))
+		return FALSE
+
+	if(!has_light_nearby() && !has_nightvision())
+		to_chat(src, span_warning("It's too dark in here to write anything!"))
+		return FALSE
+/*
+	var/pen_info = writing_instrument.get_writing_implement_details()
+	if(!pen_info || (pen_info["interaction_mode"] != MODE_WRITING))
+		to_chat(src, span_warning("You can't write with the [writing_instrument]!"))
+		return FALSE
+*/
+	if(has_gravity())
+		return TRUE
+
+	var/obj/item/pen/pen = writing_instrument
+
+	if(istype(pen)) // pen.requires_gravity - вы че там совсем отбитые нахуй
+		to_chat(src, span_warning("You try to write, but the [writing_instrument] doesn't work in zero gravity!"))
+		return FALSE
+
+	return TRUE
+
+/**
+ * Can this mob see in the dark
+ *
+ * This checks all traits, glasses, and robotic eyeball implants to see if the mob can see in the dark
+ * this does NOT check if the mob is missing it's eyeballs. Also see_in_dark is a BYOND mob var (that defaults to 2)
+**/
+/mob/proc/has_nightvision()
+	return HAS_TRAIT(src, TRAIT_NIGHT_VISION)
+
+/**
  * Checks if there is enough light where the mob is located
  *
  * Args:
@@ -1286,7 +1339,6 @@
 	VV_DROPDOWN_OPTION(VV_HK_DIRECT_CONTROL, "Assume Direct Control")
 	VV_DROPDOWN_OPTION(VV_HK_GIVE_DIRECT_CONTROL, "Give Direct Control")
 	VV_DROPDOWN_OPTION(VV_HK_OFFER_GHOSTS, "Offer Control to Ghosts")
-	VV_DROPDOWN_OPTION(VV_HK_SDQL_SPELL, "Give SDQL Spell")
 
 /mob/vv_do_topic(list/href_list)
 	. = ..()
@@ -1338,10 +1390,6 @@
 		if(!check_rights(NONE))
 			return
 		offer_control(src)
-	if(href_list[VV_HK_SDQL_SPELL])
-		if(!check_rights(R_DEBUG))
-			return
-		usr.client.cmd_sdql_spell_menu(src)
 
 /**
  * extra var handling for the logging var
@@ -1491,18 +1539,19 @@
 	SEND_SIGNAL(src, COMSIG_FIXEYE_ENABLE, TRUE, TRUE)
 	SEND_SIGNAL(src, COMSIG_FIXEYE_LOCK)
 	RegisterSignal(src, COMSIG_MOB_LOGOUT, .proc/kill_zoom, override = TRUE)
-	var/distance = min(get_dist(src, A), 7)
+	//var/distance = min(get_dist(src, A), 7)
+	var/distance = 7
 	var/direction = get_dir(src, A)
 	var/x_offset = 0
 	var/y_offset = 0
 	if(direction & NORTH)
-		y_offset = distance*world.icon_size
+		y_offset = distance * world.icon_size
 	if(direction & SOUTH)
-		y_offset = -distance*world.icon_size
+		y_offset = -distance * world.icon_size
 	if(direction & EAST)
-		x_offset = distance*world.icon_size
+		x_offset = distance * world.icon_size
 	if(direction & WEST)
-		x_offset = -distance*world.icon_size
+		x_offset = -distance * world.icon_size
 	animate(client, pixel_x = pixel_x + x_offset, pixel_y = pixel_y + y_offset, time = 7, easing = SINE_EASING)
 
 /mob/proc/unperform_zoom(atom/A, params, silent = FALSE)

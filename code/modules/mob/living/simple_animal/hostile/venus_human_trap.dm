@@ -111,7 +111,7 @@
 	melee_damage_upper = 25
 	a_intent = INTENT_HARM
 	del_on_death = TRUE
-	deathmessage = "collapses into bits of plant matter."
+	death_message = "collapses into bits of plant matter."
 	attacked_sound = 'sound/creatures/venus_trap_hurt.ogg'
 	deathsound = 'sound/creatures/venus_trap_death.ogg'
 	attack_sound = 'sound/creatures/venus_trap_hit.ogg'
@@ -139,7 +139,7 @@
 		if(prob(20))
 			to_chat(src, span_danger("Плохо без корней..."))
 
-/mob/living/simple_animal/hostile/venus_human_trap/Moved(atom/OldLoc, Dir)
+/mob/living/simple_animal/hostile/venus_human_trap/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	pixel_x = base_pixel_x + (dir & (NORTH|WEST) ? 2 : -2)
 

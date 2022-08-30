@@ -1,8 +1,5 @@
 //MAP CONVERTED BY dmm2tgm.py THIS HEADER COMMENT PREVENTS RECONVERSION, DO NOT REMOVE
 "aac" = (
-/obj/item/book/granter/spell/summonitem{
-	name = "\proper an extremely flamboyant book"
-	},
 /turf/open/floor/plating/xen,
 /area/awaymission/black_mesa/xen/antag_token_nook)
 "aai" = (
@@ -47,9 +44,8 @@
 /area/awaymission/black_mesa/xen/nihilanth_hallway)
 "aaO" = (
 /obj/item/clothing/mask/gas,
-/turf/open/floor/plating{
-	icon_state = "platingdmg1"
-	},
+/turf/open/floor/plating,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/security_outpost)
 "aaS" = (
 /obj/structure/railing{
@@ -866,9 +862,8 @@
 	},
 /area/awaymission/black_mesa/hecu_zone_external_hall)
 "alV" = (
-/turf/open/floor/plasteel/monofloor{
-	icon_state = "damaged2"
-	},
+/turf/open/floor/plasteel/monofloor,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/hecu_zone_external_hall)
 "amf" = (
 /obj/structure/lattice/catwalk,
@@ -1764,9 +1759,8 @@
 /obj/machinery/light/small/red/directional/north{
 	dir = 8
 	},
-/turf/open/floor/plating{
-	icon_state = "platingdmg2"
-	},
+/turf/open/floor/plating,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/security_outpost)
 "ayH" = (
 /obj/machinery/light/cold,
@@ -1994,9 +1988,8 @@
 /obj/item/ammo_box/a357,
 /obj/item/ammo_box/a357/match,
 /obj/item/ammo_box/a357/match,
-/turf/open/floor/plating{
-	icon_state = "platingdmg1"
-	},
+/turf/open/floor/plating,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/security_outpost)
 "aBf" = (
 /obj/structure/railing/corner{
@@ -2394,9 +2387,8 @@
 /obj/item/reagent_containers/food/drinks/bottle/vodka{
 	pixel_x = 11
 	},
-/turf/open/floor/plating{
-	icon_state = "platingdmg1"
-	},
+/turf/open/floor/plating,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/security_outpost)
 "aGB" = (
 /obj/structure/table,
@@ -3758,9 +3750,8 @@
 "aYe" = (
 /obj/structure/rack,
 /obj/item/gun/ballistic/revolver/mateba,
-/turf/open/floor/plating{
-	icon_state = "platingdmg2"
-	},
+/turf/open/floor/plating,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/security_outpost)
 "aYf" = (
 /obj/effect/mob_spawn/human/engineer,
@@ -3822,9 +3813,8 @@
 /obj/item/clothing/shoes/combat,
 /obj/item/storage/belt/military,
 /obj/item/clothing/gloves/tackler/combat/insulated,
-/turf/open/floor/plating{
-	icon_state = "platingdmg1"
-	},
+/turf/open/floor/plating,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/security_outpost)
 "aYK" = (
 /turf/open/floor/plating/asteroid/snow,
@@ -6264,9 +6254,8 @@
 /area/awaymission/black_mesa/equipment_room)
 "gIr" = (
 /obj/effect/random_mob_placer/xen,
-/turf/open/floor/plasteel/monofloor{
-	icon_state = "damaged2"
-	},
+/turf/open/floor/plasteel/monofloor,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/high_security_servers)
 "gIM" = (
 /obj/effect/turf_decal/stripes,
@@ -7089,9 +7078,8 @@
 /turf/closed/wall/r_wall,
 /area/awaymission/black_mesa/entrance_internal_hall)
 "iKp" = (
-/turf/open/floor/plasteel/monofloor{
-	icon_state = "damaged2"
-	},
+/turf/open/floor/plasteel/monofloor,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/high_security_hallway)
 "iKG" = (
 /obj/structure/chair/office,
@@ -7756,9 +7744,8 @@
 "kkK" = (
 /obj/effect/mob_spawn/human/scientist,
 /obj/item/resonator/upgraded,
-/turf/open/floor/plasteel/monofloor{
-	icon_state = "damaged2"
-	},
+/turf/open/floor/plasteel/monofloor,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/high_security_servers)
 "klO" = (
 /obj/effect/turf_decal/stripes,
@@ -8268,9 +8255,8 @@
 /turf/open/floor/circuit,
 /area/awaymission/black_mesa/lambda_teleporter)
 "lpg" = (
-/turf/open/floor/plasteel/monofloor{
-	icon_state = "damaged2"
-	},
+/turf/open/floor/plasteel/monofloor,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/high_security_servers)
 "lpp" = (
 /obj/machinery/computer,
@@ -11168,9 +11154,8 @@
 /area/awaymission/black_mesa/deep_sci_medbay)
 "sfA" = (
 /obj/item/pickaxe/diamond,
-/turf/open/floor/plasteel/monofloor{
-	icon_state = "damaged2"
-	},
+/turf/open/floor/plasteel/monofloor,
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/black_mesa/high_security_hallway)
 "sfK" = (
 /obj/structure/table,

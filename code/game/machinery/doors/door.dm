@@ -13,7 +13,7 @@
 	pass_flags_self = PASSDOORS
 	max_integrity = 350
 	armor = list(MELEE = 20, BULLET = 30, LASER = 20, ENERGY = 20, BOMB = 10, BIO = 100, RAD = 100, FIRE = 80, ACID = 70)
-	CanAtmosPass = ATMOS_PASS_DENSITY
+	can_atmos_pass = ATMOS_PASS_DENSITY
 	flags_1 = PREVENT_CLICK_UNDER_1
 	receive_ricochet_chance_mod = 0.8
 	damage_deflection = 10
@@ -43,7 +43,10 @@
 	var/datum/effect_system/spark_spread/spark_system
 	var/real_explosion_block	//ignore this, just use explosion_block
 	var/red_alert_access = FALSE //if TRUE, this door will always open on red alert
-	var/unres_sides = 0 //Unrestricted sides. A bitflag for which direction (if any) can open the door with no access
+	/// Checks to see if this airlock has an unrestricted "sensor" within (will set to TRUE if present).
+	var/unres_sensor = FALSE
+	/// Unrestricted sides. A bitflag for which direction (if any) can open the door with no access
+	var/unres_sides = NONE
 	var/safety_mode = FALSE ///Whether or not the airlock can be opened with bare hands while unpowered
 	var/can_crush = TRUE /// Whether or not the door can crush mobs.
 	var/prevent_clicks_under_when_closed = TRUE
@@ -61,6 +64,19 @@
 	if(safety_mode)
 		. += "<hr><span class='notice'>Здесь есть надпись, что этот шлюз откроется <b>просто твоими руками</b>, если здесь не будет энергии.</span>"
 
+/obj/machinery/door/add_context(atom/source, list/context, obj/item/held_item, mob/user)
+	. = ..()
+
+	if(!can_open_with_hands)
+		return .
+
+	if(isaicamera(user) || issilicon(user))
+		return .
+
+	if (isnull(held_item) && Adjacent(user))
+		context[SCREENTIP_CONTEXT_LMB] = "Открыть"
+		return CONTEXTUAL_SCREENTIP_SET
+
 /obj/machinery/door/check_access_list(list/access_list)
 	if(red_alert_access && SSsecurity_level.current_level >= SEC_LEVEL_RED)
 		return TRUE
@@ -71,6 +87,7 @@
 	set_init_door_layer()
 	update_freelook_sight()
 	air_update_turf(TRUE)
+	register_context()
 	GLOB.airlocks += src
 	spark_system = new /datum/effect_system/spark_spread
 	spark_system.set_up(2, 1, src)

@@ -1,7 +1,7 @@
 /datum/job/station_engineer
-	title = "Station Engineer"
+	title = JOB_STATION_ENGINEER
 	ru_title = "Инженер"
-	department_head = list("Chief Engineer")
+	department_head = list(JOB_CHIEF_ENGINEER)
 	faction = "Station"
 	total_positions = 4
 	spawn_positions = 4
@@ -11,6 +11,9 @@
 	exp_type = EXP_TYPE_CREW
 
 	outfit = /datum/outfit/job/engineer
+
+	skills = list(/datum/skill/engineering = SKILL_EXP_JOURNEYMAN)
+	minimal_skills = list(/datum/skill/engineering = SKILL_EXP_JOURNEYMAN)
 
 	paycheck = PAYCHECK_MEDIUM
 	paycheck_department = ACCOUNT_ENG
@@ -26,11 +29,15 @@
 		/obj/item/holosign_creator/engineering = 8,
 	)
 
+	departments_list = list(
+		/datum/job_department/engineering,
+	)
+
 	rpg_title = "Crystallomancer"
 	rpg_title_ru = "Кристалломант"
 
 /datum/outfit/job/engineer
-	name = "Station Engineer"
+	name = JOB_STATION_ENGINEER
 	jobtype = /datum/job/station_engineer
 
 	belt = /obj/item/storage/belt/utility/full/engi

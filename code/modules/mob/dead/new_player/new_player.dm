@@ -6,6 +6,8 @@
 
 	invisibility = INVISIBILITY_ABSTRACT
 
+	see_invisible = 26
+
 	density = FALSE
 	stat = DEAD
 	hud_type = /datum/hud/new_player
@@ -57,11 +59,11 @@
 				AttemptLateSpawn(VP.role_name)
 			else
 				usr << browse(null, "window=violence")
-				var/suggested_team = pick(list("Combantant: Red", "Combantant: Blue"))
+				var/suggested_team = pick(list(JOB_COMBATANT_RED, JOB_COMBATANT_BLUE))
 				if(LAZYLEN(GLOB.violence_blue_team) > LAZYLEN(GLOB.violence_red_team))
-					suggested_team = "Combantant: Red"
+					suggested_team = JOB_COMBATANT_RED
 				if(LAZYLEN(GLOB.violence_red_team) > LAZYLEN(GLOB.violence_blue_team))
-					suggested_team = "Combantant: Blue"
+					suggested_team = JOB_COMBATANT_BLUE
 				VP.role_name = suggested_team
 				AttemptLateSpawn(suggested_team)
 			return
@@ -190,7 +192,7 @@
 	if(!job)
 		return JOB_UNAVAILABLE_GENERIC
 	if((job.current_positions >= job.total_positions) && job.total_positions != -1)
-		if(job.title == "Assistant" && !GLOB.violence_mode_activated)
+		if(job.title == JOB_ASSISTANT && !GLOB.violence_mode_activated)
 			if(isnum(client.player_age) && client.player_age <= 14) //Newbies can always be assistants
 				return JOB_AVAILABLE
 			for(var/datum/job/J in SSjob.occupations)
@@ -243,10 +245,10 @@
 
 	var/is_captain = FALSE
 	// If we don't have an assigned cap yet, check if this person qualifies for some from of captaincy.
-	if(!SSjob.assigned_captain && ishuman(character) && SSjob.chain_of_command[rank] && !is_banned_from(ckey, list("Captain")))
+	if(!SSjob.assigned_captain && ishuman(character) && SSjob.chain_of_command[rank] && !is_banned_from(ckey, list(JOB_CAPTAIN)))
 		is_captain = TRUE
-	// If we already have a captain, are they a "Captain" rank and are we allowing multiple of them to be assigned?
-	else if(SSjob.always_promote_captain_job && (rank == "Captain"))
+	// If we already have a captain, are they a JOB_CAPTAIN rank and are we allowing multiple of them to be assigned?
+	else if(SSjob.always_promote_captain_job && (rank == JOB_CAPTAIN))
 		is_captain = TRUE
 
 	var/equip = SSjob.EquipRank(character, rank, TRUE, is_captain)
@@ -284,10 +286,6 @@
 		humanc.increment_scar_slot()
 		humanc.load_persistent_scars()
 
-		if(GLOB.summon_guns_triggered)
-			give_guns(humanc)
-		if(GLOB.summon_magic_triggered)
-			give_magic(humanc)
 		if(GLOB.curse_of_madness_triggered)
 			give_madness(humanc, GLOB.curse_of_madness_triggered)
 
@@ -374,7 +372,7 @@
 	popup.open(FALSE) // 0 is passed to open so that it doesn't use the onclose() proc
 
 /mob/dead/new_player/proc/display_positions(datum/job/job_datum)
-	if(job_datum.total_positions == -1)
+	if(job_datum.total_positions == -1 || job_datum.total_positions > 8)
 		return "[job_datum.current_positions]/∞"
 	var/generated_text = ""
 	var/open_positions = job_datum.total_positions - job_datum.current_positions
@@ -512,3 +510,14 @@
 
 	// Add verb for re-opening the interview panel, and re-init the verbs for the stat panel
 	add_verb(src, /mob/dead/new_player/proc/open_interview)
+
+/mob/dead/new_player/Hear(message, atom/movable/speaker, message_language, raw_message, radio_freq, list/spans, list/message_mods = list())
+	. = ..()
+	// Create map text prior to modifying message for goonchat
+	if (client?.prefs.chat_on_map && (client.prefs.see_chat_non_mob || ismob(speaker)))
+		create_chat_message(speaker, message_language, raw_message, spans)
+	// Recompose the message, because it's scrambled by default
+	message = compose_message(speaker, message_language, raw_message, radio_freq, spans, message_mods)
+	to_chat(src,
+		html = "[message]",
+		avoid_highlighting = speaker == src)

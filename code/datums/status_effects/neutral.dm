@@ -103,13 +103,12 @@
 
 /datum/status_effect/bounty/proc/rewards()
 	if(rewarded && rewarded.mind && rewarded.stat != DEAD)
-		to_chat(owner, span_boldnotice("You hear something behind you talking...</span> <span class='notice'>Bounty claimed."))
+		to_chat(owner, span_boldnotice("You hear something behind you talking... \"Bounty claimed.\""))
 		playsound(owner, 'sound/weapons/gun/shotgun/shot.ogg', 75, FALSE)
 		to_chat(rewarded, span_greentext("You feel a surge of mana flow into you!"))
-		for(var/obj/effect/proc_holder/spell/spell in rewarded.mind.spell_list)
-			spell.charge_counter = spell.charge_max
-			spell.recharging = FALSE
-			spell.update_appearance()
+		for(var/datum/action/cooldown/spell/spell in rewarded.actions)
+			spell.reset_spell_cooldown()
+
 		rewarded.adjustBruteLoss(-25)
 		rewarded.adjustFireLoss(-25)
 		rewarded.adjustToxLoss(-25)
@@ -164,7 +163,7 @@
 	/// The type of alert given to people when offered, in case you need to override some behavior (like for high-fives)
 	var/give_alert_type = /atom/movable/screen/alert/give
 
-/datum/status_effect/offering/on_creation(mob/living/new_owner, obj/item/offer, give_alert_override)
+/datum/status_effect/offering/on_creation(mob/living/new_owner, obj/item/offer, give_alert_override, mob/living/carbon/offered)
 	. = ..()
 	if(!.)
 		return
@@ -172,10 +171,13 @@
 	if(give_alert_override)
 		give_alert_type = give_alert_override
 
-	for(var/mob/living/carbon/possible_taker in orange(1, owner))
-		if(!owner.CanReach(possible_taker) || IS_DEAD_OR_INCAP(possible_taker) || !possible_taker.can_hold_items())
-			continue
-		register_candidate(possible_taker)
+	if(offered && owner.CanReach(offered) && !IS_DEAD_OR_INCAP(offered) && offered.can_hold_items())
+		register_candidate(offered)
+	else
+		for(var/mob/living/carbon/possible_taker in orange(1, owner))
+			if(!owner.CanReach(possible_taker) || IS_DEAD_OR_INCAP(possible_taker) || !possible_taker.can_hold_items())
+				continue
+			register_candidate(possible_taker)
 
 	if(!possible_takers) // no one around
 		qdel(src)
@@ -215,6 +217,7 @@
 	if(owner.CanReach(taker) && !IS_DEAD_OR_INCAP(taker))
 		return
 
+	to_chat(taker, span_warning("[owner] слишком далеко!"))
 	remove_candidate(taker)
 
 /// The offerer moved, see if anyone is out of range now
@@ -410,7 +413,8 @@
 						"Ik stond op het punt om mehki op tafel te zetten, en nu, waar ben ik?",
 						"Wake the fuck up spaceman we have a gas giant to burn",
 						"This is one hell of a beepsky smash.",
-						"Now neither of us will be virgins!")
+						"Now neither of us will be virgins!"
+					)
 					alt_clone.say(pick(say_phrases))
 				if(2)
 					phase_3_cycle = 0 //counter

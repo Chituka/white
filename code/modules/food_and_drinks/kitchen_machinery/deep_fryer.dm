@@ -7,7 +7,7 @@ GLOBAL_LIST_INIT(oilfry_blacklisted_items, typecacheof(list(
 	/obj/item/reagent_containers/syringe,
 	/obj/item/reagent_containers/food/condiment,
 	/obj/item/storage,
-	/obj/item/small_delivery,
+	/obj/item/delivery/small,
 	/obj/item/his_grace)))
 
 /obj/machinery/deepfryer
@@ -134,8 +134,8 @@ GLOBAL_LIST_INIT(oilfry_blacklisted_items, typecacheof(list(
 		user.visible_message(span_danger("[user] окунает личико [C] в [src]!"))
 		reagents.expose(C, TOUCH)
 		log_combat(user, C, "fryer slammed")
-		var/permeability = 1 - C.get_permeability_protection(list(HEAD))
-		C.apply_damage(min(30 * permeability, reagents.total_volume), BURN, BODY_ZONE_HEAD)
+		var/bio_multiplier = C.getarmor(BODY_ZONE_HEAD, BIO) * 0.01
+		C.apply_damage(min(30 * bio_multiplier, reagents.total_volume), BURN, BODY_ZONE_HEAD)
 		if(reagents.reagent_list) //This can runtime if reagents has nothing in it.
 			reagents.remove_any((reagents.total_volume/2))
 		C.Paralyze(60)

@@ -56,6 +56,7 @@
 				for(var/obj/O in turf_two)
 					if(O.density && (istype(O, /obj/structure/window) || istype(O, /obj/machinery/door)))
 						obstacles = TRUE
+						O.Bumped(user)
 				if(!obstacles)
 					user.forceMove(turf_two)
 					if(!HAS_TRAIT(user, TRAIT_FREERUNNING))
@@ -105,10 +106,12 @@
 /turf/closed/indestructible/splashscreen
 	name = "White Dream"
 	desc = "Поколение странных увлечений."
-	icon = 'icons/runtime/default_title.dmi'
+	icon = null
 	icon_state = "station_intact"
 	plane = SPLASHSCREEN_PLANE
+	invisibility = 26
 	bullet_bounce_sound = null
+	density = FALSE
 	maptext_height = 480
 	maptext_width = 608
 	maptext_x = 4
@@ -124,6 +127,7 @@
 		switch(var_name)
 			if(NAMEOF(src, icon))
 				SStitle.icon = icon
+				SStitle.autorotate = FALSE
 
 /turf/closed/indestructible/reinforced
 	name = "reinforced wall"
@@ -176,6 +180,12 @@
 	icon_state = "plastinum_wall-0"
 	base_icon_state = "plastinum_wall"
 	smoothing_flags = SMOOTH_BITMASK | SMOOTH_DIAGONAL_CORNERS
+	smoothing_groups = list(SMOOTH_GROUP_CLOSED_TURFS, SMOOTH_GROUP_WALLS, SMOOTH_GROUP_PLASTINUM_WALLS)
+	canSmoothWith = list(SMOOTH_GROUP_PLASTINUM_WALLS)
+
+/turf/closed/indestructible/riveted/plastinum/nodiagonal
+	icon_state = "map-shuttle_nd"
+	smoothing_flags = SMOOTH_BITMASK
 
 /turf/closed/indestructible/wood
 	icon = 'icons/turf/walls/wood_wall.dmi'

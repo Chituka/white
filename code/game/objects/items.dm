@@ -127,8 +127,6 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	var/body_parts_covered = 0
 	///Literally does nothing right now
 	var/gas_transfer_coefficient = 1
-	/// How likely a disease or chemical is to get through a piece of clothing
-	var/permeability_coefficient = 1
 	/// for electrical admittance/conductance (electrocution checks and shit)
 	var/siemens_coefficient = 1
 	/// How much clothing is slowing you down. Negative values speeds you up
@@ -144,8 +142,6 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	///In deciseconds, how long an item takes to remove from another person
 	var/strip_delay = 40
 	///How long it takes to resist out of the item (cuffs and such)
-	var/breakoutchance = 0
-	var/breakoutchanceincrement = 0
 	var/breakouttime = 0
 
 	///Used in [atom/proc/attackby] to say how something was attacked `"[x] has been [z.attack_verb] by [y] with [z]"`
@@ -225,8 +221,10 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 		species_exception = string_list(species_exception)
 
 	. = ..()
+	// Handle adding item associated actions
 	for(var/path in actions_types)
-		new path(src)
+		add_item_action(path)
+
 	actions_types = null
 
 	if(force_string)
@@ -236,7 +234,7 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 		if(damtype == BURN)
 			hitsound = 'sound/items/welder.ogg'
 		if(damtype == BRUTE)
-			hitsound = "swing_hit"
+			hitsound = SFX_SWING_HIT
 
 	add_weapon_description()
 
@@ -253,9 +251,54 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	if(ismob(loc))
 		var/mob/m = loc
 		m.temporarilyRemoveItemFromInventory(src, TRUE)
-	for(var/X in actions)
-		qdel(X)
+
+	// Handle cleaning up our actions list
+	for(var/datum/action/action as anything in actions)
+		remove_item_action(action)
+
 	return ..()
+
+/// Called when an action associated with our item is deleted
+/obj/item/proc/on_action_deleted(datum/source)
+	SIGNAL_HANDLER
+
+	if(!(source in actions))
+		CRASH("An action ([source.type]) was deleted that was associated with an item ([src]), but was not found in the item's actions list.")
+
+	LAZYREMOVE(actions, source)
+
+/// Adds an item action to our list of item actions.
+/// Item actions are actions linked to our item, that are granted to mobs who equip us.
+/// This also ensures that the actions are properly tracked in the actions list and removed if they're deleted.
+/// Can be be passed a typepath of an action or an instance of an action.
+/obj/item/proc/add_item_action(action_or_action_type)
+
+	var/datum/action/action
+	if(ispath(action_or_action_type, /datum/action))
+		action = new action_or_action_type(src)
+	else if(istype(action_or_action_type, /datum/action))
+		action = action_or_action_type
+	else
+		CRASH("item add_item_action got a type or instance of something that wasn't an action.")
+
+	LAZYADD(actions, action)
+	RegisterSignal(action, COMSIG_PARENT_QDELETING, .proc/on_action_deleted)
+	if(ismob(loc))
+		// We're being held or are equipped by someone while adding an action?
+		// Then they should also probably be granted the action, given it's in a correct slot
+		var/mob/holder = loc
+		give_item_action(action, holder, holder.get_slot_by_item(src))
+
+	return action
+
+/// Removes an instance of an action from our list of item actions.
+/obj/item/proc/remove_item_action(datum/action/action)
+	if(!action)
+		return
+
+	UnregisterSignal(action, COMSIG_PARENT_QDELETING)
+	LAZYREMOVE(actions, action)
+	qdel(action)
 
 /obj/item/proc/check_allowed_items(atom/target, not_inside, target_self)
 	if(((src in target) && !target_self) || (!isturf(target.loc) && !isturf(target) && not_inside))
@@ -355,7 +398,7 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 
 	. += span_smallnotice("<b>Размер:</b> [weight_class_to_icon(w_class, user, TRUE)]")
 
-	if(!user.research_scanner)
+	if(!HAS_TRAIT(user, TRAIT_RESEARCH_SCANNER))
 		return
 
 	/// Research prospects, including boostable nodes and point values. Deliver to a console to know whether the boosts have already been used.
@@ -524,6 +567,11 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 /// Called when a mob drops an item.
 /obj/item/proc/dropped(mob/user, silent = FALSE)
 	SHOULD_CALL_PARENT(TRUE)
+
+	// Remove any item actions we temporary gave out.
+	for(var/datum/action/action_item_has as anything in actions)
+		action_item_has.Remove(user)
+
 	for(var/X in actions)
 		var/datum/action/A = X
 		A.Remove(user)
@@ -569,6 +617,12 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 	SHOULD_CALL_PARENT(TRUE)
 	visual_equipped(user, slot, initial)
 	SEND_SIGNAL(src, COMSIG_ITEM_EQUIPPED, user, slot)
+	SEND_SIGNAL(user, COMSIG_MOB_EQUIPPED_ITEM, src, slot)
+
+	// Give out actions our item has to people who equip it.
+	for(var/datum/action/action as anything in actions)
+		give_item_action(action, user, slot)
+
 	for(var/X in actions)
 		var/datum/action/A = X
 		if(item_action_slot_check(slot, user)) //some items only give their actions buttons when in a specific slot.
@@ -581,7 +635,19 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 			playsound(src, pickup_sound, PICKUP_SOUND_VOLUME, ignore_walls = FALSE)
 	user.update_equipment_speed_mods()
 
-///sometimes we only want to grant the item's action if it's equipped in a specific slot.
+/// Gives one of our item actions to a mob, when equipped to a certain slot
+/obj/item/proc/give_item_action(datum/action/action, mob/to_who, slot)
+	// Some items only give their actions buttons when in a specific slot.
+	if(!item_action_slot_check(slot, to_who))
+		// There is a chance we still have our item action currently,
+		// and are moving it from a "valid slot" to an "invalid slot".
+		// So call Remove() here regardless, even if excessive.
+		action.Remove(to_who)
+		return
+
+	action.Grant(to_who)
+
+/// Sometimes we only want to grant the item's action if it's equipped in a specific slot.
 /obj/item/proc/item_action_slot_check(slot, mob/user)
 	if(slot == ITEM_SLOT_BACKPACK || slot == ITEM_SLOT_LEGCUFFED) //these aren't true slots, so avoid granting actions there
 		return FALSE
@@ -625,6 +691,9 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
  *Checks before we get to here are: mob is alive, mob is not restrained, stunned, asleep, resting, laying, item is on the mob.
  */
 /obj/item/proc/ui_action_click(mob/user, actiontype)
+	if(SEND_SIGNAL(src, COMSIG_ITEM_UI_ACTION_CLICK, user, actiontype) & COMPONENT_ACTION_HANDLED)
+		return
+
 	attack_self(user)
 
 ///This proc determines if and at what an object will reflect energy projectiles if it's in l_hand,r_hand or wear_suit
@@ -889,16 +958,18 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 		return
 
 	var/skill_modifier = 1
+	var/skill_type_to_adjust = null
 
-	if(tool_behaviour == TOOL_MINING && ishuman(user))
-		if(user.mind)
+	if(user?.mind)
+		if(tool_behaviour in MINING_TOOL_LIST)
 			skill_modifier = user.mind.get_skill_modifier(/datum/skill/mining, SKILL_SPEED_MODIFIER)
-
+			skill_type_to_adjust = /datum/skill/mining
 			if(user.mind.get_skill_level(/datum/skill/mining) >= SKILL_LEVEL_JOURNEYMAN && prob(user.mind.get_skill_modifier(/datum/skill/mining, SKILL_PROBS_MODIFIER))) // we check if the skill level is greater than Journeyman and then we check for the probality for that specific level.
 				mineral_scan_pulse(get_turf(user), SKILL_LEVEL_JOURNEYMAN - 2) //SKILL_LEVEL_JOURNEYMAN = 3 So to get range of 1+ we have to subtract 2 from it,.
-
+		else if(tool_behaviour in ENGINEERING_TOOL_LIST)
+			skill_modifier = user.mind.get_skill_modifier(/datum/skill/engineering, SKILL_SPEED_MODIFIER)
+			skill_type_to_adjust = /datum/skill/engineering
 	delay *= toolspeed * skill_modifier
-
 
 	// Play tool sound at the beginning of tool usage.
 	play_tool_sound(target, volume)
@@ -908,16 +979,19 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 		var/datum/callback/tool_check = CALLBACK(src, .proc/tool_check_callback, user, amount, extra_checks)
 
 		if(ismob(target))
-			if(!do_mob(user, target, delay, extra_checks=tool_check))
+			if(!do_mob(user, target, delay, extra_checks = tool_check))
 				return
 
 		else
-			if(!do_after(user, delay, target=target, extra_checks=tool_check))
+			if(!do_after(user, delay, target=target, extra_checks = tool_check))
 				return
 	else
 		// Invoke the extra checks once, just in case.
 		if(extra_checks && !extra_checks.Invoke())
 			return
+
+	if(skill_type_to_adjust)
+		user?.mind?.adjust_experience(skill_type_to_adjust, (delay / toolspeed / skill_modifier))
 
 	// Use tool's fuel, stack sheets or charges if amount is set.
 	if(amount && !use(amount))
@@ -1161,7 +1235,7 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
  */
 /obj/item/proc/update_action_buttons(status_only = FALSE, force = FALSE)
 	for(var/datum/action/current_action as anything in actions)
-		current_action.UpdateButtonIcon(status_only, force)
+		current_action.UpdateButtons(status_only, force)
 
 // Update icons if this is being carried by a mob
 /obj/item/wash(clean_types)
@@ -1199,6 +1273,10 @@ GLOBAL_VAR_INIT(embedpocalypse, FALSE) // if true, all items will be able to emb
 /obj/item/proc/on_offer_taken(mob/living/carbon/offerer, mob/living/carbon/taker)
 	if(SEND_SIGNAL(src, COMSIG_ITEM_OFFER_TAKEN, offerer, taker) & COMPONENT_OFFER_INTERRUPT)
 		return TRUE
+
+/// Special stuff you want to do when an outfit equips this item.
+/obj/item/proc/on_outfit_equip(mob/living/carbon/human/outfit_wearer, visuals_only, item_slot)
+	return
 
 /obj/item/proc/do_pickup_animation(atom/target)
 	if(!istype(loc, /turf))

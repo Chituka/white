@@ -57,6 +57,12 @@
 		/obj/item/circuit_component/firealarm,
 	))
 
+	AddElement( \
+		/datum/element/contextual_screentip_bare_hands, \
+		lmb_text = "Включить", \
+		rmb_text = "Выключить", \
+	)
+
 /obj/machinery/firealarm/Destroy()
 	if(my_area)
 		LAZYREMOVE(my_area.firealarms, src)
@@ -412,7 +418,21 @@
 	to_chat(user, span_notice("[ my_area.fire_detect ? "Включаю" : "Выключаю" ] термальные датчики!"))
 	log_game("[user] has [ my_area.fire_detect ? "enabled" : "disabled" ] firelock sensors using [src] at [COORD(src)]")
 
-MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/firealarm, 26)
+/obj/machinery/firealarm/directional/north
+	dir = SOUTH
+	pixel_y = 26
+
+/obj/machinery/firealarm/directional/south
+	dir = NORTH
+	pixel_y = -26
+
+/obj/machinery/firealarm/directional/east
+	dir = WEST
+	pixel_x = 26
+
+/obj/machinery/firealarm/directional/west
+	dir = EAST
+	pixel_x = -26
 
 /*
  * Return of Party button

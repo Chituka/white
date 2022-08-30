@@ -28,7 +28,7 @@
 /mob/proc/get_item_for_held_index(i)
 	if(i > 0 && i <= held_items.len)
 		return held_items[i]
-	return FALSE
+	return null
 
 
 //Odd = left. Even = right
@@ -328,6 +328,7 @@
 			else
 				I.forceMove(newloc)
 		I.dropped(src, silent)
+	SEND_SIGNAL(src, COMSIG_MOB_UNEQUIPPED_ITEM, I, force, newloc, no_move, invdrop, silent)
 	return TRUE
 
 /**

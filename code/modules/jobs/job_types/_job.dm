@@ -74,6 +74,12 @@
 	/// If this job's mail goodies compete with generic goodies.
 	var/exclusive_mail_goodies = FALSE
 
+	/// Lazy list with the departments this job belongs to.
+	/// Required to be set for playable jobs.
+	/// The first department will be used in the preferences menu,
+	/// unless department_for_prefs is set.
+	var/list/departments_list = null
+
 	///Bitfield of departments this job belongs wit
 	var/departments = NONE
 
@@ -278,7 +284,7 @@
 		H.equipOutfit(outfit_override ? outfit_override : outfit, visualsOnly)
 
 	if(!visualsOnly && is_captain)
-		var/is_acting_captain = (title != "Captain")
+		var/is_acting_captain = (title != JOB_CAPTAIN)
 		SSjob.promote_to_captain(H, is_acting_captain)
 
 	H.dna.species.after_equip_job(src, H, visualsOnly)
@@ -344,6 +350,8 @@
 	back = /obj/item/storage/backpack
 	shoes = /obj/item/clothing/shoes/sneakers/black
 	box = /obj/item/storage/box/survival
+
+	preload = TRUE // These are used by the prefs ui, and also just kinda could use the extra help at roundstart
 
 	var/backpack = /obj/item/storage/backpack
 	var/satchel  = /obj/item/storage/backpack/satchel
@@ -426,6 +434,16 @@
 	types += satchel
 	types += duffelbag
 	return types
+
+/datum/outfit/job/get_types_to_preload()
+	var/list/preload = ..()
+	preload += backpack
+	preload += satchel
+	preload += duffelbag
+	preload += /obj/item/storage/backpack/satchel/leather
+	var/skirtpath = "[uniform]/skirt"
+	preload += text2path(skirtpath)
+	return preload
 
 /// An overridable getter for more dynamic goodies.
 /datum/job/proc/get_mail_goodies(mob/recipient)

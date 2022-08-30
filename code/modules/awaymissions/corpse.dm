@@ -40,10 +40,13 @@
 	var/ready = TRUE
 	/// If the spawner uses radials
 	var/radial_based = FALSE
+	var/bypass_roundstart = FALSE
 
 //ATTACK GHOST IGNORING PARENT RETURN VALUE
 /obj/effect/mob_spawn/attack_ghost(mob/user)
-	if(!SSticker.HasRoundStarted() || !loc || !ghost_usable || GLOB.violence_mode_activated)
+	if(!loc || !ghost_usable || GLOB.violence_mode_activated)
+		return FALSE
+	if(!bypass_roundstart && !SSticker.HasRoundStarted())
 		return FALSE
 	if(!radial_based)
 		var/ghost_role = tgui_alert(usr, "Точно хочешь занять этот спаунер? (внимание, текущее тело будет покинуто)",,list("Да","Нет"))
@@ -325,7 +328,7 @@
 	icon_state = "corpsedoctor"
 
 /obj/effect/mob_spawn/human/geneticist
-	name = "Geneticist"
+	name = JOB_GENETICIST
 	outfit = /datum/outfit/job/geneticist
 	icon_state = "corpsescientist"
 
@@ -427,19 +430,25 @@
 
 /obj/effect/mob_spawn/human/skeleton
 	name = "Разложившиеся останки"
-	mob_name = "skeleton"
+	mob_name = "скелетыч"
 	mob_species = /datum/species/skeleton
 	mob_gender = NEUTER
 
 /obj/effect/mob_spawn/human/zombie
 	name = "Гниющий труп"
-	mob_name = "zombie"
+	mob_name = "зомби"
 	mob_species = /datum/species/zombie
 	assignedrole = "Zombie"
 
+/obj/effect/mob_spawn/human/monkey
+	name = "Мартыха"
+	mob_name = "мартышка"
+	mob_species = /datum/species/monkey
+	assignedrole = "Monkey"
+
 /obj/effect/mob_spawn/human/abductor
 	name = "Похититель"
-	mob_name = "alien"
+	mob_name = "пришелец"
 	mob_species = /datum/species/abductor
 	outfit = /datum/outfit/abductorcorpse
 

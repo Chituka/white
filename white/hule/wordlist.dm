@@ -76,19 +76,24 @@ GLOBAL_LIST_INIT(ic_autoemote, list(
 	"рофл" = "laugh", "rofl" = "laugh",
 	"кек" = "giggle", "kek" = "giggle",
 	"хз" = "shrug", "hz" = "shrug",
+	"мяу" = "moan", "meow" = "moan",
 ))
 
 GLOBAL_LIST_INIT(ic_autocorrect, list(
-	"бог" = "НАУКА", "god" = "SCIENCE",
-	"боги" = "НАУКА", "gods" = "SCIENCE",
-	"богов" = "НАУКИ", "богами" = "НАУКОЙ",
-	"рцд" = "автоматический строительный комплекс", "rcd" = "rapid construction device",
-	"рпд" = "портативный раздатчик труб", "rpd" = "rapid pipe dispenser",
-	"секс" = "танец", "sex" = "dance",
-	"смо" = "главный врач", "cmo" = "chief medical officer",
-	"хос" = "начальник охраны", "hos" = "head of security",
-	"рд" = "научный руководитель", "rd" = "research director",
-	"се" = "старший инженер", "ce" = "chief engineer",
-	"км" = "квартирмейстер", "qm" = "quartermaster",
-	"хоп" = "глава персонала", "hop" = "head of personnel",
+	//"бог" = "НАУКА", "god" = "SCIENCE",
+	//"боги" = "НАУКА", "gods" = "SCIENCE",
+	//"богов" = "НАУКИ", "богами" = "НАУКОЙ",
+	//"рцд" = "автоматический строительный комплекс", "rcd" = "rapid construction device",
+	//"рпд" = "портативный раздатчик труб", "rpd" = "rapid pipe dispenser",
+	//"секс" = "танец", "sex" = "dance",
+	//"смо" = "главный врач", "cmo" = "chief medical officer",
+	//"хос" = "начальник охраны", "hos" = "head of security",
+	//"рд" = "научный руководитель", "rd" = "research director",
+	//"се" = "старший инженер", "ce" = "chief engineer",
+	//"км" = "квартирмейстер", "qm" = "quartermaster",
+	//"хоп" = "глава персонала", "hop" = "head of personnel",
+	//"гп" = "глава персонала", "врио" = "заместитель",
+	//"гсб" = "хос хуесос",
+	"шатл" = "шаттл"
+	
 ))

@@ -54,7 +54,7 @@
 		temp.restricted_jobs += temp.protected_jobs
 
 	if(CONFIG_GET(flag/protect_assistant_from_antagonist))
-		temp.restricted_jobs += "Assistant"
+		temp.restricted_jobs += JOB_ASSISTANT
 
 	var/list/mob/living/carbon/human/candidates = list()
 	var/mob/living/carbon/human/H = null
@@ -86,7 +86,7 @@
 		temp.restricted_jobs += temp.protected_jobs
 
 	if(CONFIG_GET(flag/protect_assistant_from_antagonist))
-		temp.restricted_jobs += "Assistant"
+		temp.restricted_jobs += JOB_ASSISTANT
 
 	var/list/mob/living/carbon/human/candidates = list()
 	var/mob/living/carbon/human/H = null
@@ -116,7 +116,7 @@
 		temp.restricted_jobs += temp.protected_jobs
 
 	if(CONFIG_GET(flag/protect_assistant_from_antagonist))
-		temp.restricted_jobs += "Assistant"
+		temp.restricted_jobs += JOB_ASSISTANT
 
 	var/list/mob/living/carbon/human/candidates = list()
 	var/mob/living/carbon/human/H = null
@@ -146,7 +146,7 @@
 		temp.restricted_jobs += temp.protected_jobs
 
 	if(CONFIG_GET(flag/protect_assistant_from_antagonist))
-		temp.restricted_jobs += "Assistant"
+		temp.restricted_jobs += JOB_ASSISTANT
 
 	var/list/mob/living/carbon/human/candidates = list()
 	var/mob/living/carbon/human/H = null
@@ -174,7 +174,7 @@
 
 	var/mob/dead/observer/selected = pick_n_take(candidates)
 
-	var/mob/living/carbon/human/new_character = makeBody(selected)
+	var/mob/living/carbon/human/new_character = make_body(selected)
 	new_character.mind.make_Wizard()
 	return TRUE
 
@@ -185,7 +185,7 @@
 		temp.restricted_jobs += temp.protected_jobs
 
 	if(CONFIG_GET(flag/protect_assistant_from_antagonist))
-		temp.restricted_jobs += "Assistant"
+		temp.restricted_jobs += JOB_ASSISTANT
 
 	var/list/mob/living/carbon/human/candidates = list()
 	var/mob/living/carbon/human/H = null
@@ -214,7 +214,7 @@
 		temp.restricted_jobs += temp.protected_jobs
 
 	if(CONFIG_GET(flag/protect_assistant_from_antagonist))
-		temp.restricted_jobs += "Assistant"
+		temp.restricted_jobs += JOB_ASSISTANT
 
 	var/list/mob/living/carbon/human/candidates = list()
 	var/mob/living/carbon/human/H = null
@@ -288,7 +288,7 @@
 		var/datum/team/nuclear/nuke_team
 		if(choice == "Обычная")
 			for(var/mob/c in chosen)
-				var/mob/living/carbon/human/new_character=makeBody(c)
+				var/mob/living/carbon/human/new_character=make_body(c)
 				if(!leader_chosen)
 					leader_chosen = TRUE
 					var/datum/antagonist/nukeop/N = new_character.mind.add_antag_datum(/datum/antagonist/nukeop/leader)
@@ -302,7 +302,7 @@
 					qdel(S)
 					new /obj/machinery/nuclearbomb/syndicate/bananium(T)
 			for(var/mob/c in chosen)
-				var/mob/living/carbon/human/new_character=makeBody(c)
+				var/mob/living/carbon/human/new_character=make_body(c)
 				if(!leader_chosen)
 					leader_chosen = TRUE
 					var/datum/antagonist/nukeop/N = new_character.mind.add_antag_datum(/datum/antagonist/nukeop/leader/clownop)
@@ -580,11 +580,13 @@
 			return FALSE
 		var/obj/structure/closet/supplypod/bluespacepod/banka = new()
 		var/parking = find_safe_turf()
-		for(var/mob/c in chosen)
-			var/mob/living/carbon/human/new_character=makeBody(c)
-			new_character.mind.add_antag_datum(/datum/antagonist/ert/spacepol)
-			new_character.equipOutfit(/datum/outfit/spacepol)
-			new_character.forceMove(banka)
+		for(var/mob/dead/observer/c in chosen)
+			var/mob/living/carbon/human/cop = new(GLOB.newplayer_start)
+			c.client.prefs.copy_to(cop)
+			cop.key = c.key
+			cop.mind.add_antag_datum(/datum/antagonist/ert/spacepol)
+			cop.equipOutfit(/datum/outfit/spacepol)
+			cop.forceMove(banka)
 		new /obj/effect/pod_landingzone(parking, banka)
 		priority_announce("Внимание, в вашем районе проходит облава.", sound('white/alexs410/sound/manhunt.ogg'), sender_override = "Главное управление Спецотряда")
-
+		return TRUE

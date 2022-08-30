@@ -10,7 +10,7 @@
 /obj/item/alienartifact/examine(mob/user)
 	. = ..()
 	var/mob/living/L = user
-	if(istype(L) && L.mind?.assigned_role != "Curator")
+	if(istype(L) && L.mind?.assigned_role != JOB_CURATOR)
 		return
 	for(var/datum/artifact_effect/effect in effects)
 		for(var/verb in effect.effect_act_descs)
@@ -165,7 +165,7 @@
 
 /datum/artifact_effect/airfreeze/Initialize(atom/source)
 	. = ..()
-	source.CanAtmosPass = ATMOS_PASS_NO
+	source.can_atmos_pass = ATMOS_PASS_NO
 
 //===================
 // Atmos Stabilizer
@@ -374,9 +374,9 @@
 
 /datum/artifact_effect/gas_remove/Initialize(source)
 	. = ..()
-	input = pickweight(valid_inputs)
+	input = pick_weight(valid_inputs)
 	effect_act_descs = list("near gas")
-	output = pickweight(valid_outputs)
+	output = pick_weight(valid_outputs)
 
 /datum/artifact_effect/gas_remove/process(delta_time)
 	var/turf/T = get_turf(source_object)

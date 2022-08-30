@@ -116,9 +116,9 @@
 /turf/open/floor/engine,
 /area/engineering/main)
 "at" = (
+/obj/effect/turf_decal/stripes/line,
 /obj/machinery/atmospherics/components/unary/portables_connector/visible{
-	icon_state = "connector_map-1";
-	piping_layer = 1
+	dir = 4
 	},
 /turf/open/floor/plasteel,
 /area/engineering/main)
@@ -144,12 +144,10 @@
 /obj/effect/turf_decal/stripes/line,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
 /obj/structure/cable,
-/obj/machinery/atmospherics/pipe/smart/manifold4w/orange/visible/layer1,
 /turf/open/floor/plasteel,
 /area/engineering/main)
 "az" = (
 /obj/effect/turf_decal/stripes/line,
-/obj/machinery/atmospherics/pipe/smart/manifold4w/orange/visible/layer1,
 /turf/open/floor/plasteel,
 /area/engineering/main)
 "aA" = (
@@ -415,17 +413,6 @@
 /area/engineering/main)
 "bp" = (
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
-/turf/open/floor/plasteel,
-/area/engineering/main)
-"bq" = (
-/obj/effect/turf_decal/stripes/line,
-/obj/machinery/light{
-	pixel_y = 0
-	},
-/obj/machinery/atmospherics/pipe/smart/manifold4w/orange/visible/layer1,
-/obj/machinery/camera/autoname{
-	dir = 1
-	},
 /turf/open/floor/plasteel,
 /area/engineering/main)
 "br" = (
@@ -960,15 +947,6 @@
 	},
 /turf/open/floor/plasteel,
 /area/engineering/main)
-"Dp" = (
-/obj/machinery/door/airlock/external{
-	name = "Engineering External Access";
-	req_access_txt = "10;13"
-	},
-/obj/machinery/door/firedoor,
-/obj/effect/mapping_helpers/airlock/cyclelink_helper,
-/turf/open/floor/plating,
-/area/engineering/main)
 "GV" = (
 /obj/effect/turf_decal/box,
 /obj/machinery/the_singularitygen/tesla,
@@ -1414,7 +1392,7 @@ bR
 Ia
 zz
 BT
-Dp
+Bp
 YT
 xH
 by
@@ -1873,8 +1851,8 @@ ab
 cb
 cb
 co
-at
-bq
+cb
+bL
 cf
 ad
 ad
@@ -1958,7 +1936,7 @@ ab
 cb
 ck
 cb
-az
+at
 bb
 ad
 ad

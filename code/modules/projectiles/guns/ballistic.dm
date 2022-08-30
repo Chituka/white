@@ -93,6 +93,7 @@
 	var/flip_cooldown = 0
 	var/suppressor_x_offset ///pixel offset for the suppressor overlay on the x axis.
 	var/suppressor_y_offset ///pixel offset for the suppressor overlay on the y axis.
+	var/legacy_icon_handler = FALSE
 
 /obj/item/gun/ballistic/Initialize(mapload)
 	. = ..()
@@ -114,6 +115,19 @@
 
 /obj/item/gun/ballistic/add_weapon_description()
 	AddElement(/datum/element/weapon_description, attached_proc = .proc/add_notes_ballistic)
+
+/obj/item/gun/ballistic/fire_sounds()
+	var/frequency_to_use = sin((90/magazine?.max_ammo) * get_ammo())
+	var/click_frequency_to_use = 1 - frequency_to_use * 0.75
+	var/play_click = round(sqrt(magazine?.max_ammo * 2)) > get_ammo()
+	if(suppressed)
+		playsound(src, suppressed_sound, suppressed_volume, vary_fire_sound, ignore_walls = FALSE, extrarange = SILENCED_SOUND_EXTRARANGE, falloff_distance = 0)
+		if(play_click)
+			playsound(src, 'sound/weapons/gun/general/ballistic_click.ogg', suppressed_volume, vary_fire_sound, ignore_walls = FALSE, extrarange = SILENCED_SOUND_EXTRARANGE, falloff_distance = 0, frequency = click_frequency_to_use)
+	else
+		playsound(src, fire_sound, fire_sound_volume, vary_fire_sound)
+		if(play_click)
+			playsound(src, 'sound/weapons/gun/general/ballistic_click.ogg', fire_sound_volume, vary_fire_sound, frequency = click_frequency_to_use)
 
 /**
  *
@@ -138,8 +152,14 @@
 	else
 		icon_state = "[initial(icon_state)][sawn_off ? "_sawn" : ""]"
 
+/obj/item/gun/ballistic/proc/update_legacy_icon()
+	icon_state = "[initial(icon_state)][magazine ? "" : "_e"]"
+
 /obj/item/gun/ballistic/update_overlays()
 	. = ..()
+	if(legacy_icon_handler)
+		update_legacy_icon()
+		return
 	if(show_bolt_icon)
 		if (bolt_type == BOLT_TYPE_LOCKING)
 			. += "[icon_state]_bolt[bolt_locked ? "_locked" : ""]"

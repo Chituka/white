@@ -30,3 +30,18 @@
 #define EXOSUIT_MODULE_COMBAT		EXOSUIT_MODULE_GYGAX | EXOSUIT_MODULE_HONK | EXOSUIT_MODULE_DURAND | EXOSUIT_MODULE_PHAZON
 /// Module is compatible with "Medical" Exosuit modelsm - Odysseus
 #define EXOSUIT_MODULE_MEDICAL		EXOSUIT_MODULE_ODYSSEUS
+
+/// Module is standard in use
+#define MODULE_GENERAL "Основной"
+/// Module is preferred for engineering uses
+#define MODULE_ENGINEERING "Инженерный"
+/// Module is preferred for medical uses
+#define MODULE_MEDICAL "Медицинский"
+/// Module is preferred for science uses
+#define MODULE_SCIENCE "Научный"
+/// Module is preferred for security uses
+#define MODULE_SECURITY "Охранный"
+/// Module is preferred for supply uses
+#define MODULE_SUPPLY "Снабженский"
+/// Module is preferred for service uses
+#define MODULE_SERVICE "Сервисный"

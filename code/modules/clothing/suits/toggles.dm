@@ -52,7 +52,7 @@
 
 	for(var/X in actions)
 		var/datum/action/A = X
-		A.UpdateButtonIcon()
+		A.UpdateButtons()
 
 /obj/item/clothing/suit/hooded/dropped()
 	..()
@@ -81,7 +81,7 @@
 			H.update_inv_wear_suit()
 			for(var/X in actions)
 				var/datum/action/A = X
-				A.UpdateButtonIcon()
+				A.UpdateButtons()
 	else
 		RemoveHood()
 
@@ -134,7 +134,7 @@
 	usr.update_inv_wear_suit()
 	for(var/X in actions)
 		var/datum/action/A = X
-		A.UpdateButtonIcon()
+		A.UpdateButtons()
 
 /obj/item/clothing/suit/toggle/examine(mob/user)
 	. = ..()
@@ -169,6 +169,14 @@
 /obj/item/clothing/suit/space/hardsuit/ui_action_click()
 	..()
 	ToggleHelmet()
+
+/obj/item/clothing/suit/space/hardsuit/ui_action_click(mob/user, action)
+	if(istype(action, /datum/action/item_action/toggle_spacesuit))
+		toggle_spacesuit(user)
+		return TRUE
+	else
+		ToggleHelmet()
+		return TRUE
 
 /obj/item/clothing/suit/space/hardsuit/equipped(mob/user, slot)
 	if(!helmettype)

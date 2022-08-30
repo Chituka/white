@@ -12,13 +12,16 @@
 	var/suittoggled = FALSE
 	limb_integrity = 0 // disabled for most exo-suits
 
+/obj/item/clothing/suit/Initialize(mapload)
+	. = ..()
+	setup_shielding()
 
 /obj/item/clothing/suit/worn_overlays(isinhands = FALSE)
 	. = list()
 	if(!isinhands)
 		if(damaged_clothes)
 			. += mutable_appearance('icons/effects/item_damage.dmi', "damaged[blood_overlay_type]")
-		if(HAS_BLOOD_DNA(src))
+		if(GET_ATOM_BLOOD_DNA_LENGTH(src))
 			. += mutable_appearance('icons/effects/blood.dmi', "[blood_overlay_type]blood")
 		var/mob/living/carbon/human/M = loc
 		if(ishuman(M) && M.w_uniform)
@@ -33,3 +36,12 @@
 	if(ismob(loc))
 		var/mob/M = loc
 		M.update_inv_wear_suit()
+
+/**
+ * Wrapper proc to apply shielding through AddComponent().
+ * Called in /obj/item/clothing/Initialize().
+ * Override with an AddComponent(/datum/component/shielded, args) call containing the desired shield statistics.
+ * See /datum/component/shielded documentation for a description of the arguments
+ **/
+/obj/item/clothing/suit/proc/setup_shielding()
+	return

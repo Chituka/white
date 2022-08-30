@@ -687,11 +687,12 @@
 /obj/effect/mob_spawn/human/donate/artist
 	name = "Экстрактор"
 	desc = "Вытягивает заблудшие души с того света и конвертирует их в дешёвую рабочую силу."
-	icon = 'white/valtos/icons/prison/prison.dmi'
 	icon_state = "spwn"
+	plane = SPLASHSCREEN_PLANE
 	roundstart = FALSE
 	death = FALSE
 	permanent = TRUE
+	density = FALSE
 	uses = -1
 	short_desc = "Я артист. Я работаю на развлечение публики."
 	flavour_text = "Будущее цирковых технологий. Развлекайте публику на станции любыми возможными способами, не покидая Цирк."
@@ -699,6 +700,8 @@
 	assignedrole = "Artist"
 
 	req_sum = 50 // sugar is bad
+
+	bypass_roundstart = TRUE
 
 	//mobs that were spawned from /this/ one instance of the spawner
 	var/list/mob/living/spawned_mobs = list()
@@ -710,22 +713,57 @@
 /obj/effect/mob_spawn/human/donate/artist/Initialize(mapload)
 	. = ..()
 	START_PROCESSING(SSprocessing, src)
+	RegisterSignal(src, COMSIG_CLICK, .proc/get_from_lobby)
 
 /obj/effect/mob_spawn/human/donate/artist/Destroy()
 	STOP_PROCESSING(SSprocessing, src)
+	UnregisterSignal(src, COMSIG_CLICK)
 	. = ..()
 
-/obj/effect/mob_spawn/human/donate/artist/attack_ghost(mob/user)
+/obj/effect/mob_spawn/human/donate/artist/proc/get_from_lobby(datum/source, location, control, params, mob/user)
+	SIGNAL_HANDLER
+
+	if(!isnewplayer(usr))
+		return
+
+	spawn(-1)
+		attack_ghost(usr, from_lobby = TRUE)
+
+/obj/effect/mob_spawn/human/donate/artist/attack_ghost(mob/user, from_lobby = FALSE)
 	if(user.ckey in round_banned_ckeys)
 		to_chat(user, span_warning("А хуй тебе!"))
 		return
+	if(from_lobby)
+		if(!radial_based)
+			var/ghost_role = tgui_alert(usr, "Хочешь попробовать себя в роли артиста? После гибели ты будешь возвращён обратно в лобби.", ,list("Да", "Нет"))
+			if(ghost_role != "Да" || !loc || QDELETED(user))
+				return FALSE
+		if(is_banned_from(user.key, banType))
+			to_chat(user, span_warning("А хуй тебе!"))
+			return FALSE
+		log_game("[key_name(user)] became [mob_name]")
+		create(user, from_lobby = from_lobby)
+		return TRUE
 	. = ..()
 
-/obj/effect/mob_spawn/human/donate/artist/create(mob/user, newname)
+/obj/effect/mob_spawn/human/donate/artist/create(mob/user, newname, from_lobby = FALSE)
 	. = ..()
 	var/mob/living/L = .
 	spawned_mobs += L
 	spawned_mobs[L] = L.ckey
+	if(from_lobby)
+		RegisterSignal(L, COMSIG_LIVING_BEFORE_DUSTED, .proc/send_back_to_lobby)
+
+/obj/effect/mob_spawn/human/donate/artist/proc/send_back_to_lobby(datum/source)
+	SIGNAL_HANDLER
+
+	var/mob/living/dead = source
+
+	dead?.mind?.remove_all_antag_datums()
+	DIRECT_OUTPUT(dead, sound(null))
+	var/mob/dead/new_player/NP = new()
+	NP.ckey = dead.ckey
+	qdel(dead)
 
 /obj/effect/mob_spawn/human/donate/artist/special(mob/living/L)
 	amount += 1
@@ -734,7 +772,44 @@
 		L.real_name = "Ali Rezun"
 		L.say("Убивать.")
 	L.name = L.real_name
+	var/area/A = get_area(L)
+	A.luminosity = 1
+	DIRECT_OUTPUT(L, sound(null))
+	L.client?.tgui_panel?.stop_music()
+	L.client?.kill_lobby()
 
+/obj/machinery/artist_showcase_toggler
+	name = "большой ржавый рубильник"
+	desc = "Если приглядеться, то за толстым слоем ржавчины и крови можно разглядеть надпись \"ПЕРЕКЛЮЧЕНИЕ ВИДИМОСТИ\". К чему бы это?"
+	icon = 'white/valtos/icons/switch.dmi'
+	icon_state = "switch-off"
+	var/is_turned = FALSE
+	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
+
+/obj/machinery/artist_showcase_toggler/attack_hand(mob/user)
+	. = ..()
+	if(.)
+		return
+	add_fingerprint(user)
+	if(is_turned)
+		to_chat(user, span_danger("Рубильник не поддаётся!"))
+		return
+	user.visible_message(span_warning("<b>[user]</b> дёргает рубильник! ПРЕДСТАВЛЕНИЕ НАЧИНАЕТСЯ!"))
+	is_turned = TRUE
+	icon_state = "switch-on"
+	SStitle.splash_turf.plane = GAME_PLANE_FOV_HIDDEN
+	SStitle.splash_turf.mouse_opacity = 0
+	SStitle.splash_turf.blend_mode = 3
+	playsound(src.loc, 'white/valtos/sounds/leveron.ogg', 50, TRUE)
+	spawn(180 SECONDS)
+		icon_state = "switch-off"
+		is_turned = FALSE
+		playsound(src.loc, 'white/valtos/sounds/leveroff.ogg', 90, TRUE)
+		var/turf/T = get_turf(src)
+		T.visible_message(span_notice("<b>[src]</b> возвращается на место!"))
+		SStitle.splash_turf.plane = SPLASHSCREEN_PLANE
+		SStitle.splash_turf.mouse_opacity = 1
+		SStitle.splash_turf.blend_mode = 0
 
 //stolen from CTF code
 /obj/effect/mob_spawn/human/donate/artist/process(delta_time)
@@ -742,26 +817,30 @@
 		if(!i)
 			spawned_mobs -= i
 			continue
+
 		var/mob/living/carbon/human/artist = i
 		if(HAS_TRAIT(artist, TRAIT_CRITICAL_CONDITION) || artist.stat == DEAD || !artist.key)
 			spawned_mobs.Remove(artist)
 			artist.alpha = 0 //because dust animation does not hide the body while playing, which look really fuckiing weird
+			SEND_SIGNAL(artist, COMSIG_LIVING_BEFORE_DUSTED)
 			artist.dust(drop_items = TRUE)
 			continue
+
 		var/area/A = get_area(artist)
-		if(!istype(A, /area/centcom/circus) && !istype(A, /area/centcom/outdoors/circus)) //just in case
+		if(!istype(A, /area/centcom/circus) && !istype(A, /area/start) && !istype(A, /area/centcom/outdoors/circus)) //just in case
 			round_banned_ckeys.Add(spawned_mobs[artist])
 			spawned_mobs.Remove(artist)
 			to_chat(artist, span_userdanger("Ох, лучше бы я не покидал Цирк...")) //let them know they fucked up
 			message_admins("Игрок [artist.ckey], будучи Артистом, каким-то образом сбежал из цирка, за что был казнён и лишён доступа к спавнеру до конца раунда. Такого быть не должно: выясните, как он этого добился и передайте кодербасу. Если же это произошло по вине админбаса, удалите сикей игрока из переменной спавнера (round_banned_ckeys). Позиция игрока на момент обнаружения побега: x=[artist.x], y=[artist.y], z=[artist.z], название зоны - [get_area_name(artist)]")
 			artist.emote("agony")
 
-
 			for(var/s=1,s<51,s++)
 				addtimer(CALLBACK(artist, /mob/proc/emote, "poo"), 1+2*log(s) SECONDS)
+
 			spawn(8.7 SECONDS)
 				artist.visible_message(span_hypnophrase("[artist.name] распидорасило: похоже, за побег из Цирка он был отправлен в бессрочную ссылку на [pick("Цитадель", "Флаффи", "Скайрэт", "Опух", "парашу")]. [pick("Прикольно", "Страшно", "Помянем", "Ужасно", "Кошмар", "Грустно", "Смешно")]."))
 				artist.gib(TRUE)
+
 			continue
 		/*
 		else
@@ -894,7 +973,7 @@
 			if(bet > user.client.mc_cached)
 				to_chat(user, "Где деньги, Лебовски?")
 				return
-			//inc_metabalance(user, -bet, TRUE, "Оплатил входной билет.")
+			inc_metabalance(user, -bet, TRUE, "Оплатил входной билет.")
 			to_chat(user, span_clown("Потеряно [bet] дублей. Оплатил входной билет."))
 			spawn_user(user)
 		return
@@ -916,7 +995,7 @@
 		return
 	bet = betinput
 	duel_status = DUEL_PENDING
-	//inc_metabalance(user, -bet, TRUE, "Оплатил входной билет.")
+	inc_metabalance(user, -bet, TRUE, "Оплатил входной билет.")
 	to_chat(user, span_clown("Потеряно [bet] дублей. Оплатил входной билет."))
 	spawn_user(user, bet)
 	to_chat(user, span_noticealien("Создано предложение о дуэли. Если никто не откликнется за 30 секунд, дуэль будет отменена и вам вернут деньги."))
@@ -1021,10 +1100,10 @@
 
 
 	if(!first_lost)
-		//inc_metabalance(fighter1, bet*pay_mul, TRUE, msg)
+		inc_metabalance(fighter1, bet*pay_mul, TRUE, msg)
 		to_chat(fighter1, span_clown("Начислено [bet*pay_mul] дублей. [msg]"))
 	if(!second_lost)
-		//inc_metabalance(fighter2, bet*pay_mul, TRUE, msg)
+		inc_metabalance(fighter2, bet*pay_mul, TRUE, msg)
 		to_chat(fighter2, span_clown("Начислено [bet*pay_mul] дублей. [msg]"))
 
 	fighter1?.dust(FALSE, FALSE, TRUE)
@@ -1306,14 +1385,14 @@ GLOBAL_LIST_EMPTY(assblasted_people)
 	var/list/atom/movable/pushedstuff = list() // can't use the contents var for whatever reason
 	var/pushing = PUSHING
 
-/obj/projectile/broom/Moved(atom/OldLoc, Dir)
+/obj/projectile/broom/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	if(pushing != PUSHING)
 		if(pushing == STOP_PUSHING_FOR_ONE_TILE)
 			pushing = PUSHING
 		return
 
-	for(var/atom/movable/AM in get_turf(OldLoc))
+	for(var/atom/movable/AM in get_turf(old_loc))
 		var/C = can_push(AM)
 		if(C)
 			AM.forceMove(src)
@@ -1377,7 +1456,7 @@ GLOBAL_LIST_EMPTY(assblasted_people)
 		return TRUE
 	if(ismob(AM))
 		var/mob/M = AM
-		if(M.mind?.assigned_role == "Clown")
+		if(M.mind?.assigned_role == JOB_CLOWN)
 			return TRUE*2
 	if(islizard(AM) || isclown(AM)  || isdrone(AM) || isswarmer(AM) || isdead(AM) || ismouse(AM) || isfelinid(AM) )
 		return TRUE*2 // reserved for mob/living //refactor later, this is ugly

@@ -236,7 +236,7 @@
 	density = TRUE
 	var/buildstacktype = /obj/item/stack/sheet/iron
 	var/buildstackamount = 5
-	CanAtmosPass = ATMOS_PASS_NO
+	can_atmos_pass = ATMOS_PASS_NO
 
 /obj/structure/fans/deconstruct()
 	if(!(flags_1 & NODECONSTRUCT_1))
@@ -306,7 +306,6 @@
 						/obj/item/gun/magic/wand/fireball,
 						/obj/item/stack/telecrystal/twenty,
 						/obj/item/nuke_core,
-						/obj/item/phylactery,
 						/obj/item/banhammer)
 
 /obj/item/fakeartefact/Initialize(mapload)

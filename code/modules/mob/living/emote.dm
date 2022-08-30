@@ -160,8 +160,8 @@
 
 /datum/emote/living/deathgasp/run_emote(mob/user, params, type_override, intentional)
 	var/mob/living/simple_animal/S = user
-	if(istype(S) && S.deathmessage)
-		message_simple = S.deathmessage
+	if(istype(S) && S.death_message)
+		message_simple = S.death_message
 	. = ..()
 	message_simple = initial(message_simple)
 	if(. && user.deathsound)
@@ -375,6 +375,9 @@
 								'white/valtos/sounds/emotes/laugh_female_5.ogg',\
 								'white/valtos/sounds/emotes/laugh_female_6.ogg',\
 								'white/valtos/sounds/emotes/laugh_female_7.ogg')
+				if(H.skin_tone == "african1" || H.skin_tone == "african2")
+					return pick('white/valtos/sounds/emotes/laugh_africanamericanmemberoflgbtq_1.ogg',\
+								'white/valtos/sounds/emotes/laugh_africanamericanmemberoflgbtq_2.ogg')
 				else
 					return pick('white/valtos/sounds/emotes/laugh_male_1.ogg',\
 								'white/valtos/sounds/emotes/laugh_male_2.ogg',\

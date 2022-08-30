@@ -3,7 +3,7 @@
 	name = "био-капюшон"
 	icon_state = "bio"
 	desc = "Капюшон, защищающий голову и лицо от биологических загрязнений."
-	permeability_coefficient = 0.01
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 0, ACID = 0)
 	clothing_flags = THICKMATERIAL | BLOCK_GAS_SMOKE_EFFECT | SNUG_FIT
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 100, RAD = 80, FIRE = 30, ACID = 100)
 	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES|HIDEHAIR|HIDEFACIALHAIR|HIDEFACE|HIDESNOUT
@@ -14,10 +14,11 @@
 	name = "био-костюм"
 	desc = "Костюм, который защищает от биологического загрязнения."
 	icon_state = "bio"
+	worn_icon = 'icons/mob/clothing/suits/bio.dmi'
 	inhand_icon_state = "bio_suit"
 	w_class = WEIGHT_CLASS_BULKY
 	gas_transfer_coefficient = 0.01
-	permeability_coefficient = 0.01
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 0, ACID = 0)
 	clothing_flags = THICKMATERIAL
 	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
 	slowdown = 0.25
@@ -30,10 +31,10 @@
 
 //Standard biosuit, orange stripe
 /obj/item/clothing/head/bio_hood/general
-	icon_state = "bio_general"
+	icon_state = "bio"
 
 /obj/item/clothing/suit/bio_suit/general
-	icon_state = "bio_general"
+	icon_state = "bio"
 
 
 //Virology biosuit, green stripe

@@ -28,7 +28,7 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 
 #define isspaceturf(A) (istype(A, /turf/open/space))
 
-#define isopenspace(A) (istype(A, /turf/open/openspace))
+#define isopenspace(A) (istype(A, /turf/open/openspace) || istype(A, /turf/open/space/openspace))
 
 #define isfloorturf(A) (istype(A, /turf/open/floor))
 
@@ -86,6 +86,8 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 
 #define isalien(A) (istype(A, /mob/living/carbon/alien))
 
+#define isalienhumanoid(A) (istype(A, /mob/living/carbon/alien/humanoid))
+
 #define islarva(A) (istype(A, /mob/living/carbon/alien/larva))
 
 #define isalienadult(A) (istype(A, /mob/living/carbon/alien/humanoid) || istype(A, /mob/living/simple_animal/hostile/alien))
@@ -97,8 +99,6 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 #define isalienroyal(A) (istype(A, /mob/living/carbon/alien/humanoid/royal))
 
 #define isalienqueen(A) (istype(A, /mob/living/carbon/alien/humanoid/royal/queen))
-
-#define istruedevil(A) (istype(A, /mob/living/carbon/true_devil))
 
 //Silicon mobs
 #define issilicon(A) (istype(A, /mob/living/silicon))
@@ -152,11 +152,13 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 
 #define isclown(A) (istype(A, /mob/living/simple_animal/hostile/clown))
 
+#define isspider(A) (istype(A, /mob/living/simple_animal/hostile/giant_spider))
+
 #define iseminence(A) (istype(A, /mob/living/simple_animal/eminence))
 
 #define iscogscarab(A) (istype(A, /mob/living/simple_animal/drone/cogscarab))
 
-#define isstunmob(A) (istype(A, /mob/living/simple_animal/hostile/zombie) || istype(A, /mob/living/simple_animal/hostile/alien) || istype(A, /mob/living/simple_animal/hostile/poison/giant_spider) || istype(A, /mob/living/simple_animal/hostile/clown) || istype(A, /mob/living/simple_animal/hostile/netherworld) || istype(A, /mob/living/simple_animal/hostile/blob) || istype(A, /mob/living/simple_animal/hostile/ratvar))
+#define isstunmob(A) (istype(A, /mob/living/simple_animal/hostile/zombie) || istype(A, /mob/living/simple_animal/hostile/alien) || istype(A, /mob/living/simple_animal/hostile/giant_spider) || istype(A, /mob/living/simple_animal/hostile/clown) || istype(A, /mob/living/simple_animal/hostile/netherworld) || istype(A, /mob/living/simple_animal/hostile/blob) || istype(A, /mob/living/simple_animal/hostile/ratvar))
 
 //Misc mobs
 #define isobserver(A) (istype(A, /mob/dead/observer))

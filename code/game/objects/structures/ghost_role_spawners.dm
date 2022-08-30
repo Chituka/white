@@ -428,54 +428,6 @@
 	new/obj/structure/fluff/empty_sleeper/syndicate(get_turf(src))
 	. = ..()
 
-/obj/effect/mob_spawn/human/demonic_friend
-	name = "Essence of friendship"
-	desc = "Oh boy! Oh boy! A friend!"
-	mob_name = "Demonic friend"
-	icon = 'icons/obj/cardboard_cutout.dmi'
-	icon_state = "cutout_basic"
-	outfit = /datum/outfit/demonic_friend
-	death = FALSE
-	roundstart = FALSE
-	random = TRUE
-	var/obj/effect/proc_holder/spell/targeted/summon_friend/spell
-	var/datum/mind/owner
-	assignedrole = "SuperFriend"
-
-/obj/effect/mob_spawn/human/demonic_friend/Initialize(mapload, datum/mind/owner_mind, obj/effect/proc_holder/spell/targeted/summon_friend/summoning_spell)
-	. = ..()
-	owner = owner_mind
-	flavour_text = "You have been given a reprieve from your eternity of torment, to be [owner.name]'s friend for [owner.p_their()] short mortal coil."
-	important_info = "Be aware that if you do not live up to [owner.name]'s expectations, they can send you back to hell with a single thought. [owner.name]'s death will also return you to hell."
-	var/area/A = get_area(src)
-	if(!mapload && A)
-		notify_ghosts("\A friendship shell has been completed in [A.name].", source = src, action=NOTIFY_ATTACK, flashwindow = FALSE)
-	objectives = "Be [owner.name]'s friend, and keep [owner.name] alive, so you don't get sent back to hell."
-	spell = summoning_spell
-
-
-/obj/effect/mob_spawn/human/demonic_friend/special(mob/living/L)
-	if(!QDELETED(owner.current) && owner.current.stat != DEAD)
-		L.fully_replace_character_name(null,"[owner.name]'s best friend")
-		soullink(/datum/soullink/oneway, owner.current, L)
-		spell.friend = L
-		spell.charge_counter = spell.charge_max
-		L.mind.hasSoul = FALSE
-		var/mob/living/carbon/human/H = L
-		var/obj/item/worn = H.wear_id
-		var/obj/item/card/id/id = worn.GetID()
-		id.registered_name = L.real_name
-		id.update_label()
-
-/datum/outfit/demonic_friend
-	name = "Demonic Friend"
-	uniform = /obj/item/clothing/under/misc/assistantformal
-	shoes = /obj/item/clothing/shoes/laceup
-	r_pocket = /obj/item/radio/off
-	back = /obj/item/storage/backpack
-	implants = list(/obj/item/implant/mindshield) //No revolutionaries, he's MY friend.
-	id = /obj/item/card/id
-
 /obj/effect/mob_spawn/human/syndicate
 	name = "Syndicate Operative"
 	roundstart = FALSE
@@ -685,7 +637,7 @@
 	rank = "Mate"
 
 /obj/effect/mob_spawn/human/pirate/skeleton/captain
-	rank = "Captain"
+	rank = JOB_CAPTAIN
 	outfit = /datum/outfit/pirate/captain
 
 /obj/effect/mob_spawn/human/pirate/skeleton/gunner
@@ -733,10 +685,10 @@
 	short_desc = "You are a syndicate operative on old ship, stuck in hostile space."
 	flavour_text = "Your ship docks after a long time somewhere in hostile space, reporting a malfunction. You are stuck here, with Nanotrasen station nearby. Fix the ship, find a way to power it and follow your captain's orders."
 	important_info = "Obey orders given by your captain. DO NOT let the ship fall into enemy hands."
-	outfit = /datum/outfit/syndicatespace/syndicrew
+	outfit = /datum/outfit/syndicatespace
 	assignedrole = ROLE_SYNDICATE_CYBERSUN
 
-/datum/outfit/syndicatespace/syndicrew/post_equip(mob/living/carbon/human/H)
+/datum/outfit/syndicatespace/post_equip(mob/living/carbon/human/H)
 	H.faction |= ROLE_SYNDICATE
 
 /obj/effect/mob_spawn/human/syndicatespace/special(mob/living/new_spawn)
@@ -754,14 +706,11 @@
 	outfit = /datum/outfit/syndicatespace/syndicaptain
 	assignedrole = ROLE_SYNDICATE_CYBERSUN_CAPTAIN
 
-/datum/outfit/syndicatespace/syndicaptain/post_equip(mob/living/carbon/human/H)
-	H.faction |= ROLE_SYNDICATE
-
 /obj/effect/mob_spawn/human/syndicatespace/captain/Destroy()
 	new/obj/structure/fluff/empty_sleeper/syndicate/captain(get_turf(src))
 	return ..()
 
-/datum/outfit/syndicatespace/syndicrew
+/datum/outfit/syndicatespace
 	name = "Syndicate Ship Crew Member"
 	uniform = /obj/item/clothing/under/syndicate/combat
 	glasses = /obj/item/clothing/glasses/night
@@ -779,17 +728,10 @@
 /datum/outfit/syndicatespace/syndicaptain
 	name = "Syndicate Ship Captain"
 	suit = /obj/item/clothing/suit/armor/vest/capcarapace/syndicate
-	uniform = /obj/item/clothing/under/syndicate/combat
-	glasses = /obj/item/clothing/glasses/night
+	mask = null
 	head = /obj/item/clothing/head/hos/beret/syndicate
 	ears = /obj/item/radio/headset/syndicate/alt/leader
-	shoes = /obj/item/clothing/shoes/combat
-	gloves = /obj/item/clothing/gloves/combat
-	back = /obj/item/storage/backpack
-	r_pocket = /obj/item/kitchen/knife/combat/survival
-	belt = /obj/item/storage/belt/military/assault
 	id = /obj/item/card/id/advanced/black/syndicate_command/captain_id
-	implants = list(/obj/item/implant/weapons_auth)
 	backpack_contents = list(/obj/item/documents/syndicate/red, /obj/item/paper/fluff/ruins/forgottenship/password, /obj/item/gun/ballistic/automatic/pistol/aps)
 
 /obj/effect/mob_spawn/human/beach/alive

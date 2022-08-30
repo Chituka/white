@@ -188,7 +188,7 @@
 
 /obj/item/storage/box/mothic_rations/PopulateContents()
 	for(var/i in 1 to 3)
-		var/randomFood = pickweight(list(/obj/item/food/sustenance_bar = 10,
+		var/randomFood = pick_weight(list(/obj/item/food/sustenance_bar = 10,
 							  /obj/item/food/sustenance_bar/cheese = 5,
 							  /obj/item/food/sustenance_bar/mint = 5,
 							  /obj/item/food/sustenance_bar/neapolitan = 5,
@@ -743,8 +743,10 @@
 	righthand_file = 'icons/mob/inhands/weapons/staves_righthand.dmi'
 
 /obj/item/nullrod/tribal_knife
-	icon_state = "аритмический нож"
+	name = "аритмический нож"
 	desc = "Они говорят, что страх — настоящий убийца разума, но удар ножом в голову тоже работает. Честь обязывает не вкладывать в ножны однажды обнажив."
+	icon = 'icons/obj/items_and_weapons.dmi'
+	icon_state = "crysknife"
 	inhand_icon_state = "crysknife"
 	lefthand_file = 'icons/mob/inhands/weapons/swords_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/weapons/swords_righthand.dmi'

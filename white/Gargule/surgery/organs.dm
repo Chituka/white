@@ -7,14 +7,10 @@
 	icon_state = "severedtail"
 	tail_type = "Alien"
 	color = null
-
+	actions_types = list(/datum/action/cooldown/spell/aoe/repulse/xeno/weak)
 
 /obj/item/organ/tail/lizard/alien/Remove(mob/living/carbon/human/H,  special = 0)
 	..()
-	if(isalien(H))
-		H.RemoveSpell(/obj/effect/proc_holder/spell/aoe_turf/repulse/xeno)
-	else
-		H.RemoveSpell(/obj/effect/proc_holder/spell/aoe_turf/repulse/xeno_weak)
 	if(istype(H))
 		H.dna.species.mutant_bodyparts -= "tail_lizard"
 		H.dna.species.mutant_bodyparts -= "spines"
@@ -23,13 +19,8 @@
 		spines = H.dna.features["spines"]
 		H.update_body()
 
-
 /obj/item/organ/tail/lizard/alien/Insert(mob/living/carbon/human/H, special = 0, drop_if_replaced = TRUE)
 	..()
-	if(isalien(owner))
-		owner.AddSpell(new /obj/effect/proc_holder/spell/aoe_turf/repulse/xeno(src))
-	else
-		owner.AddSpell(new /obj/effect/proc_holder/spell/aoe_turf/repulse/xeno_weak(src))
 	if(istype(H))
 		if(!("tail_lizard" in H.dna.species.mutant_bodyparts))
 			H.dna.species.mutant_bodyparts |= "tail_lizard"
@@ -70,8 +61,7 @@
 /obj/item/organ/cyberimp/eyes/hud/science
 	name = "Имплант научного интерфейса"
 	desc = "Выводит научный интерфейс поверх всего что вы видите. Сканирует реагенты и предметы."
-	actions_types = list(/datum/action/item_action/toggle_research_scanner)
-	var/scan_reagents = 1//something like that, i think
+	HUD_trait = TRAIT_RESEARCH_SCANNER
 
 /////Simple organs/////
 
@@ -127,7 +117,7 @@
 		update_brightness(user)
 		for(var/X in actions)
 			var/datum/action/A = X
-			A.UpdateButtonIcon()
+			A.UpdateButtons()
 		if(on)
 			owner.show_message("Your skin emmits light!")
 		else

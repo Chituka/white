@@ -1,7 +1,7 @@
 /datum/job/janitor
-	title = "Janitor"
+	title = JOB_JANITOR
 	ru_title = "Уборщик"
-	department_head = list("Head of Personnel")
+	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = "Station"
 	total_positions = 2
 	spawn_positions = 1
@@ -21,11 +21,15 @@
 		/obj/item/lightreplacer = 10
 	)
 
+	departments_list = list(
+		/datum/job_department/service,
+	)
+
 	rpg_title = "Groundskeeper"
 	rpg_title_ru = "Хранитель земель"
 
 /datum/outfit/job/janitor
-	name = "Janitor"
+	name = JOB_JANITOR
 	jobtype = /datum/job/janitor
 
 	belt = /obj/item/modular_computer/tablet/pda/janitor
@@ -40,3 +44,9 @@
 	if(GARBAGEDAY in SSevents.holidays)
 		backpack_contents += /obj/item/gun/ballistic/revolver
 		r_pocket = /obj/item/ammo_box/a357
+
+/datum/outfit/job/janitor/get_types_to_preload()
+	. = ..()
+	if(GARBAGEDAY in SSevents.holidays)
+		. += /obj/item/gun/ballistic/revolver
+		. += /obj/item/ammo_box/a357

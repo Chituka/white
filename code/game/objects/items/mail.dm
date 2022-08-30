@@ -155,7 +155,7 @@
 				goodies += job_goodies
 
 	for(var/iterator = 0, iterator < goodie_count, iterator++)
-		var/target_good = pickweight(goodies)
+		var/target_good = pick_weight(goodies)
 		if(ispath(target_good, /datum/reagent))
 			var/obj/item/reagent_containers/target_container = new /obj/item/reagent_containers/glass/bottle(src)
 			target_container.reagents.add_reagent(target_good, target_container.volume)
@@ -261,7 +261,7 @@
 	storage.display_numerical_stacking = FALSE
 	storage.set_holdable(list(
 		/obj/item/mail,
-		/obj/item/small_delivery,
+		/obj/item/delivery/small,
 		/obj/item/paper
 	))
 

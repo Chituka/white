@@ -1394,6 +1394,16 @@
 	crate_name = "raw flux anomaly"
 	crate_type = /obj/structure/closet/crate/secure/science
 
+/datum/supply_pack/science/raw_hallucination_anomaly
+	name = "Raw Hallucination Anomaly"
+	desc = "The raw core of a hallucination anomaly, ready to be implosion-compressed into a powerful artifact."
+	cost = BUY_CRATE_VALUE * 10
+	access = ACCESS_TOXINS
+	access_view = ACCESS_TOXINS
+	contains = list(/obj/item/raw_anomaly_core/hallucination)
+	crate_name = "raw hallucination anomaly"
+	crate_type = /obj/structure/closet/crate/secure/science
+
 /datum/supply_pack/science/raw_grav_anomaly
 	name = "Raw Gravitational Anomaly"
 	desc = "The raw core of a gravitational anomaly, ready to be implosion-compressed into a powerful artifact."
@@ -1432,6 +1442,26 @@
 	access_view = ACCESS_TOXINS
 	contains = list(/obj/item/raw_anomaly_core/pyro)
 	crate_name = "raw pyro anomaly"
+	crate_type = /obj/structure/closet/crate/secure/science
+
+/datum/supply_pack/science/raw_bioscrambler_anomaly
+	name = "Raw Bioscrambler Anomaly"
+	desc = "The raw core of a bioscrambler anomaly, ready to be implosion-compressed into a powerful artifact."
+	cost = BUY_CRATE_VALUE * 10
+	access = ACCESS_TOXINS
+	access_view = ACCESS_TOXINS
+	contains = list(/obj/item/raw_anomaly_core/bioscrambler)
+	crate_name = "raw bioscrambler anomaly"
+	crate_type = /obj/structure/closet/crate/secure/science
+
+/datum/supply_pack/science/raw_dimensional_anomaly
+	name = "Raw Dimensional Anomaly"
+	desc = "The raw core of a dimensional anomaly, ready to be implosion-compressed into a powerful artifact."
+	cost = BUY_CRATE_VALUE * 10
+	access = ACCESS_TOXINS
+	access_view = ACCESS_TOXINS
+	contains = list(/obj/item/raw_anomaly_core/dimensional)
+	crate_name = "raw dimensional anomaly"
 	crate_type = /obj/structure/closet/crate/secure/science
 
 /datum/supply_pack/science/robotics
@@ -1509,6 +1539,18 @@
 					/obj/item/storage/box/swab,
 					/obj/item/construction/plumbing/research)
 	crate_name = "cytology supplies crate"
+
+/datum/supply_pack/science/mod_core
+	name = "MOD core Crate"
+	desc = "Three cores, perfect for any MODsuit construction! Naturally harvested™, of course."
+	cost = BUY_CRATE_VALUE * 3
+	access = ACCESS_ROBOTICS
+	access_view = ACCESS_ROBOTICS
+	contains = list(/obj/item/mod/core/standard,
+		/obj/item/mod/core/standard,
+		/obj/item/mod/core/standard)
+	crate_name = "MOD core crate"
+	crate_type = /obj/structure/closet/crate/secure/science
 
 /datum/supply_pack/science/reserve
 	name = "Резервные платы Научного отдела"
@@ -2387,7 +2429,7 @@
 	var/the_toy
 	for(var/i in 1 to num_contained)
 		if(prob(50))
-			the_toy = pickweight(GLOB.arcade_prize_pool)
+			the_toy = pick_weight(GLOB.arcade_prize_pool)
 		else
 			the_toy = pick(subtypesof(/obj/item/toy/plush))
 		new the_toy(C)

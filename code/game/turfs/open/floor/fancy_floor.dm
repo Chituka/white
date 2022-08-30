@@ -108,7 +108,7 @@
 	heavyfootstep = FOOTSTEP_GENERIC_HEAVY
 
 /turf/open/floor/bamboo/setup_broken_states()
-	return list("damaged")
+	return list("bamboodamaged")
 
 /turf/open/floor/grass
 	name = "травяной покров"
@@ -131,7 +131,7 @@
 
 /turf/open/floor/grass/Initialize(mapload)
 	. = ..()
-	AddElement(/datum/element/diggable, ore_type, 2, "вскапываю", "вскапывает")
+	AddElement(/datum/element/diggable, ore_type, 2, worm_chance = 50, action_text = "вскапываю", action_text_third_person = "вскапывает")
 	if(nospawn)
 		return
 	spawniconchange()
@@ -241,9 +241,6 @@
 	clawfootstep = FOOTSTEP_CARPET_BAREFOOT
 	heavyfootstep = FOOTSTEP_GENERIC_HEAVY
 	tiled_dirt = FALSE
-
-/turf/open/floor/carpet/setup_broken_states()
-	return list("damaged")
 
 /turf/open/floor/carpet/examine(mob/user)
 	. = ..()
@@ -435,6 +432,19 @@
 	underlay_appearance.icon_state = "basalt"
 	return TRUE
 
+/turf/open/floor/fakeice
+	desc = "Is it marble, polished to a mirror finish? Or just really, really grippy ice?"
+	icon = 'icons/turf/floors/ice_turf.dmi'
+	icon_state = "ice_turf-0"
+	base_icon_state = "ice_turf-0"
+
+/turf/open/floor/fakeice/slippery
+	desc = "Somehow, it is not melting under these conditions. Must be some very thick ice. Just as slippery too."
+
+/turf/open/floor/fakeice/slippery/Initialize(mapload)
+	. = ..()
+	MakeSlippery(TURF_WET_PERMAFROST, INFINITY, 0, INFINITY, TRUE)
+
 /turf/open/floor/fakespace
 	icon = 'icons/turf/space.dmi'
 	icon_state = "0"
@@ -447,10 +457,10 @@
 
 /turf/open/floor/fakespace/Initialize(mapload)
 	. = ..()
-	icon_state = SPACE_ICON_STATE
+	icon_state = SPACE_ICON_STATE(x, y, z)
 
 /turf/open/floor/fakespace/get_smooth_underlay_icon(mutable_appearance/underlay_appearance, turf/asking_turf, adjacency_dir)
 	underlay_appearance.icon = 'icons/turf/space.dmi'
-	underlay_appearance.icon_state = SPACE_ICON_STATE
+	underlay_appearance.icon_state = SPACE_ICON_STATE(x, y, z)
 	underlay_appearance.plane = PLANE_SPACE
 	return TRUE

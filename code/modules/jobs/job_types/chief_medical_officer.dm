@@ -1,7 +1,7 @@
 /datum/job/chief_medical_officer
-	title = "Chief Medical Officer"
+	title = JOB_CHIEF_MEDICAL_OFFICER
 	ru_title = "Главный Врач"
-	department_head = list("Captain")
+	department_head = list(JOB_CAPTAIN)
 	auto_deadmin_role_flags = DEADMIN_POSITION_HEAD
 	head_announce = list(RADIO_CHANNEL_MEDICAL)
 	faction = "Station"
@@ -35,6 +35,11 @@
 		/obj/effect/spawner/lootdrop/space/fancytool/raremedicalonly = 1
 	)
 
+	departments_list = list(
+		/datum/job_department/medical,
+		/datum/job_department/command,
+	)
+
 	rpg_title = "High Cleric"
 	rpg_title_ru = "Высший Клерик"
 
@@ -60,7 +65,7 @@
 	new /obj/item/sensor_device(src)
 
 /datum/outfit/job/cmo
-	name = "Chief Medical Officer"
+	name = JOB_CHIEF_MEDICAL_OFFICER
 	jobtype = /datum/job/chief_medical_officer
 
 	id = /obj/item/card/id/advanced/silver
@@ -68,7 +73,8 @@
 	r_pocket = /obj/item/modular_computer/tablet/pda/heads/cmo
 	l_pocket = /obj/item/pinpointer/crew
 	ears = /obj/item/radio/headset/heads/cmo
-	uniform = /obj/item/clothing/under/rank/medical/chief_medical_officer
+	head = /obj/item/clothing/head/surgerycap/cmo
+	uniform = /obj/item/clothing/under/rank/medical/chief_medical_officer/scrubs
 	shoes = /obj/item/clothing/shoes/sneakers/brown
 	suit = /obj/item/clothing/suit/toggle/labcoat/cmo
 	l_hand = /obj/item/storage/firstaid/medical

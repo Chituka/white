@@ -1,3 +1,9 @@
+// Remove these once we have Byond implementation.
+#define ISNAN(a) (a!=a)
+#define ISINF(a) (!ISNAN(a) && ISNAN(a-a))
+#define IS_INF_OR_NAN(a) (ISNAN(a-a))
+// Aight dont remove the rest
+
 // Credits to Nickr5 for the useful procs I've taken from his library resource.
 // This file is quadruple wrapped for your pleasure
 // (
@@ -101,9 +107,9 @@
 /proc/SolveQuadratic(a, b, c)
 	ASSERT(a)
 	. = list()
-	var/d		= b*b - 4 * a * c
+	var/d = b*b - 4 * a * c
 	var/bottom  = 2 * a
-	if(d < 0)
+	if(d < 0 || IS_INF_OR_NAN(d) || IS_INF_OR_NAN(bottom))
 		return
 	var/root = sqrt(d)
 	. += (-b + root) / bottom
@@ -231,3 +237,6 @@
 
 /// The number of cells in a taxicab circle (rasterized diamond) of radius X.
 #define DIAMOND_AREA(X) (1 + 2*(X)*((X)+1))
+
+/// Checks if a number needs to have a 0 placed infront, 24 hour format. Takes a number, returns a string.
+#define TIMESTAMP_TO_PROPER_FORMAT(number) (number < 10 ? "0[number]" : number)

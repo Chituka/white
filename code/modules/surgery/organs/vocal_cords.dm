@@ -158,13 +158,13 @@
 
 	if(user.mind)
 		//Chaplains are very good at speaking with the voice of god
-		if(user.mind.assigned_role == "Chaplain")
+		if(user.mind.assigned_role == JOB_CHAPLAIN)
 			power_multiplier *= 2
 		//Command staff has authority
 		if(user.mind.assigned_role in GLOB.command_positions)
 			power_multiplier *= 1.4
 		//Why are you speaking
-		if(user.mind.assigned_role == "Mime")
+		if(user.mind.assigned_role == JOB_MIME)
 			power_multiplier *= 0.5
 
 	//Cultists are closer to their gods and are more powerful, but they'll give themselves away
@@ -180,15 +180,7 @@
 
 	for(var/V in listeners)
 		var/mob/living/L = V
-		var/datum/antagonist/devil/devilinfo = is_devil(L)
-		if(devilinfo && findtext(message, devilinfo.truename))
-			var/start = findtext(message, devilinfo.truename)
-			listeners = list(L) //Devil names are unique.
-			power_multiplier *= 5 //if you're a devil and god himself addressed you, you fucked up
-			//Cut out the name so it doesn't trigger commands
-			message = copytext(message, 1, start) + copytext(message, start + length(devilinfo.truename))
-			break
-		else if(findtext(message, L.real_name, 1, length(L.real_name) + 1))
+		if(findtext(message, L.real_name, 1, length(L.real_name) + 1))
 			specific_listeners += L //focus on those with the specified name
 			//Cut out the name so it doesn't trigger commands
 			found_string = L.real_name
@@ -283,7 +275,7 @@
 	else if((findtext(message, silence_words)))
 		cooldown = COOLDOWN_STUN
 		for(var/mob/living/carbon/C in listeners)
-			if(user.mind && (user.mind.assigned_role == "Curator" || user.mind.assigned_role == "Mime"))
+			if(user.mind && (user.mind.assigned_role == JOB_CURATOR || user.mind.assigned_role == JOB_MIME))
 				power_multiplier *= 3
 			C.silent += (10 * power_multiplier)
 
@@ -364,11 +356,7 @@
 		for(var/V in listeners)
 			var/mob/living/L = V
 			var/text = ""
-			if(is_devil(L))
-				var/datum/antagonist/devil/devilinfo = is_devil(L)
-				text = devilinfo.truename
-			else
-				text = L.real_name
+			text = L.real_name
 			addtimer(CALLBACK(L, /atom/movable/proc/say, text), 5 * i)
 			i++
 
@@ -551,7 +539,7 @@
 	else if((findtext(message, honk_words)))
 		cooldown = COOLDOWN_MEME
 		addtimer(CALLBACK(GLOBAL_PROC, .proc/playsound, get_turf(user), 'sound/items/bikehorn.ogg', 300, 1), 25)
-		if(user.mind && user.mind.assigned_role == "Clown")
+		if(user.mind && user.mind.assigned_role == JOB_CLOWN)
 			for(var/mob/living/carbon/C in listeners)
 				C.slip(140 * power_multiplier)
 			cooldown = COOLDOWN_MEME

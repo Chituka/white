@@ -43,8 +43,6 @@
 	var/list/restricted_roles = list()
 	var/list/datum/objective/objectives = list()
 
-	var/list/spell_list = list() // Wizard mode & "Give Spell" badmin button.
-
 	var/linglink
 	var/datum/martial_art/martial_art
 	var/static/default_martial_art = new/datum/martial_art
@@ -136,8 +134,8 @@
 		SStgui.on_transfer(current, new_character)
 
 	if(key)
-		if(new_character.key != key)					//if we're transferring into a body with a key associated which is not ours
-			new_character.ghostize(1)						//we'll need to ghostize so that key isn't mobless.
+		if(new_character.key != key) //if we're transferring into a body with a key associated which is not ours
+			new_character.ghostize(1) //we'll need to ghostize so that key isn't mobless.
 	else
 		key = new_character.key
 
@@ -157,15 +155,16 @@
 	if(iscarbon(new_character))
 		var/mob/living/carbon/C = new_character
 		C.last_mind = src
-	transfer_actions(new_character)
 	transfer_martial_arts(new_character)
 	RegisterSignal(new_character, COMSIG_LIVING_DEATH, .proc/set_death_time)
 	if(active || force_key_move)
-		new_character.key = key		//now transfer the key to link the client to our new body
+		new_character.key = key //now transfer the key to link the client to our new body
 	if(new_character.client)
 		LAZYCLEARLIST(new_character.client.recent_examines)
 		new_character.client.init_verbs() // re-initialize character specific verbs
 	current.update_atom_languages()
+	SEND_SIGNAL(src, COMSIG_MIND_TRANSFERRED, old_current)
+	SEND_SIGNAL(current, COMSIG_MOB_MIND_TRANSFERRED_INTO)
 
 //I cannot trust you fucks to do this properly
 /datum/mind/proc/set_original_character(new_original_character)
@@ -753,29 +752,6 @@
 	if(!(has_antag_datum(/datum/antagonist/dreamer)))
 		add_antag_datum(/datum/antagonist/dreamer)
 
-/datum/mind/proc/AddSpell(obj/effect/proc_holder/spell/S)
-	spell_list += S
-	S.action.Grant(current)
-
-/datum/mind/proc/owns_soul()
-	return soulOwner == src
-
-
-//To remove a specific spell from a mind
-/datum/mind/proc/RemoveSpell(obj/effect/proc_holder/spell/spell)
-	if(!spell)
-		return
-	for(var/X in spell_list)
-		var/obj/effect/proc_holder/spell/S = X
-		if(istype(S, spell))
-			spell_list -= S
-			qdel(S)
-	current?.client.stat_panel.send_message("check_spells")
-
-/datum/mind/proc/RemoveAllSpells()
-	for(var/obj/effect/proc_holder/S in spell_list)
-		RemoveSpell(S)
-
 /datum/mind/proc/transfer_martial_arts(mob/living/new_character)
 	if(!ishuman(new_character))
 		return
@@ -784,27 +760,6 @@
 			martial_art.remove(new_character)
 		else
 			martial_art.teach(new_character)
-
-/datum/mind/proc/transfer_actions(mob/living/new_character)
-	if(current?.actions)
-		for(var/datum/action/A in current.actions)
-			A.Grant(new_character)
-	transfer_mindbound_actions(new_character)
-
-/datum/mind/proc/transfer_mindbound_actions(mob/living/new_character)
-	for(var/X in spell_list)
-		var/obj/effect/proc_holder/spell/S = X
-		S.action.Grant(new_character)
-
-/datum/mind/proc/disrupt_spells(delay, list/exceptions = New())
-	for(var/X in spell_list)
-		var/obj/effect/proc_holder/spell/S = X
-		for(var/type in exceptions)
-			if(istype(S, type))
-				continue
-		S.charge_counter = delay
-		S.updateButtonIcon()
-		INVOKE_ASYNC(S, /obj/effect/proc_holder/spell.proc/start_recharge)
 
 /datum/mind/proc/get_ghost(even_if_they_cant_reenter, ghosts_with_clients)
 	for(var/mob/dead/observer/G in (ghosts_with_clients ? GLOB.player_list : GLOB.dead_mob_list))
@@ -883,12 +838,12 @@
 //AI
 /mob/living/silicon/ai/mind_initialize()
 	..()
-	mind.assigned_role = "AI"
+	mind.assigned_role = JOB_AI
 
 //BORG
 /mob/living/silicon/robot/mind_initialize()
 	..()
-	mind.assigned_role = "Cyborg"
+	mind.assigned_role = JOB_CYBORG
 
 //PAI
 /mob/living/silicon/pai/mind_initialize()

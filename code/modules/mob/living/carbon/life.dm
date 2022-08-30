@@ -342,17 +342,20 @@
 			. |= BP.on_life(delta_time, times_fired, stam_regen)
 
 /mob/living/carbon/proc/handle_organs(delta_time, times_fired)
-	if(stat != DEAD)
-		for(var/organ_slot in GLOB.organ_process_order)
-			var/obj/item/organ/organ = getorganslot(organ_slot)
-			if(organ?.owner) // This exist mostly because reagent metabolization can cause organ reshuffling
-				organ.on_life(delta_time, times_fired)
-	else
+	if(stat == DEAD)
 		if(reagents.has_reagent(/datum/reagent/toxin/formaldehyde, 1) || reagents.has_reagent(/datum/reagent/cryostylane)) // No organ decay if the body contains formaldehyde.
 			return
-		for(var/V in internal_organs)
-			var/obj/item/organ/O = V
-			O.on_death(delta_time, times_fired) //Needed so organs decay while inside the body.
+		for(var/obj/item/organ/organ as anything in internal_organs)
+			organ.on_death(delta_time, times_fired) //Needed so organs decay while inside the body.
+		return
+
+	// NOTE: internal_organs_slot is sorted by GLOB.organ_process_order on insertion
+	for(var/slot in internal_organs_slot)
+		// We don't use getorganslot here because we know we have the organ we want, since we're iterating the list containing em already
+		// This code is hot enough that it's just not worth the time
+		var/obj/item/organ/organ = internal_organs_slot[slot]
+		if(organ?.owner) // This exist mostly because reagent metabolization can cause organ reshuffling
+			organ.on_life(delta_time, times_fired)
 
 /mob/living/carbon/handle_diseases(delta_time, times_fired)
 	for(var/thing in diseases)
@@ -382,37 +385,39 @@
 
 
 /mob/living/carbon/handle_mutations_and_radiation(delta_time, times_fired)
-	if(dna?.temporary_mutations.len)
-		for(var/mut in dna.temporary_mutations)
-			if(dna.temporary_mutations[mut] < world.time)
-				if(mut == UI_CHANGED)
-					if(dna.previous["UI"])
-						dna.uni_identity = merge_text(dna.uni_identity,dna.previous["UI"])
-						updateappearance(mutations_overlay_update=1)
-						dna.previous.Remove("UI")
-					dna.temporary_mutations.Remove(mut)
-					continue
-				if(mut == UE_CHANGED)
-					if(dna.previous["name"])
-						real_name = dna.previous["name"]
-						name = real_name
-						dna.previous.Remove("name")
-					if(dna.previous["UE"])
-						dna.unique_enzymes = dna.previous["UE"]
-						dna.previous.Remove("UE")
-					if(dna.previous["blood_type"])
-						dna.blood_type = dna.previous["blood_type"]
-						dna.previous.Remove("blood_type")
-					dna.temporary_mutations.Remove(mut)
-					continue
-		for(var/datum/mutation/human/HM in dna.mutations)
-			if(HM?.timed)
-				dna.remove_mutation(HM.type)
 
 	radiation = max(radiation - (RAD_LOSS_PER_SECOND * delta_time), 0)
 	if(radiation > RAD_MOB_SAFE)
 		adjustToxLoss(log(radiation-RAD_MOB_SAFE)*RAD_TOX_COEFFICIENT*delta_time)
 
+	if(!dna?.temporary_mutations.len)
+		return
+
+	for(var/mut in dna.temporary_mutations)
+		if(dna.temporary_mutations[mut] < world.time)
+			if(mut == UI_CHANGED)
+				if(dna.previous["UI"])
+					dna.unique_identity = merge_text(dna.unique_identity,dna.previous["UI"])
+					updateappearance(mutations_overlay_update=1)
+					dna.previous.Remove("UI")
+				dna.temporary_mutations.Remove(mut)
+				continue
+			if(mut == UE_CHANGED)
+				if(dna.previous["name"])
+					real_name = dna.previous["name"]
+					name = real_name
+					dna.previous.Remove("name")
+				if(dna.previous["UE"])
+					dna.unique_enzymes = dna.previous["UE"]
+					dna.previous.Remove("UE")
+				if(dna.previous["blood_type"])
+					dna.blood_type = dna.previous["blood_type"]
+					dna.previous.Remove("blood_type")
+				dna.temporary_mutations.Remove(mut)
+				continue
+	for(var/datum/mutation/human/HM in dna.mutations)
+		if(HM?.timeout)
+			dna.remove_mutation(HM.type)
 
 /*
 Alcohol Poisoning Chart
@@ -523,7 +528,7 @@ All effects don't start immediately, but rather get worse over time; the rate is
 		if(drunkenness >= 11 && slurring < 5)
 			slurring += 0.6 * delta_time
 
-		if(mind && (mind.assigned_role == "Scientist" || mind.assigned_role == "Research Director"))
+		if(mind && (mind.assigned_role == JOB_SCIENTIST || mind.assigned_role == JOB_RESEARCH_DIRECTOR))
 			if(SSresearch.science_tech)
 				if(drunkenness >= 12.9 && drunkenness <= 13.8)
 					drunkenness = round(drunkenness, 0.01)

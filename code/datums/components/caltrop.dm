@@ -83,13 +83,26 @@
 	if(HAS_TRAIT(H, TRAIT_LIGHT_STEP))
 		damage *= 0.75
 
-
 	if(!(flags & CALTROP_SILENT) && !H.has_status_effect(/datum/status_effect/caltropped))
 		H.apply_status_effect(/datum/status_effect/caltropped)
 		H.visible_message(
 			span_danger("[H] наступает на [parent]."),
 			span_userdanger("Наступаю на [parent]!")
 		)
+
+	var/atom/atom_parent = parent
+	if(atom_parent.reagents)
+		var/datum/reagents/atom_reagents = atom_parent.reagents
+		if(!atom_reagents.total_volume)
+			H.transfer_blood_to(atom_parent, 2)
+		else
+			atom_reagents.trans_to(H, 2, transfered_by = H, methods = INJECT)
+		if(isitem(atom_parent))
+			var/obj/item/item_parent = atom_parent
+			item_parent.embedding = list("pain_mult" = 1, "embed_chance" = 30, "fall_chance" = 70)
+			item_parent.updateEmbedding()
+			item_parent.tryEmbed(O, TRUE, TRUE)
+			H.update_damage_overlays()
 
 	H.apply_damage(damage, BRUTE, picked_def_zone, wound_bonus = CANT_WOUND)
 

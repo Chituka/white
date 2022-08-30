@@ -46,6 +46,7 @@
 #define UNIT_TEST_FAILED 1
 #define UNIT_TEST_SKIPPED 2
 
+#define TEST_PRE 0
 #define TEST_DEFAULT 1
 #define TEST_DEL_WORLD INFINITY
 
@@ -84,9 +85,13 @@
 #include "holidays.dm"
 #include "keybinding_init.dm"
 #include "machine_disassembly.dm"
+//#include "mapping.dm" // something wrong
+#include "modsuit.dm"
 #include "medical_wounds.dm"
 #include "merge_type.dm"
 #include "metabolizing.dm"
+#include "mindbound_actions.dm"
+#include "mob_faction.dm"
 #include "ntnetwork_tests.dm"
 #include "outfit_sanity.dm"
 #include "paintings.dm"
@@ -105,6 +110,10 @@
 #include "spawn_humans.dm"
 #include "spawn_mobs.dm"
 #include "species_whitelists.dm"
+#include "spell_invocations.dm"
+#include "spell_mindswap.dm"
+#include "spell_names.dm"
+#include "spell_shapeshift.dm"
 #include "stomach.dm"
 #include "strippable.dm"
 #include "subsystem_init.dm"
@@ -112,6 +121,7 @@
 #include "teleporters.dm"
 #include "timer_sanity.dm"
 #include "unit_test.dm"
+#include "wizard_loadout.dm"
 
 #ifdef REFERENCE_TRACKING //Don't try and parse this file if ref tracking isn't turned on. IE: don't parse ref tracking please mr linter
 #include "find_reference_sanity.dm"

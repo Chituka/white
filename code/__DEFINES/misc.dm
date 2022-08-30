@@ -30,37 +30,22 @@
 	pixel_x = -offset; \
 }
 
-//Human Overlays Indexes/////////
-#define MUTATIONS_LAYER			29		//mutations. Tk headglows, cold resistance glow, etc
-#define BODY_BEHIND_LAYER		28		//certain mutantrace features (tail when looking south) that must appear behind the body parts
-#define BODYPARTS_LAYER			27		//Initially "AUGMENTS", this was repurposed to be a catch-all bodyparts flag
-#define BODY_ADJ_LAYER			26		//certain mutantrace features (snout, body markings) that must appear above the body parts
-#define BODY_LAYER				25		//underwear, undershirts, socks, eyes, lips(makeup)
-#define FRONT_MUTATIONS_LAYER	24		//mutations that should appear above body, body_adj and bodyparts layer (e.g. laser eyes)
-#define DAMAGE_LAYER			23		//damage indicators (cuts and burns)
-#define UNIFORM_LAYER			22
-#define ID_LAYER				21
-#define ID_CARD_LAYER 			20
-#define HANDS_PART_LAYER		19
-#define GLOVES_LAYER			18
-#define SHOES_LAYER				17
-#define EARS_LAYER				16
-#define SUIT_LAYER				15
-#define GLASSES_LAYER			14
-#define BELT_LAYER				13		//Possible make this an overlay of somethign required to wear a belt?
-#define SUIT_STORE_LAYER		12
-#define NECK_LAYER				11
-#define BACK_LAYER				10
-#define HAIR_LAYER				9		//TODO: make part of head layer?
-#define FACEMASK_LAYER			8
-#define HEAD_LAYER				7
-#define HANDCUFF_LAYER			6
-#define LEGCUFF_LAYER			5
-#define HANDS_LAYER				4
-#define BODY_FRONT_LAYER		3
-#define HALO_LAYER				2		//blood cult ascended halo, because there's currently no better solution for adding/removing
-#define FIRE_LAYER				1		//If you're on fire
-#define TOTAL_LAYERS			29		//KEEP THIS UP-TO-DATE OR SHIT WILL BREAK ;_;
+#define MAPPING_DIRECTIONAL_HELPERS_INVERTED(path, offset) ##path/directional/north {\
+	dir = SOUTH; \
+	pixel_y = offset; \
+} \
+##path/directional/south {\
+	dir = NORTH; \
+	pixel_y = -offset; \
+} \
+##path/directional/east {\
+	dir = WEST; \
+	pixel_x = offset; \
+} \
+##path/directional/west {\
+	dir = EAST; \
+	pixel_x = -offset; \
+}
 
 //Human Overlay Index Shortcuts for alternate_worn_layer, layers
 //Because I *KNOW* somebody will think layer+1 means "above"
@@ -280,12 +265,8 @@ GLOBAL_LIST_INIT(pda_styles, sort_list(list(MONO, VT, ORBITRON, SHARE)))
 
 */
 
-// Consider these images/atoms as part of the UI/HUD
-#define APPEARANCE_UI_IGNORE_ALPHA			(RESET_COLOR|RESET_TRANSFORM|NO_CLIENT_COLOR|RESET_ALPHA|PIXEL_SCALE)
-#define APPEARANCE_UI						(RESET_COLOR|RESET_TRANSFORM|NO_CLIENT_COLOR|PIXEL_SCALE)
-
-//Just space
-#define SPACE_ICON_STATE	"[((x + y) ^ ~(x * y) + z) % 25]"
+///The icon_state for space.  There is 25 total icon states that vary based on the x/y/z position of the turf
+#define SPACE_ICON_STATE(x, y, z) "[((x + y) ^ ~(x * y) + z) % 25]"
 
 // Maploader bounds indices
 #define MAP_MINX 1
@@ -434,10 +415,8 @@ GLOBAL_LIST_INIT(pda_styles, sort_list(list(MONO, VT, ORBITRON, SHARE)))
 #define BONE_SCAR_FILE "wounds/bone_scar_desc.json"
 #define SCAR_LOC_FILE "wounds/scar_loc.json"
 #define EXODRONE_FILE "exodrone.json"
-
-//Fullscreen overlay resolution in tiles.
-#define FULLSCREEN_OVERLAY_RESOLUTION_X 15
-#define FULLSCREEN_OVERLAY_RESOLUTION_Y 15
+/// File location for ninja lines
+#define NINJA_FILE "ninja.json"
 
 #define SUMMON_GUNS "guns"
 #define SUMMON_MAGIC "magic"
@@ -461,6 +440,14 @@ GLOBAL_LIST_INIT(pda_styles, sort_list(list(MONO, VT, ORBITRON, SHARE)))
 //Filters
 #define AMBIENT_OCCLUSION filter(type="drop_shadow", x=0, y=-2, size=4, color="#04080FAA")
 #define GAUSSIAN_BLUR(filter_size) filter(type="blur", size=filter_size)
+
+/**
+ * The point where gravity is negative enough to pull you upwards.
+ * That means walking checks for a ceiling instead of a floor, and you can fall "upwards"
+ *
+ * This should only be possible on multi-z maps because it works like shit on maps that aren't.
+ */
+#define NEGATIVE_GRAVITY -1
 
 #define STANDARD_GRAVITY 1 //Anything above this is high gravity, anything below no grav
 /// The gravity strength threshold for high gravity damage.

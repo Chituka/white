@@ -1,6 +1,6 @@
 /mob/living/silicon/robot
-	name = "Cyborg"
-	real_name = "Cyborg"
+	name = JOB_CYBORG
+	real_name = JOB_CYBORG
 	icon = 'icons/mob/robots.dmi'
 	icon_state = "robot"
 	maxHealth = 100
@@ -17,7 +17,7 @@
 	light_on = FALSE
 
 	var/custom_name = ""
-	var/braintype = "Cyborg"
+	var/braintype = JOB_CYBORG
 	var/obj/item/robot_suit/robot_suit = null //Used for deconstruction to remember what the borg was constructed out of..
 	var/obj/item/mmi/mmi = null
 
@@ -66,7 +66,6 @@
 
 	var/alarms = list("Motion"=list(), "Fire"=list(), "Atmosphere"=list(), "Power"=list(), "Camera"=list(), "Burglar"=list())
 
-	var/magpulse = FALSE // Magboot-like effect.
 	var/ionpulse = FALSE // Jetpack-like effect.
 	var/ionpulse_on = FALSE // Jetpack-like effect.
 	var/datum/effect_system/trail_follow/ion/ion_trail // Ionpulse effect.
@@ -204,7 +203,7 @@
 	alert_control.listener.RegisterSignal(src, COMSIG_LIVING_DEATH, /datum/alarm_listener/proc/prevent_alarm_changes)
 	alert_control.listener.RegisterSignal(src, COMSIG_LIVING_REVIVE, /datum/alarm_listener/proc/allow_alarm_changes)
 
-/mob/living/silicon/robot/model/syndicate/Initialize(mapload)
+/mob/living/silicon/robot/modules/syndicate/Initialize(mapload)
 	. = ..()
 	laws = new /datum/ai_laws/syndicate_override()
 	//addtimer(CALLBACK(src, .proc/show_playstyle), 5)
@@ -274,7 +273,7 @@
 	var/list/modulelist = list("Engineering" = /obj/item/robot_module/engineering, \
 	"Medical" = /obj/item/robot_module/medical, \
 	"Miner" = /obj/item/robot_module/miner, \
-	"Janitor" = /obj/item/robot_module/janitor, \
+	JOB_JANITOR = /obj/item/robot_module/janitor, \
 	"Service" = /obj/item/robot_module/butler)
 	if(!CONFIG_GET(flag/disable_peaceborg))
 		modulelist["Peacekeeper"] = /obj/item/robot_module/peacekeeper
@@ -693,7 +692,7 @@
 	if(!modularInterface)
 		modularInterface = new /obj/item/modular_computer/tablet/integrated/syndicate(src)
 		modularInterface.saved_identification = real_name
-		modularInterface.saved_job = "Cyborg"
+		modularInterface.saved_job = JOB_CYBORG
 	return ..()
 
 /mob/living/silicon/robot/modules/syndicate/proc/show_playstyle()
@@ -901,7 +900,6 @@
 
 	hat_offset = module.hat_offset
 
-	magpulse = module.magpulsing
 	INVOKE_ASYNC(src, .proc/updatename)
 
 

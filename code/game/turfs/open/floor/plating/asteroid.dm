@@ -23,6 +23,8 @@
 	var/dug
 	/// Whether to change the turf's icon_state to "[base_icon_state]_dug" when its dugged up
 	var/postdig_icon_change = TRUE
+	/// Percentage chance of receiving a bonus worm
+	var/worm_chance = 30
 
 /turf/open/floor/plating/asteroid/setup_broken_states()
 	return list("asteroid_dug")
@@ -30,7 +32,6 @@
 /turf/open/floor/plating/asteroid/Initialize(mapload)
 	var/proper_name = name
 	. = ..()
-	AddElement(/datum/element/diggable, /obj/item/stack/ore/glass, 2)
 	name = proper_name
 	if(prob(floor_variance))
 		icon_state = "[base_icon_state][rand(0,12)]"
@@ -39,6 +40,8 @@
 /turf/open/floor/plating/asteroid/proc/getDug()
 	dug = TRUE
 	new digResult(src, 5)
+	if (prob(worm_chance))
+		new /obj/item/food/bait/worm(src)
 	if(postdig_icon_change)
 		icon_state = "[base_icon_state]_dug"
 
@@ -66,10 +69,28 @@
 
 /turf/open/floor/plating/asteroid/attackby(obj/item/W, mob/user, params)
 	. = ..()
-	if(!.)
-		if(istype(W, /obj/item/storage/bag/ore))
-			for(var/obj/item/stack/ore/O in src)
-				SEND_SIGNAL(W, COMSIG_PARENT_ATTACKBY, O)
+	if(.)
+		return TRUE
+
+	if(W.tool_behaviour == TOOL_SHOVEL || W.tool_behaviour == TOOL_MINING)
+		if(!can_dig(user))
+			return TRUE
+
+		if(!isturf(user.loc))
+			return
+
+		balloon_alert(user, "копаю...")
+
+		if(W.use_tool(src, user, 40, volume=50))
+			if(!can_dig(user))
+				return TRUE
+			getDug()
+			SSblackbox.record_feedback("tally", "pick_used_mining", 1, W.type)
+			return TRUE
+
+	if(istype(W, /obj/item/storage/bag/ore))
+		for(var/obj/item/stack/ore/O in src)
+			SEND_SIGNAL(W, COMSIG_PARENT_ATTACKBY, O)
 
 /turf/open/floor/plating/asteroid/ex_act(severity, target)
 	. = SEND_SIGNAL(src, COMSIG_ATOM_EX_ACT, severity, target)
@@ -95,6 +116,7 @@
 
 /turf/open/floor/plating/asteroid/basalt/airless
 	initial_gas_mix = AIRLESS_ATMOS
+	worm_chance = 0
 
 /turf/open/floor/plating/asteroid/basalt/Initialize(mapload)
 	. = ..()
@@ -127,6 +149,7 @@
 	initial_gas_mix = AIRLESS_ATMOS
 	baseturfs = /turf/open/floor/plating/asteroid/airless
 	turf_type = /turf/open/floor/plating/asteroid/airless
+	worm_chance = 0
 
 /turf/open/floor/plating/asteroid/snow
 	gender = PLURAL
@@ -192,6 +215,7 @@
 
 /turf/open/floor/plating/asteroid/snow/airless
 	initial_gas_mix = AIRLESS_ATMOS
+	worm_chance = 0
 
 /turf/open/floor/plating/asteroid/snow/temperatre
 	initial_gas_mix = "o2=22;n2=82;TEMP=255.37"

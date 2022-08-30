@@ -1,7 +1,7 @@
 /datum/job/cook
-	title = "Cook"
+	title = JOB_COOK
 	ru_title = "Повар"
-	department_head = list("Head of Personnel")
+	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
@@ -19,6 +19,10 @@
 	display_order = JOB_DISPLAY_ORDER_COOK
 	bounty_types = CIV_JOB_CHEF
 
+	departments_list = list(
+		/datum/job_department/service,
+	)
+
 	rpg_title = "Tavern Chef"
 	rpg_title_ru = "Повар Трактира"
 
@@ -34,7 +38,7 @@
 	)
 
 /datum/outfit/job/cook
-	name = "Cook"
+	name = JOB_COOK
 	jobtype = /datum/job/cook
 
 	belt = /obj/item/modular_computer/tablet/pda/cook
@@ -68,3 +72,7 @@
 	var/datum/martial_art/cqc/under_siege/justacook = new
 	justacook.teach(H)
 
+/datum/outfit/job/cook/get_types_to_preload()
+	. = ..()
+	. += /obj/item/clothing/suit/apron/chef
+	. += /obj/item/clothing/head/soft/mime

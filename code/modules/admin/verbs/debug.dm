@@ -106,7 +106,7 @@ But you can call procs that are of type /mob/living/carbon/human/proc/ for that 
 	var/obj/item/paicard/card = new(T)
 	var/mob/living/silicon/pai/pai = new(card)
 
-	var/chosen_name = tgui_input_text(choice, "Enter your pAI name:", "pAI Name", "Personal AI")
+	var/chosen_name = tgui_input_text(choice, "Enter your pAI name:", "pAI Name", JOB_PERSONAL_AI)
 
 	if (isnull(chosen_name))
 		return
@@ -696,6 +696,15 @@ But you can call procs that are of type /mob/living/carbon/human/proc/ for that 
 	var/msg = input(src, null, "Debug HUDs") as num|null
 	if(msg)
 		debug_huds(msg)
+
+/client/proc/open_colorblind_test()
+	set category = "Дбг"
+	set name = "Colorblind Testing"
+	set desc = "Change your view to a budget version of colorblindness to test for usability"
+
+	if(!holder)
+		return
+	holder.color_test.ui_interact(mob)
 
 /client/proc/debug_huds(i as num)
 	set name = "Debug HUDs"

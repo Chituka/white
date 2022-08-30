@@ -7,7 +7,7 @@
 	armor = list(MELEE = 100, BULLET = 80, LASER = 80, ENERGY = 100, BOMB = 50, BIO = 100, RAD = 100, FIRE = 50, ACID = 50)
 	density = FALSE
 	anchored = TRUE
-	CanAtmosPass = ATMOS_PASS_NO
+	can_atmos_pass = ATMOS_PASS_NO
 
 /obj/structure/plasticflaps/opaque
 	opacity = TRUE
@@ -62,8 +62,9 @@
 		if(isbot(caller))
 			return TRUE
 
-		var/mob/living/M = caller
-		if(!M.ventcrawler && M.mob_size != MOB_SIZE_TINY)
+		var/mob/living/living_caller = caller
+		var/ventcrawler = HAS_TRAIT(living_caller, TRAIT_VENTCRAWLER_ALWAYS) || HAS_TRAIT(living_caller, TRAIT_VENTCRAWLER_NUDE)
+		if(!ventcrawler && living_caller.mob_size != MOB_SIZE_TINY)
 			return FALSE
 
 	if(caller?.pulling)

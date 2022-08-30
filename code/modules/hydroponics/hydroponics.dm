@@ -63,6 +63,104 @@
 	reagents.add_reagent(/datum/reagent/plantnutriment/eznutriment, 10) //Half filled nutrient trays for dirt trays to have more to grow with in prison/lavaland.
 	. = ..()
 
+	var/static/list/hovering_item_typechecks = list(
+		/obj/item/plant_analyzer = list(
+			SCREENTIP_CONTEXT_LMB = "Состояние",
+			SCREENTIP_CONTEXT_RMB = "Химикаты"
+		),
+		/obj/item/cultivator = list(
+			SCREENTIP_CONTEXT_LMB = "Удалить сорняки",
+		),
+		/obj/item/shovel = list(
+			SCREENTIP_CONTEXT_LMB = "Очистить",
+		),
+	)
+
+	AddElement(/datum/element/contextual_screentip_item_typechecks, hovering_item_typechecks)
+	register_context()
+
+/obj/machinery/hydroponics/add_context(
+	atom/source,
+	list/context,
+	obj/item/held_item,
+	mob/living/user,
+)
+
+	// If we don't have a seed, we can't do much.
+
+	// The only option is to plant a new seed.
+	if(!myseed)
+		if(istype(held_item, /obj/item/seeds))
+			context[SCREENTIP_CONTEXT_LMB] = "Посадить"
+			return CONTEXTUAL_SCREENTIP_SET
+		return NONE
+
+	// If we DO have a seed, we can do a few things!
+
+	// With a hand we can harvest or remove dead plants
+	// If the plant's not in either state, we can't do much else, so early return.
+	if(isnull(held_item))
+		// Silicons can't interact with trays :frown:
+		if(issilicon(user))
+			return NONE
+
+		if(dead)
+			context[SCREENTIP_CONTEXT_LMB] = "Убрать мёртвое растение"
+			return CONTEXTUAL_SCREENTIP_SET
+
+		if(harvest)
+			context[SCREENTIP_CONTEXT_LMB] = "Собрать урожай"
+			return CONTEXTUAL_SCREENTIP_SET
+
+		return NONE
+
+	// If the plant is harvestable, we can graft it with secateurs or harvest it with a plant bag.
+	if(harvest)
+		if(istype(held_item, /obj/item/secateurs))
+			context[SCREENTIP_CONTEXT_LMB] = "Срезать веточку"
+			return CONTEXTUAL_SCREENTIP_SET
+
+		if(istype(held_item, /obj/item/storage/bag/plants))
+			context[SCREENTIP_CONTEXT_LMB] = "Собрать"
+			return CONTEXTUAL_SCREENTIP_SET
+
+	// If the plant's in good health, we can shear it.
+	if(istype(held_item, /obj/item/geneshears) && plant_health > GENE_SHEAR_MIN_HEALTH)
+		context[SCREENTIP_CONTEXT_LMB] = "Удалить геном"
+		return CONTEXTUAL_SCREENTIP_SET
+
+	// If we've got a charged somatoray, we can mutation lock it.
+	if(istype(held_item, /obj/item/gun/energy/floragun) && myseed.endurance > 20 && LAZYLEN(myseed.mutatelist))
+		var/obj/item/gun/energy/floragun/flower_gun = held_item
+		if(flower_gun.cell.charge >= flower_gun.cell.maxcharge)
+			context[SCREENTIP_CONTEXT_LMB] = "Заблокировать мутацию"
+			return CONTEXTUAL_SCREENTIP_SET
+
+	// Edibles and pills can be composted.
+	if(IS_EDIBLE(held_item) || istype(held_item, /obj/item/reagent_containers/pill))
+		context[SCREENTIP_CONTEXT_LMB] = "Компост"
+		return CONTEXTUAL_SCREENTIP_SET
+
+	// And if a reagent container has water or plant fertilizer in it, we can use it on the plant.
+	if(is_reagent_container(held_item) && length(held_item.reagents.reagent_list))
+		var/datum/reagent/most_common_reagent = held_item.reagents.get_master_reagent()
+		context[SCREENTIP_CONTEXT_LMB] = "Наполнить [istype(most_common_reagent, /datum/reagent/water) ? "водой" : "питательными веществами"]"
+		return CONTEXTUAL_SCREENTIP_SET
+
+	return NONE
+
+/obj/machinery/hydroponics/constructable/add_context(
+	atom/source,
+	list/context,
+	obj/item/held_item,
+	mob/living/user,
+)
+
+	// Constructible trays will always show that you can activate auto-grow with ctrl+click
+	. = ..()
+	context[SCREENTIP_CONTEXT_CTRL_LMB] = "Активировать авто-рост"
+	return CONTEXTUAL_SCREENTIP_SET
+
 
 /obj/machinery/hydroponics/constructable
 	name = "лоток гидропоники"
@@ -72,7 +170,7 @@
 /obj/machinery/hydroponics/constructable/ComponentInitialize()
 	. = ..()
 	AddComponent(/datum/component/simple_rotation, ROTATION_ALTCLICK | ROTATION_CLOCKWISE | ROTATION_COUNTERCLOCKWISE | ROTATION_VERBS, null, CALLBACK(src, .proc/can_be_rotated))
-	AddComponent(/datum/component/plumbing/simple_demand)
+	AddComponent(/datum/component/plumbing/hydroponics)
 
 /obj/machinery/hydroponics/constructable/proc/can_be_rotated(mob/user, rotation_type)
 	return !anchored
@@ -111,6 +209,76 @@
 			return
 
 	return ..()
+
+/// Special demand connector that consumes as normal, but redirects water into the magical water space.
+/datum/component/plumbing/hydroponics
+	demand_connects = SOUTH
+	/// Alternate reagents container to buffer incoming water
+	var/datum/reagents/water_reagents
+	/// Actual parent reagents that has nutrients
+	var/datum/reagents/nutri_reagents
+
+/datum/component/plumbing/hydroponics/Initialize(start=TRUE, _ducting_layer, _turn_connects=TRUE, datum/reagents/custom_receiver)
+	. = ..()
+
+	if(!istype(parent, /obj/machinery/hydroponics/constructable))
+		return COMPONENT_INCOMPATIBLE
+
+	var/obj/machinery/hydroponics/constructable/hydro_parent = parent
+
+	water_reagents = new(hydro_parent.maxwater)
+	water_reagents.my_atom = hydro_parent
+
+	nutri_reagents = reagents
+
+/datum/component/plumbing/hydroponics/Destroy()
+	qdel(water_reagents)
+	nutri_reagents = null
+	return ..()
+
+/datum/component/plumbing/hydroponics/send_request(dir)
+	var/obj/machinery/hydroponics/constructable/hydro_parent = parent
+
+	var/initial_nutri_amount = nutri_reagents.total_volume
+	if(initial_nutri_amount < nutri_reagents.maximum_volume)
+		// Well boy howdy, we have no way to tell a supply to not mix the water with everything else,
+		// So we'll let it leak in, and move the water over.
+		set_recipient_reagents_holder(nutri_reagents)
+		reagents = nutri_reagents
+		process_request(
+			amount = MACHINE_REAGENT_TRANSFER,
+			reagent = null,
+			dir = dir
+		)
+
+		// Move the leaked water from nutrients to... water
+		var/leaking_water_amount = nutri_reagents.get_reagent_amount(/datum/reagent/water)
+		if(leaking_water_amount)
+			nutri_reagents.trans_id_to(water_reagents, /datum/reagent/water, leaking_water_amount)
+
+	// We should only take MACHINE_REAGENT_TRANSFER every tick; this is the remaining amount we can take
+	var/remaining_transfer_amount = max(MACHINE_REAGENT_TRANSFER - (nutri_reagents.total_volume - initial_nutri_amount), 0)
+
+	// How much extra water we should gather this tick to try to fill the water tray.
+	var/extra_water_to_gather = clamp(hydro_parent.maxwater - hydro_parent.waterlevel - water_reagents.total_volume, 0, remaining_transfer_amount)
+	if(extra_water_to_gather > 0)
+		set_recipient_reagents_holder(water_reagents)
+		reagents = water_reagents
+		process_request(
+			amount = extra_water_to_gather,
+			reagent = /datum/reagent/water,
+			dir = dir,
+		)
+
+	// Now transfer all remaining water in that buffer and clear it out.
+	var/final_water_amount = water_reagents.total_volume
+	if(final_water_amount)
+		hydro_parent.adjustWater(round(final_water_amount))
+		// Using a pipe doesn't afford you extra water storage and the baseline behavior for trays is that excess water goes into the shadow realm.
+		water_reagents.del_reagent(/datum/reagent/water)
+
+	// Plumbing pauses if reagents is full.. so let's cheat and make sure it ticks unless both trays are happy
+	reagents = hydro_parent.waterlevel < hydro_parent.maxwater ? water_reagents : nutri_reagents
 
 /obj/machinery/hydroponics/bullet_act(obj/projectile/Proj) //Works with the Somatoray to modify plant variables.
 	if(!myseed)

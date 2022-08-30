@@ -22,6 +22,20 @@
 	var/obj/item/bodybag/foldedbag_instance = null
 	var/tagged = FALSE // so closet code knows to put the tag overlay back
 
+/obj/structure/closet/body_bag/Initialize(mapload)
+	. = ..()
+	var/static/list/tool_behaviors = list(
+		TOOL_WIRECUTTER = list(
+			SCREENTIP_CONTEXT_RMB = "Убрать бирку",
+		),
+	)
+	AddElement(/datum/element/contextual_screentip_tools, tool_behaviors)
+	AddElement( \
+		/datum/element/contextual_screentip_bare_hands, \
+		rmb_text = "сложить", \
+	)
+	AddElement(/datum/element/contextual_screentip_sharpness, lmb_text = "Убрать бирку")
+
 /obj/structure/closet/body_bag/Destroy()
 	// If we have a stored bag, and it's in nullspace (not in someone's hand), delete it.
 	if (foldedbag_instance && !foldedbag_instance.loc)
@@ -66,6 +80,16 @@
 	if(.)
 		set_density(FALSE)
 		mouse_drag_pointer = MOUSE_ACTIVE_POINTER
+
+/obj/structure/closet/body_bag/attack_hand_secondary(mob/user, list/modifiers)
+	. = ..()
+	if(. == SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN)
+		return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
+	if(!attempt_fold(user))
+		return SECONDARY_ATTACK_CONTINUE_CHAIN
+	perform_fold(user)
+	qdel(src)
+	return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
 
 /obj/structure/closet/body_bag/MouseDrop(over_object, src_location, over_location)
 	. = ..()
@@ -295,23 +319,15 @@
 	log_game("[key_name(user)] [sinched ? "sinched":"unsinched"] secure environmental bag [src] at [AREACOORD(src)]")
 	update_icon()
 
-/obj/structure/closet/body_bag/environmental/prisoner/syndicate
-	name = "syndicate prisoner transport bag"
-	desc = "An alteration of Nanotrasen's environmental protection bag which has been used in several high-profile kidnappings. Designed to keep a victim unconscious, alive, and secured during transport."
-	icon = 'icons/obj/bodybag.dmi'
-	icon_state = "syndieenvirobag"
-	contents_pressure_protection = 1
-	contents_thermal_insulation = 1
-	foldedbag_path = /obj/item/bodybag/environmental/prisoner/syndicate
-	weather_protection = list(WEATHER_ALL)
-	breakout_time = 8 MINUTES
-	sinch_time = 20 SECONDS
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized
+	name = "pressurized prisoner transport bag"
+	foldedbag_path = /obj/item/bodybag/environmental/prisoner/pressurized
 
-/obj/structure/closet/body_bag/environmental/prisoner/syndicate/Initialize(mapload)
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized/Initialize(mapload)
 	. = ..()
 	refresh_air()
 
-/obj/structure/closet/body_bag/environmental/prisoner/syndicate/proc/refresh_air()
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized/proc/refresh_air()
 	air_contents = null
 	air_contents = new(50) //liters
 	air_contents.set_temperature(T20C)
@@ -319,32 +335,51 @@
 	air_contents.set_moles(GAS_O2, (ONE_ATMOSPHERE*50)/(R_IDEAL_GAS_EQUATION*T20C) * O2STANDARD)
 	air_contents.set_moles(GAS_NITROUS, (ONE_ATMOSPHERE*50)/(R_IDEAL_GAS_EQUATION*T20C) * N2STANDARD)
 
-/obj/structure/closet/body_bag/environmental/prisoner/syndicate/Destroy()
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized/Destroy()
 	if(air_contents)
 		QDEL_NULL(air_contents)
-
 	return ..()
 
-/obj/structure/closet/body_bag/environmental/prisoner/syndicate/return_air()
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized/return_air()
 	if(sinched)
 		refresh_air()
 		return air_contents
 	return ..()
 
-/obj/structure/closet/body_bag/environmental/prisoner/syndicate/remove_air(amount)
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized/remove_air(amount)
 	if(sinched)
 		refresh_air()
-		return air_contents // The internals for this bag are bottomless. Syndicate bluespace trickery.
+		return air_contents.remove(amount) // The internals for this bag are bottomless.
 	return ..(amount)
 
-/obj/structure/closet/body_bag/environmental/prisoner/syndicate/return_analyzable_air()
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized/return_analyzable_air()
 	if(sinched)
 		refresh_air()
 		return air_contents
 	return ..()
 
-/obj/structure/closet/body_bag/environmental/prisoner/syndicate/togglelock(mob/living/user, silent)
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized/togglelock(mob/living/user, silent)
 	. = ..()
 	if(sinched)
 		for(var/mob/living/target in contents)
 			to_chat(target, span_warning("You hear a faint hiss, and a white mist fills your vision..."))
+
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized/syndicate
+	name = "syndicate prisoner transport bag"
+	desc = "An alteration of Nanotrasen's environmental protection bag which has been used in several high-profile kidnappings. Designed to keep a victim unconscious, alive, and secured during transport."
+	icon = 'icons/obj/bodybag.dmi'
+	icon_state = "syndieenvirobag"
+	contents_pressure_protection = 1
+	contents_thermal_insulation = 1
+	foldedbag_path = /obj/item/bodybag/environmental/prisoner/syndicate
+	weather_protection = list(TRAIT_WEATHER_IMMUNE)
+	breakout_time = 8 MINUTES
+	sinch_time = 20 SECONDS
+
+/obj/structure/closet/body_bag/environmental/prisoner/pressurized/syndicate/refresh_air()
+	air_contents = null
+	air_contents = new(50) //liters
+	air_contents.set_temperature(T20C)
+
+	air_contents.set_moles(GAS_O2, (ONE_ATMOSPHERE*50)/(R_IDEAL_GAS_EQUATION*T20C) * O2STANDARD)
+	air_contents.set_moles(GAS_NITROUS, (ONE_ATMOSPHERE*50)/(R_IDEAL_GAS_EQUATION*T20C) * N2STANDARD)

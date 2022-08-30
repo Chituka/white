@@ -290,6 +290,9 @@ GLOBAL_LIST_INIT(bananium_recipes, list ( \
 	. = ..()
 	. += GLOB.bananium_recipes
 
+/obj/item/stack/sheet/mineral/bananium/ten
+	amount = 10
+
 /*
  * Titanium
  */
@@ -312,7 +315,7 @@ GLOBAL_LIST_INIT(bananium_recipes, list ( \
 
 GLOBAL_LIST_INIT(titanium_recipes, list ( \
 	new/datum/stack_recipe("Титановая плитка", /obj/item/stack/tile/mineral/titanium, 1, 4, 20), \
-	new/datum/stack_recipe("Сиденье для шатла", /obj/structure/chair/comfy/shuttle, 2, one_per_turf = TRUE, on_floor = TRUE), \
+	new/datum/stack_recipe("Сиденье для шаттла", /obj/structure/chair/comfy/shuttle, 2, one_per_turf = TRUE, on_floor = TRUE), \
 	))
 
 /obj/item/stack/sheet/mineral/titanium/get_main_recipes()

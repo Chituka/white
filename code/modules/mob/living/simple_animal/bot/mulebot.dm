@@ -535,11 +535,11 @@
 	if(!last_move || isspaceturf(oldLoc)) //if we didn't sucessfully move, or if our old location was a spaceturf.
 		return
 	var/obj/effect/decal/cleanable/blood/tracks/B = new(oldLoc)
-	B.add_blood_DNA(return_blood_DNA())
+	B.add_blood_DNA(GET_ATOM_BLOOD_DNA(src))
 	B.setDir(direct)
 	bloodiness--
 
-/mob/living/simple_animal/bot/mulebot/Moved()
+/mob/living/simple_animal/bot/mulebot/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 
 	for(var/mob/living/carbon/human/future_pancake in loc)

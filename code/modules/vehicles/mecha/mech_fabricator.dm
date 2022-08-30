@@ -46,24 +46,26 @@
 
 	/// A list of categories that valid MECHFAB design datums will broadly categorise themselves under.
 	var/list/part_sets = list(
-								"Киборги",
-								"Модули киборгов",
-								"Рипли",
-								"Одиссей",
-								"Кларк",
-								"Гигакс",
-								"Дюранд",
-								"Х.О.Н.К",
-								"Фазон",
-								"Саванна-Иванов",
-								"Модули экзокостюмов",
-								"Орудийные модули",
-								"Аммуниция",
-								"Управление",
-								"Кибернетика",
-								"Импланты",
-								"Батареи и прочее"
-								)
+		"Киборги",
+		"Модули киборгов",
+		"Рипли",
+		"Одиссей",
+		"Кларк",
+		"Гигакс",
+		"Дюранд",
+		"Х.О.Н.К",
+		"Фазон",
+		"Саванна-Иванов",
+		"Модули экзокостюмов",
+		"Орудийные модули",
+		"Аммуниция",
+		"Управление",
+		"Кибернетика",
+		"Импланты",
+		"Создание MOD",
+		"Модули MOD",
+		"Батареи и прочее"
+	)
 
 /obj/machinery/mecha_part_fabricator/Initialize(mapload)
 	stored_research = SSresearch.science_tech
@@ -125,6 +127,10 @@
 		cost[M.name] = get_resource_cost_w_coeff(D, M)
 
 	var/list/category_override = null
+
+	if(istype(D, /datum/design/module))
+		var/datum/design/module/module_design = D
+		D.sub_category = list(module_design.department_type)
 
 	var/list/part = list(
 		"name" = D.name,

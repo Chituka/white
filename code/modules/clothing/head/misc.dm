@@ -49,7 +49,7 @@
 	name = "шляпа чумного доктора"
 	desc = "Когда-то их использовали чумные врачи. Они практически бесполезны."
 	icon_state = "plaguedoctor"
-	permeability_coefficient = 0.01
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 0, ACID = 0)
 
 /obj/item/clothing/head/hasturhood
 	name = "капюшон Хастура"
@@ -292,6 +292,36 @@
 	armor = list(MELEE = 5, BULLET = 5, LASER = 5, ENERGY = 15, BOMB = 0, BIO = 0, RAD = 0, FIRE = 0, ACID = 0)
 	resistance_flags = FIRE_PROOF | ACID_PROOF
 
+/obj/item/clothing/head/cowboy_hat_black
+	name = "desperado hat"
+	desc = "People with ropes around their necks don't always hang."
+	icon_state = "cowboy_hat_black"
+	inhand_icon_state = "cowboy_hat_black"
+
+/obj/item/clothing/head/cowboy_hat_white
+	name = "ten-gallon hat"
+	desc = "There are two kinds of people in the world: those with guns and those that dig. You dig?"
+	icon_state = "cowboy_hat_white"
+	inhand_icon_state = "cowboy_hat_white"
+
+/obj/item/clothing/head/cowboy_hat_grey
+	name = "drifter hat"
+	desc = "The hat for an assistant with no name."
+	icon_state = "cowboy_hat_grey"
+	inhand_icon_state = "cowboy_hat_grey"
+
+/obj/item/clothing/head/cowboy_hat_red
+	name = "deputy hat"
+	desc = "Don't let the garish coloration fool you. This hat has seen some terrible things."
+	icon_state = "cowboy_hat_red"
+	inhand_icon_state = "cowboy_hat_red"
+
+/obj/item/clothing/head/cowboy_hat_brown
+	name = "sheriff hat"
+	desc = "Reach for the skies, pardner."
+	icon_state = "cowboy_hat_brown"
+	inhand_icon_state = "cowboy_hat_brown"
+
 /obj/item/clothing/head/cone
 	desc = "Этот конус пытается вас о чем-то предупредить!"
 	name = "предупреждающий конус"
@@ -506,16 +536,6 @@
 	flags_inv = 0
 	armor = list(MELEE = 30, BULLET = 15, LASER = 30, ENERGY = 40, BOMB = 25, BIO = 0, RAD = 0, FIRE = 50, ACID = 50)
 	strip_delay = (8 SECONDS)
-
-/obj/item/clothing/head/devil_horns
-	name = "дьяволские рога"
-	desc = "Они не снимаются"
-	icon_state = "devil_horns"
-	armor = list(MELEE = 10, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 100)
-
-/obj/item/clothing/head/devil_horns/Initialize(mapload)
-	. = ..()
-	ADD_TRAIT(src, TRAIT_NODROP, CURSED_ITEM_TRAIT(type))
 
 /obj/item/clothing/head/rainbowbunchcrown
 	name = "Радужная цветочная корона"

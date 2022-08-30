@@ -288,6 +288,7 @@
 	icon_state = "sink"
 	desc = "A sink used for washing one's hands and face. Passively reclaims water over time."
 	anchored = TRUE
+	pixel_z = 1
 	///Something's being washed at the moment
 	var/busy = FALSE
 	///What kind of reagent is produced by this sink by default? (We now have actual plumbing, Arcane, August 2020)
@@ -298,23 +299,48 @@
 	var/buildstackamount = 1
 	///Does the sink have a water recycler to recollect it's water supply?
 	var/has_water_reclaimer = TRUE
-	///Has the water reclamation begun?
-	var/reclaiming = FALSE
 	///Units of water to reclaim per second
 	var/reclaim_rate = 0.5
+	///Amount of shift the pixel for placement
+	var/pixel_shift = 14
 
-/obj/structure/sink/Initialize(mapload, bolt)
+MAPPING_DIRECTIONAL_HELPERS(/obj/structure/sink, (-14))
+
+/obj/structure/sink/Initialize(mapload, ndir = 0, has_water_reclaimer = null)
 	. = ..()
-	if(has_water_reclaimer)
-		create_reagents(100, NO_REACT)
+
+	if(ndir)
+		dir = ndir
+
+	if(has_water_reclaimer != null)
+		src.has_water_reclaimer = has_water_reclaimer
+
+	switch(dir)
+		if(NORTH)
+			pixel_x = 0
+			pixel_y = -pixel_shift
+		if(SOUTH)
+			pixel_x = 0
+			pixel_y = pixel_shift
+		if(EAST)
+			pixel_x = -pixel_shift
+			pixel_y = 0
+		if(WEST)
+			pixel_x = pixel_shift
+			pixel_y = 0
+
+	create_reagents(100, NO_REACT)
+	if(src.has_water_reclaimer)
 		reagents.add_reagent(dispensedreagent, 100)
-	AddComponent(/datum/component/plumbing/simple_demand, bolt)
+	AddComponent(/datum/component/plumbing/simple_demand, extend_pipe_to_edge = TRUE)
 
 /obj/structure/sink/examine(mob/user)
 	. = ..()
-	. += "<hr><span class='notice'>[reagents.total_volume]/[reagents.maximum_volume] liquids remaining.</span>"
+	if(has_water_reclaimer)
+		. += span_notice("A water recycler is installed. It looks like you could pry it out.")
+	. += span_notice("[reagents.total_volume]/[reagents.maximum_volume] liquids remaining.")
 
-/obj/structure/sink/attack_hand(mob/living/user)
+/obj/structure/sink/attack_hand(mob/living/user, list/modifiers)
 	. = ..()
 	if(.)
 		return
@@ -334,7 +360,7 @@
 	var/washing_face = 0
 	if(selected_area in list(BODY_ZONE_HEAD, BODY_ZONE_PRECISE_MOUTH, BODY_ZONE_PRECISE_EYES))
 		washing_face = 1
-	user.visible_message(span_notice("[user] starts washing [user.ru_ego()] [washing_face ? "face" : "hands"]...") , \
+	user.visible_message(span_notice("[user] starts washing [user.p_their()] [washing_face ? "face" : "hands"]..."), \
 						span_notice("You start washing your [washing_face ? "face" : "hands"]..."))
 	busy = TRUE
 
@@ -363,7 +389,7 @@
 	else
 		user.wash(CLEAN_WASH)
 
-	user.visible_message(span_notice("[user] washes [user.ru_ego()] [washing_face ? "face" : "hands"] using [src].") , \
+	user.visible_message(span_notice("[user] washes [user.p_their()] [washing_face ? "face" : "hands"] using [src]."), \
 						span_notice("You wash your [washing_face ? "face" : "hands"] using [src]."))
 
 /obj/structure/sink/attackby(obj/item/O, mob/living/user, params)
@@ -371,10 +397,10 @@
 		to_chat(user, span_warning("Someone's already washing here!"))
 		return
 
-	if(istype(O, /obj/item/reagent_containers))
+	if(is_reagent_container(O))
 		var/obj/item/reagent_containers/RG = O
 		if(reagents.total_volume <= 0)
-			to_chat(user, span_notice("<b>[src.name]</b> is dry."))
+			to_chat(user, span_notice("\The [src] is dry."))
 			return FALSE
 		if(RG.is_refillable())
 			if(!RG.reagents.holder_full())
@@ -412,6 +438,17 @@
 		deconstruct()
 		return
 
+	if(O.tool_behaviour == TOOL_CROWBAR)
+		if(!has_water_reclaimer)
+			to_chat(user, span_warning("There isn't a water recycler to remove."))
+			return
+
+		O.play_tool_sound(src)
+		has_water_reclaimer = FALSE
+		new/obj/item/stock_parts/water_recycler(get_turf(loc))
+		to_chat(user, span_notice("You remove the water reclaimer from [src]"))
+		return
+
 	if(istype(O, /obj/item/stack/medical/gauze))
 		var/obj/item/stack/medical/gauze/G = O
 		new /obj/item/reagent_containers/glass/rag(src.loc)
@@ -419,10 +456,28 @@
 		G.use(1)
 		return
 
+	if(istype(O, /obj/item/stack/sheet/cloth))
+		var/obj/item/stack/sheet/cloth/cloth = O
+		new /obj/item/reagent_containers/glass/rag(loc)
+		to_chat(user, span_notice("You tear off a strip of cloth and make a rag."))
+		cloth.use(1)
+		return
+
 	if(istype(O, /obj/item/stack/ore/glass))
 		new /obj/item/stack/sheet/sandblock(loc)
 		to_chat(user, span_notice("You wet the sand in the sink and form it into a block."))
 		O.use(1)
+		return
+
+	if(istype(O, /obj/item/stock_parts/water_recycler))
+		if(has_water_reclaimer)
+			to_chat(user, span_warning("There is already has a water recycler installed."))
+			return
+
+		playsound(src, 'sound/machines/click.ogg', 20, TRUE)
+		qdel(O)
+		has_water_reclaimer = TRUE
+		begin_reclamation()
 		return
 
 	if(!istype(O))
@@ -439,7 +494,7 @@
 		busy = FALSE
 		O.wash(CLEAN_WASH)
 		reagents.expose(O, TOUCH, 5 / max(reagents.total_volume, 5))
-		user.visible_message(span_notice("[user] washes [O] using [src].") , \
+		user.visible_message(span_notice("[user] washes [O] using [src]."), \
 							span_notice("You wash [O] using [src]."))
 		return 1
 	else
@@ -448,14 +503,16 @@
 /obj/structure/sink/deconstruct()
 	if(!(flags_1 & NODECONSTRUCT_1))
 		drop_materials()
+		if(has_water_reclaimer)
+			new /obj/item/stock_parts/water_recycler(drop_location())
 	..()
 
 /obj/structure/sink/process(delta_time)
-	if(has_water_reclaimer && reagents.total_volume < reagents.maximum_volume)
-		reagents.add_reagent(dispensedreagent, reclaim_rate * delta_time)
-	else
-		reclaiming = FALSE
+	// Water reclamation complete?
+	if(!has_water_reclaimer || reagents.total_volume >= reagents.maximum_volume)
 		return PROCESS_KILL
+
+	reagents.add_reagent(dispensedreagent, reclaim_rate * delta_time)
 
 /obj/structure/sink/proc/drop_materials()
 	if(buildstacktype)
@@ -466,13 +523,15 @@
 			new M.sheet_type(loc, FLOOR(custom_materials[M] / MINERAL_MATERIAL_AMOUNT, 1))
 
 /obj/structure/sink/proc/begin_reclamation()
-	if(!reclaiming)
-		reclaiming = TRUE
-		START_PROCESSING(SSplumbing, src)
+	START_PROCESSING(SSplumbing, src)
 
 /obj/structure/sink/kitchen
 	name = "kitchen sink"
 	icon_state = "sink_alt"
+	pixel_z = 4
+	pixel_shift = 16
+
+MAPPING_DIRECTIONAL_HELPERS(/obj/structure/sink/kitchen, (-16))
 
 /obj/structure/sink/greyscale
 	icon_state = "sink_greyscale"
@@ -496,16 +555,25 @@
 		to_chat(user, span_warning("It is fastened to the floor!"))
 	return !anchored
 
-/obj/structure/sinkframe/attackby(obj/item/I, mob/living/user, params)
-	if(istype(I, /obj/item/stock_parts/water_recycler))
-		qdel(I)
-		var/obj/structure/sink/greyscale/new_sink = new /obj/structure/sink/greyscale(loc)
-		new_sink.has_water_reclaimer = TRUE
+/obj/structure/sinkframe/attackby(obj/item/tool, mob/living/user, params)
+	if(istype(tool, /obj/item/stock_parts/water_recycler))
+		qdel(tool)
+		var/obj/structure/sink/greyscale/new_sink = new(loc, REVERSE_DIR(dir), TRUE)
 		new_sink.set_custom_materials(custom_materials)
-		new_sink.setDir(dir)
 		qdel(src)
+		playsound(new_sink, 'sound/machines/click.ogg', 20, TRUE)
 		return
 	return ..()
+
+/obj/structure/sinkframe/wrench_act(mob/living/user, obj/item/tool)
+	. = ..()
+
+	tool.play_tool_sound(src)
+	var/obj/structure/sink/greyscale/new_sink = new(loc, REVERSE_DIR(dir), FALSE)
+	new_sink.set_custom_materials(custom_materials)
+	qdel(src)
+
+	return TRUE
 
 //Water source, use the type water_source for unlimited water sources like classic sinks.
 /obj/structure/water_source

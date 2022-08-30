@@ -344,7 +344,7 @@
 	damage_deflection = 30
 	normal_integrity = 240
 	air_tight = FALSE
-	CanAtmosPass = ATMOS_PASS_YES
+	can_atmos_pass = ATMOS_PASS_YES
 	var/construction_state = GEAR_SECURE //Pinion airlocks have custom deconstruction
 
 /obj/machinery/door/airlock/clockwork/Initialize(mapload)
@@ -497,7 +497,6 @@
 	obj_integrity = 20
 	broken = TRUE
 	rods_type = /obj/item/stack/tile/bronze
-	rods_amount = 1
 	rods_broken = FALSE
 	grille_type = /obj/structure/grille/ratvar
 

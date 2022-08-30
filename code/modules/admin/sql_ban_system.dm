@@ -253,13 +253,15 @@
 			break_counter++
 		output += "</div></div>"
 		//standard departments all have identical handling
-		var/list/job_lists = list("Security" = GLOB.security_positions,
-							"Engineering" = GLOB.engineering_positions,
-							"Medical" = GLOB.medical_positions,
-							"Science" = GLOB.science_positions,
-							"Supply" = GLOB.supply_positions,
-							"Service" = GLOB.service_positions,
-							"Scum" = GLOB.scum_positions)
+		var/list/job_lists = list(
+			"Security" = GLOB.security_positions,
+			"Engineering" = GLOB.engineering_positions,
+			"Medical" = GLOB.medical_positions,
+			"Science" = GLOB.science_positions,
+			"Supply" = GLOB.supply_positions,
+			"Service" = GLOB.service_positions,
+			"Scum" = GLOB.scum_positions
+		)
 		for(var/department in job_lists)
 			//the first element is the department head so they need the same javascript call as above
 			output += "<div class='column'><label class='rolegroup [ckey(department)]'><input type='checkbox' name='[department]' class='hidden' [usr.client.prefs.tgui_fancy ? " onClick='toggle_checkboxes(this, \"_com\")'" : ""]>[department]</label><div class='content'>"
@@ -278,8 +280,10 @@
 				break_counter++
 			output += "</div></div>"
 		//departments/groups that don't have command staff would throw a javascript error since there's no corresponding reference for toggle_head()
-		var/list/headless_job_lists = list("Silicon" = GLOB.nonhuman_positions,
-										"Abstract" = list("Appearance", "Emote", "Deadchat", "OOC", "Urgent Adminhelp"))
+		var/list/headless_job_lists = list(
+			"Silicon" = GLOB.nonhuman_positions,
+			"Abstract" = list("Appearance", "Emote", "Deadchat", "OOC", "Urgent Adminhelp")
+		)
 		for(var/department in headless_job_lists)
 			output += "<div class='column'><label class='rolegroup [ckey(department)]'><input type='checkbox' name='[department]' class='hidden' [usr.client.prefs.tgui_fancy ? " onClick='toggle_checkboxes(this, \"_com\")'" : ""]>[department]</label><div class='content'>"
 			break_counter = 0
@@ -312,7 +316,6 @@
 				ROLE_BROTHER,
 				ROLE_CHANGELING,
 				ROLE_CULTIST,
-				ROLE_DEVIL,
 				ROLE_FAMILIES,
 				ROLE_HERETIC,
 				ROLE_HIVE,
@@ -579,13 +582,13 @@
 	var/datum/admin_help/AH = admin_ticket_log(player_ckey, msg)
 	if(C)
 		build_ban_cache(C)
-		to_chat(C.mob, span_boldannounce("Сработала защита от детей. Этот раунд - последний."))
+		to_chat(C.mob, span_boldannounce("TEBE PIZDEC!"))
 	if(roles_to_ban[1] == "Server" && AH)
 		AH.Resolve()
 	for(var/client/i in GLOB.clients - C)
 		if(i.address == player_ip || i.computer_id == player_cid)
 			build_ban_cache(i)
-			to_chat(i.mob, span_boldannounce("Сработала защита от детей. Этот раунд - последний."))
+			to_chat(i.mob, span_boldannounce("TEBE PIZDEC!"))
 
 /datum/admins/proc/unban_panel(player_key, admin_key, player_ip, player_cid, page = 0)
 	if(!check_rights(R_BAN))

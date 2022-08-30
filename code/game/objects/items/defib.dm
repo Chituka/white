@@ -192,7 +192,7 @@
 	update_power()
 	for(var/X in actions)
 		var/datum/action/A = X
-		A.UpdateButtonIcon()
+		A.UpdateButtons()
 
 
 /obj/item/defibrillator/equipped(mob/user, slot)
@@ -353,7 +353,7 @@
 		return
 	RegisterSignal(user, COMSIG_MOVABLE_MOVED, .proc/check_range)
 
-/obj/item/shockpaddles/Moved()
+/obj/item/shockpaddles/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	check_range()
 

@@ -54,7 +54,7 @@
 
 	dust_animation()
 	spawn_dust(just_ash)
-	QDEL_IN(src,5) // since this is sometimes called in the middle of movement, allow half a second for movement to finish, ghosting to happen and animation to play. Looks much nicer and doesn't cause multiple runtimes.
+	QDEL_IN(src, 5) // since this is sometimes called in the middle of movement, allow half a second for movement to finish, ghosting to happen and animation to play. Looks much nicer and doesn't cause multiple runtimes.
 
 /mob/living/proc/dust_animation()
 	return
@@ -102,12 +102,6 @@
 
 	if (client)
 		client.move_delay = initial(client.move_delay)
-
-	for(var/s in ownedSoullinks)
-		var/datum/soullink/S = s
-		S.ownerDies(gibbed)
-	for(var/s in sharedSoullinks)
-		var/datum/soullink/S = s
-		S.sharerDies(gibbed)
+		COOLDOWN_START(client, respawn_delay, 20 MINUTES)
 
 	return TRUE

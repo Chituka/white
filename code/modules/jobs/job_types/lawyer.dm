@@ -1,7 +1,7 @@
 /datum/job/lawyer
-	title = "Lawyer"
+	title = JOB_LAWYER
 	ru_title = "Адвокат"
-	department_head = list("Head of Personnel")
+	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = "Station"
 	total_positions = 2
 	spawn_positions = 2
@@ -19,11 +19,15 @@
 
 	display_order = JOB_DISPLAY_ORDER_LAWYER
 
+	departments_list = list(
+		/datum/job_department/service,
+	)
+
 	rpg_title = "Magistrate"
 	rpg_title_ru = "Магистрат"
 
 /datum/outfit/job/lawyer
-	name = "Lawyer"
+	name = JOB_LAWYER
 	jobtype = /datum/job/lawyer
 
 	belt = /obj/item/modular_computer/tablet/pda/lawyer
@@ -50,3 +54,8 @@
 	else
 		use_purple_suit = TRUE
 	..()
+
+/datum/outfit/job/lawyer/get_types_to_preload()
+	. = ..()
+	. += /obj/item/clothing/under/rank/civilian/lawyer/purpsuit
+	. += /obj/item/clothing/suit/toggle/lawyer/purple

@@ -21,6 +21,8 @@
 	intact = TRUE
 	tiled_dirt = TRUE
 
+	/// Determines the type of damage overlay that will be used for the tile
+	var/damaged_dmi = 'icons/turf/damaged.dmi'
 	var/broken = FALSE
 	var/burnt = FALSE
 	var/floor_tile = null //tile that this floor drops
@@ -120,20 +122,27 @@
 		return
 	T.break_tile()
 
-/turf/open/floor/proc/break_tile()
+/turf/open/floor/break_tile()
 	if(broken)
 		return
-	icon_state = pick(broken_states)
-	broken = 1
+	broken = TRUE
+	update_appearance()
 
 /turf/open/floor/burn_tile()
-	if(broken || burnt)
+	if(burnt)
 		return
-	if(LAZYLEN(burnt_states))
-		icon_state = pick(burnt_states)
-	else
-		icon_state = pick(broken_states)
-	burnt = 1
+	burnt = TRUE
+	update_appearance()
+
+/turf/open/floor/update_overlays()
+	. = ..()
+	if(broken)
+		. += mutable_appearance(damaged_dmi, pick(broken_states))
+	else if(burnt)
+		if(LAZYLEN(burnt_states))
+			. += mutable_appearance(damaged_dmi, pick(burnt_states))
+		else
+			. += mutable_appearance(damaged_dmi, pick(broken_states))
 
 /turf/open/floor/proc/make_plating(force = FALSE)
 	return ScrapeAway(flags = CHANGETURF_INHERIT_AIR)
@@ -173,7 +182,7 @@
 			return TRUE
 
 /turf/open/floor/proc/try_replace_tile(obj/item/stack/tile/T, mob/user, params)
-	if(T.turf_type == type)
+	if(T.turf_type == type && T.turf_dir == dir)
 		return
 	var/obj/item/crowbar/CB = user.is_holding_item_of_type(/obj/item/crowbar)
 	if(!CB)
@@ -298,6 +307,7 @@
 				new_airlock.req_access = new_airlock.electronics.accesses
 			if(new_airlock.electronics.unres_sides)
 				new_airlock.unres_sides = new_airlock.electronics.unres_sides
+				new_airlock.unres_sensor = TRUE
 			new_airlock.autoclose = TRUE
 			new_airlock.update_icon()
 			return TRUE

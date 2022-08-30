@@ -30,6 +30,7 @@ GLOBAL_PROTECT(href_token)
 
 	var/datum/filter_editor/filteriffic
 	var/datum/particle_editor/particlic
+	var/datum/colorblind_tester/color_test = new
 
 /datum/admins/New(datum/admin_rank/R, ckey, force_active = FALSE, protected)
 	if(IsAdminAdvancedProcCall())
@@ -129,7 +130,6 @@ GLOBAL_PROTECT(href_token)
 	if(owner)
 		GLOB.admins -= owner
 		owner.remove_admin_verbs()
-		owner.init_verbs()
 		owner.holder = null
 		owner = null
 

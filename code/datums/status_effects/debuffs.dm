@@ -226,8 +226,11 @@
 	ADD_TRAIT(owner, TRAIT_HANDS_BLOCKED, TRAIT_STATUS_EFFECT(id))
 	owner.add_filter("stasis_status_ripple", 2, list("type" = "ripple", "flags" = WAVE_BOUNDED, "radius" = 0, "size" = 2))
 	var/filter = owner.get_filter("stasis_status_ripple")
-	animate(filter, radius = 0, time = 0.2 SECONDS, size = 2, easing = JUMP_EASING, loop = -1, flags = ANIMATION_PARALLEL)
-	animate(radius = 32, time = 1.5 SECONDS, size = 0)
+	animate(filter, radius = 32, time = 15, size = 0, loop = -1)
+
+	if(iscarbon(owner))
+		var/mob/living/carbon/carbon_owner = owner
+		carbon_owner.update_bodypart_bleed_overlays()
 
 
 /datum/status_effect/grouped/stasis/tick()
@@ -238,6 +241,9 @@
 	REMOVE_TRAIT(owner, TRAIT_HANDS_BLOCKED, TRAIT_STATUS_EFFECT(id))
 	owner.remove_filter("stasis_status_ripple")
 	update_time_of_death()
+	if(iscarbon(owner))
+		var/mob/living/carbon/carbon_owner = owner
+		carbon_owner.update_bodypart_bleed_overlays()
 	return ..()
 
 /atom/movable/screen/alert/status_effect/stasis
@@ -840,10 +846,13 @@
 
 	if(!owner.can_hear())
 		return
-	if(hearing_args[HEARING_SPEAKER] == owner)
+	var/mob/hearing_speaker = hearing_args[HEARING_SPEAKER]
+	if(hearing_speaker == owner)
 		return
 	var/mob/living/carbon/C = owner
 	C.cure_trauma_type(/datum/brain_trauma/hypnosis, TRAUMA_RESILIENCE_SURGERY) //clear previous hypnosis
+	hearing_speaker.log_message("has hypnotised [key_name(C)] with the phrase '[hearing_args[HEARING_RAW_MESSAGE]]'", LOG_ATTACK)
+	C.log_message("has been hypnotised by the phrase '[hearing_args[HEARING_RAW_MESSAGE]]' spoken by [key_name(hearing_speaker)]", LOG_VICTIM, log_globally = FALSE)
 	addtimer(CALLBACK(C, /mob/living/carbon.proc/gain_trauma, /datum/brain_trauma/hypnosis, TRAUMA_RESILIENCE_SURGERY, hearing_args[HEARING_RAW_MESSAGE]), 10)
 	addtimer(CALLBACK(C, /mob/living.proc/Stun, 60, TRUE, TRUE), 15) //Take some time to think about it
 	qdel(src)

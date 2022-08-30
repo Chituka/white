@@ -118,6 +118,7 @@
 	chameleon_action.chameleon_name = "Очки"
 	chameleon_action.chameleon_blacklist = typecacheof(/obj/item/clothing/glasses/changeling, only_root_path = TRUE)
 	chameleon_action.initialize_disguises()
+	add_item_action(chameleon_action)
 
 /obj/item/clothing/glasses/hud/security/chameleon/emp_act(severity)
 	. = ..()
@@ -196,6 +197,9 @@
 	if (hud_type)
 		var/datum/atom_hud/H = GLOB.huds[hud_type]
 		H.show_to(user)
+
+/datum/action/item_action/switch_hud
+	name = "Switch HUD"
 
 /obj/item/clothing/glasses/hud/toggle/thermal
 	name = "тепловой HUD"

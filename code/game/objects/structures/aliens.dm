@@ -63,7 +63,7 @@
 	canSmoothWith = list(SMOOTH_GROUP_ALIEN_RESIN)
 	max_integrity = 200
 	var/resintype = null
-	CanAtmosPass = ATMOS_PASS_DENSITY
+	can_atmos_pass = ATMOS_PASS_DENSITY
 
 
 /obj/structure/alien/resin/Initialize(mapload)
@@ -333,12 +333,12 @@
 /obj/structure/alien/egg/proc/Grow()
 	status = GROWN
 	update_icon()
-	proximity_monitor.SetRange(1)
+	proximity_monitor.set_range(1)
 
 //drops and kills the hugger if any is remaining
 /obj/structure/alien/egg/proc/Burst(kill = TRUE)
 	if(status == GROWN || status == GROWING)
-		proximity_monitor.SetRange(0)
+		proximity_monitor.set_range(0)
 		status = BURST
 		update_icon()
 		flick("egg_opening", src)

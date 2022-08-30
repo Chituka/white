@@ -369,11 +369,10 @@
 			if(prob(multiplier))
 				user.mind.add_antag_datum(/datum/antagonist/heretic)
 		if(53)
-			var/obj/effect/proc_holder/spell/furion/FS = new
-			FS.charge_max = 180 SECONDS - multiplier
-			FS.cooldown_min = max(60 SECONDS - multiplier, 0)
-			FS.clothes_req = FALSE
-			user.AddSpell(FS)
+			var/datum/action/cooldown/spell/furion/FS = new(user)
+			FS.cooldown_time = 180 SECONDS - multiplier
+			FS.spell_requirements = NONE
+			FS.Grant(user)
 			user.fully_replace_character_name(user.real_name, "Дифи Лекс")
 		if(54)
 			throwforce = 40 + multiplier
@@ -400,7 +399,7 @@
 		if(60)
 			START_PROCESSING(SSobj, src)
 		if(61)
-			var/obj/item/book/granter/spell/summonitem/SI = new(get_turf(user))
+			var/obj/item/book/granter/action/spell/summonitem/SI = new(get_turf(user))
 			user.equip_or_collect(SI)
 		if(62)
 			user.mind.assigned_role = "Кошмар"
@@ -416,7 +415,7 @@
 			morb.key = user.key
 			qdel(user)
 		if(65)
-			var/mob/living/simple_animal/hostile/poison/giant_spider/GS = new(get_turf(user))
+			var/mob/living/simple_animal/hostile/giant_spider/GS = new(get_turf(user))
 			GS.key = user.key
 			qdel(user)
 		if(66)
@@ -567,8 +566,8 @@
 				var/list/candidates = poll_ghost_candidates("Хотите быть террористом?", ROLE_TRAITOR, ROLE_TRAITOR)
 
 				if(candidates.len >= 2)
-					var/mob/living/carbon/human/first = makeBody(pick_n_take(candidates))
-					var/mob/living/carbon/human/second = makeBody(pick_n_take(candidates))
+					var/mob/living/carbon/human/first = make_body(pick_n_take(candidates))
+					var/mob/living/carbon/human/second = make_body(pick_n_take(candidates))
 
 					var/datum/team/schoolshooters/T = new
 
@@ -636,7 +635,7 @@
 					var/leader_chosen = FALSE
 					var/datum/team/nuclear/nuke_team
 					for(var/mob/c in chosen)
-						var/mob/living/carbon/human/new_character=makeBody(c)
+						var/mob/living/carbon/human/new_character=make_body(c)
 						if(!leader_chosen)
 							leader_chosen = TRUE
 							var/datum/antagonist/nukeop/N = new_character.mind.add_antag_datum(/datum/antagonist/nukeop/leader)

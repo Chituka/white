@@ -114,7 +114,19 @@
 		update_label()
 		update_icon()
 
+	register_context()
+
 	RegisterSignal(src, COMSIG_ATOM_UPDATED_ICON, .proc/update_in_wallet)
+
+/obj/item/card/id/add_context(atom/source, list/context, obj/item/held_item, mob/user)
+	. = ..()
+
+	if(held_item != src)
+		return
+
+	context[SCREENTIP_CONTEXT_LMB] = "Показать ID"
+	context[SCREENTIP_CONTEXT_RMB] = "Снять кредиты"
+	return CONTEXTUAL_SCREENTIP_SET
 
 /obj/item/card/id/Destroy()
 	if (registered_account)
@@ -755,7 +767,7 @@
 
 	cached_flat_icon = null
 
-	if(registered_name && registered_name != "Captain")
+	if(registered_name && registered_name != JOB_CAPTAIN)
 		. += mutable_appearance(icon, assigned_icon_state)
 
 	var/trim_icon_file = trim_icon_override ? trim_icon_override : trim?.trim_icon
@@ -795,7 +807,7 @@
 /obj/item/card/id/advanced/gold/captains_spare
 	name = "запасная ID-карта капитана"
 	desc = "Запасная ID-карта самого Верховного Лорда."
-	registered_name = "Captain"
+	registered_name = JOB_CAPTAIN
 	trim = /datum/id_trim/job/captain
 	registered_age = null
 
@@ -808,8 +820,8 @@
 	AddComponent(/datum/component/areabound)
 
 /obj/item/card/id/advanced/gold/captains_spare/update_label() //so it doesn't change to Captain's ID card (Captain) on a sneeze
-	if(registered_name == "Captain")
-		name = "[initial(name)][(!assignment || assignment == "Captain") ? "" : " ([ru_job_parse(assignment)])"]"
+	if(registered_name == JOB_CAPTAIN)
+		name = "[initial(name)][(!assignment || assignment == JOB_CAPTAIN) ? "" : " ([ru_job_parse(assignment)])"]"
 		update_icon()
 	else
 		..()
@@ -833,7 +845,7 @@
 	trim = /datum/id_trim/centcom/ert
 
 /obj/item/card/id/advanced/centcom/ert
-	registered_name = "Emergency Response Team Commander"
+	registered_name = JOB_ERT_COMMANDER
 	trim = /datum/id_trim/centcom/ert/commander
 
 /obj/item/card/id/advanced/centcom/ert/security
@@ -871,7 +883,7 @@
 /obj/item/card/id/advanced/black/deathsquad
 	name = "ОТРЯД СМЕРТИ"
 	desc = "Карта офицера отряда смерти?"
-	registered_name = "Death Commando"
+	registered_name = JOB_ERT_DEATHSQUAD
 	trim = /datum/id_trim/centcom/deathsquad
 	wildcard_slots = WILDCARD_LIMIT_DEATHSQUAD
 
@@ -999,6 +1011,7 @@
 	chameleon_card_action.chameleon_type = /obj/item/card/id/advanced
 	chameleon_card_action.chameleon_name = "ID-карта"
 	chameleon_card_action.initialize_disguises()
+	add_item_action(chameleon_card_action)
 
 /obj/item/card/id/advanced/chameleon/Destroy()
 	theft_target = null
@@ -1216,7 +1229,7 @@
 					if(selected_trim_path)
 						SSid_access.apply_trim_to_chameleon_card(src, trim_list[selected_trim_path])
 
-				var/target_occupation = stripped_input(user, "Какую должность мы выберем?\nЗаметка: это не добавит доступа, просто изменит видимую должность.", "Выбираем работу", assignment ? assignment : "Assistant", MAX_MESSAGE_LEN)
+				var/target_occupation = stripped_input(user, "Какую должность мы выберем?\nЗаметка: это не добавит доступа, просто изменит видимую должность.", "Выбираем работу", assignment ? assignment : JOB_ASSISTANT, MAX_MESSAGE_LEN)
 				if(target_occupation)
 					assignment = target_occupation
 

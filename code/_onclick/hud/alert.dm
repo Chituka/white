@@ -279,6 +279,11 @@
 		var/mob/living/carbon/M = usr
 		return M.help_shake_act(M)
 
+/atom/movable/screen/alert/negative
+	name = "Negative Gravity"
+	desc = "You're getting pulled upwards. While you won't have to worry about falling down anymore, you may accidentally fall upwards!"
+	icon_state = "negative"
+
 /atom/movable/screen/alert/weightless
 	name = "Невесомость"
 	desc = "Гравитация перестала действовать на меня, и я бесцельно парю. Мне понадобится что-то большое и тяжелое, например \
@@ -333,7 +338,6 @@
 	add_overlay(receiving)
 	src.receiving = receiving
 	src.offerer = offerer
-	RegisterSignal(taker, COMSIG_MOVABLE_MOVED, .proc/check_in_range, override = TRUE) //Override to prevent runtimes when people offer a item multiple times
 
 /atom/movable/screen/alert/give/Click(location, control, params)
 	. = ..()
@@ -349,14 +353,6 @@
 /atom/movable/screen/alert/give/proc/handle_transfer()
 	var/mob/living/carbon/taker = owner
 	taker.take(offerer, receiving)
-
-/// Simply checks if the other person is still in range
-/atom/movable/screen/alert/give/proc/check_in_range(atom/taker)
-	SIGNAL_HANDLER
-
-	if(!offerer.CanReach(taker))
-		to_chat(owner, span_warning("You moved out of range of [offerer]!"))
-		owner?.clear_alert("[offerer]")
 
 /atom/movable/screen/alert/give/highfive/setup(mob/living/carbon/taker, mob/living/carbon/offerer, obj/item/receiving)
 	. = ..()
@@ -417,7 +413,6 @@
 	add_overlay(receiving)
 	src.receiving = receiving
 	src.offerer = offerer
-	RegisterSignal(taker, COMSIG_MOVABLE_MOVED, .proc/check_in_range, override = TRUE) //Override to prevent runtimes when people offer a item multiple times
 
 /// Gives the player the option to succumb while in critical condition
 /atom/movable/screen/alert/succumb
@@ -661,6 +656,29 @@
 	name = "Blood Overcharge"
 	desc = "Your blood's electric charge is becoming dangerously high, find an outlet for your energy. Use Grab Intent on an APC to channel your energy into it."
 	icon_state = "cell_overcharge"
+
+//MODsuit unique
+/atom/movable/screen/alert/nocore
+	name = "Missing Core"
+	desc = "Unit has no core. No modules available until a core is reinstalled. Robotics may provide assistance."
+	icon_state = "no_cell"
+
+/atom/movable/screen/alert/emptycell/plasma
+	name = "Out of Power"
+	desc = "Unit's plasma core has no charge remaining. No modules available until plasma core is recharged. \
+		Unit can be refilled through plasma fuel."
+
+/atom/movable/screen/alert/emptycell/plasma/update_desc()
+	. = ..()
+	desc = initial(desc)
+
+/atom/movable/screen/alert/lowcell/plasma
+	name = "Low Charge"
+	desc = "Unit's plasma core is running low. Unit can be refilled through plasma fuel."
+
+/atom/movable/screen/alert/lowcell/plasma/update_desc()
+	. = ..()
+	desc = initial(desc)
 
 //Need to cover all use cases - emag, illegal upgrade module, malf AI hack, traitor cyborg
 /atom/movable/screen/alert/hacked

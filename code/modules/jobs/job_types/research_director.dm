@@ -1,8 +1,8 @@
 /datum/job/research_director
-	title = "Research Director"
+	title = JOB_RESEARCH_DIRECTOR
 	ru_title = "Научный Руководитель"
 	auto_deadmin_role_flags = DEADMIN_POSITION_HEAD
-	department_head = list("Captain")
+	department_head = list(JOB_CAPTAIN)
 	head_announce = list("Science")
 	faction = "Station"
 	total_positions = 1
@@ -32,6 +32,11 @@
 		/obj/item/borg/upgrade/ai = 2
 	)
 
+	departments_list = list(
+		/datum/job_department/science,
+		/datum/job_department/command,
+	)
+
 	rpg_title = "Archmagister"
 	rpg_title_ru = "Архимагистр"
 
@@ -41,7 +46,7 @@
 		SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, .proc/minor_announce, "Учитывая нехватку экипажа, текущим капитаном станции теперь является [H.real_name]!"))
 
 /datum/outfit/job/rd
-	name = "Research Director"
+	name = JOB_RESEARCH_DIRECTOR
 	jobtype = /datum/job/research_director
 
 	id = /obj/item/card/id/advanced/silver

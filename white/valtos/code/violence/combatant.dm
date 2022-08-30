@@ -57,7 +57,7 @@
 	antag_rep = 0
 
 /datum/job/combantant/red
-	title = "Combantant: Red"
+	title = JOB_COMBATANT_RED
 	ru_title = "Комбатант: Красные"
 	faction = "Violence"
 	supervisors = "красным"
@@ -68,9 +68,10 @@
 	. = ..()
 	var/datum/antagonist/combatant/red/comb = new
 	H.mind.add_antag_datum(comb)
+	H.faction = list("combatant_red")
 
 /datum/job/combantant/blue
-	title = "Combantant: Blue"
+	title = JOB_COMBATANT_BLUE
 	ru_title = "Комбатант: Синие"
 	faction = "Violence"
 	supervisors = "синим"
@@ -81,6 +82,7 @@
 	. = ..()
 	var/datum/antagonist/combatant/blue/comb = new
 	H.mind.add_antag_datum(comb)
+	H.faction = list("combatant_blue")
 
 /datum/id_trim/combatant
 	assignment = "white"
@@ -107,14 +109,14 @@
 	var/team = "white"
 
 /datum/outfit/job/combantant/red
-	name = "Combantant: Red"
+	name = JOB_COMBATANT_RED
 	jobtype = /datum/job/combantant/red
 	uniform = /obj/item/clothing/under/color/red
 	id = /obj/item/card/id/red
 	team = "red"
 
 /datum/outfit/job/combantant/blue
-	name = "Combantant: Blue"
+	name = JOB_COMBATANT_BLUE
 	jobtype = /datum/job/combantant/blue
 	uniform = /obj/item/clothing/under/color/blue
 	id = /obj/item/card/id/blue

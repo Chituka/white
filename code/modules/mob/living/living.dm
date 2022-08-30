@@ -30,31 +30,21 @@
 	med_hud_set_status()
 
 /mob/living/Destroy()
-	if(LAZYLEN(status_effects))
-		for(var/s in status_effects)
-			var/datum/status_effect/S = s
-			if(S.on_remove_on_mob_delete) //the status effect calls on_remove when its mob is deleted
-				qdel(S)
-			else
-				S.be_replaced()
-	if(ranged_ability)
-		ranged_ability.remove_ranged_ability(src)
+	for(var/datum/status_effect/effect as anything in status_effects)
+		// The status effect calls on_remove when its mob is deleted
+		if(effect.on_remove_on_mob_delete)
+			qdel(effect)
+
+		else
+			effect.be_replaced()
+
 	if(buckled)
-		buckled.unbuckle_mob(src,force=1)
+		buckled.unbuckle_mob(src, force=1)
 
 	remove_from_all_data_huds()
 	GLOB.mob_living_list -= src
-	QDEL_LIST(diseases)
-	for(var/s in ownedSoullinks)
-		var/datum/soullink/S = s
-		S.ownerDies(FALSE)
-		qdel(s) //If the owner is destroy()'d, the soullink is destroy()'d
-	ownedSoullinks = null
-	for(var/s in sharedSoullinks)
-		var/datum/soullink/S = s
-		S.sharerDies(FALSE)
-		S.removeSoulsharer(src) //If a sharer is destroy()'d, they are simply removed
-	sharedSoullinks = null
+	QDEL_LAZYLIST(diseases)
+	QDEL_LIST(surgeries)
 	return ..()
 
 /mob/living/onZImpact(turf/T, levels, message = TRUE)
@@ -64,6 +54,8 @@
 	return ..()
 
 /mob/living/proc/ZImpactDamage(turf/T, levels)
+	if(SEND_SIGNAL(src, COMSIG_LIVING_Z_IMPACT, levels, T) & NO_Z_IMPACT_DAMAGE)
+		return
 	var/total_damage = (levels * 5) ** 1.5
 	for(var/mob/living/L in T)
 		if(L == src)
@@ -106,6 +98,9 @@
 
 //Called when we bump onto a mob
 /mob/living/proc/MobBump(mob/M)
+
+	SEND_SIGNAL(src, COMSIG_LIVING_MOB_BUMP, M)
+
 	//Even if we don't push/swap places, we "touched" them, so spread fire
 	spreadFire(M)
 
@@ -754,10 +749,6 @@
 		clear_alert("not_enough_oxy")
 		reload_fullscreen()
 		. = TRUE
-		if(mind)
-			for(var/S in mind.spell_list)
-				var/obj/effect/proc_holder/spell/spell = S
-				spell.updateButtonIcon()
 		if(excess_healing)
 			INVOKE_ASYNC(src, .proc/emote, "gasp")
 			log_combat(src, src, "revived")
@@ -860,6 +851,10 @@
 		return FALSE
 
 /mob/living/proc/update_damage_overlays()
+	return
+
+/// Proc that only really gets called for humans, to handle bleeding overlays.
+/mob/living/proc/update_wound_overlays()
 	return
 
 /mob/living/Move(atom/newloc, direct, glide_size_override)
@@ -1066,21 +1061,40 @@
 	. = ..()
 	if(!SSticker.HasRoundStarted())
 		return
-	var/was_weightless = alerts["gravity"] && istype(alerts["gravity"], /atom/movable/screen/alert/weightless)
-	if(has_gravity)
-		if(has_gravity == 1)
-			clear_alert("gravity")
-		else
-			if(has_gravity >= GRAVITY_DAMAGE_THRESHOLD)
-				throw_alert("gravity", /atom/movable/screen/alert/veryhighgravity)
-			else
-				throw_alert("gravity", /atom/movable/screen/alert/highgravity)
-		if(was_weightless)
-			REMOVE_TRAIT(src, TRAIT_MOVE_FLOATING, NO_GRAVITY_TRAIT)
-	else
-		throw_alert("gravity", /atom/movable/screen/alert/weightless)
-		if(!was_weightless)
-			ADD_TRAIT(src, TRAIT_MOVE_FLOATING, NO_GRAVITY_TRAIT)
+	var/atom/movable/screen/alert/gravity_alert = alerts["gravity"]
+	switch(has_gravity)
+		if(-INFINITY to NEGATIVE_GRAVITY)
+			if(!istype(gravity_alert, /atom/movable/screen/alert/negative))
+				throw_alert("gravity", /atom/movable/screen/alert/negative)
+				var/matrix/flipped_matrix = transform
+				flipped_matrix.b = -flipped_matrix.b
+				flipped_matrix.e = -flipped_matrix.e
+				animate(src, transform = flipped_matrix, pixel_y = pixel_y+4, time = 0.5 SECONDS, easing = EASE_OUT)
+				base_pixel_y += 4
+		if(NEGATIVE_GRAVITY + 0.01 to 0)
+			if(!istype(gravity_alert, /atom/movable/screen/alert/weightless))
+				throw_alert("gravity", /atom/movable/screen/alert/weightless)
+				ADD_TRAIT(src, TRAIT_MOVE_FLOATING, NO_GRAVITY_TRAIT)
+		if(0.01 to STANDARD_GRAVITY)
+			if(gravity_alert)
+				clear_alert("gravity")
+		if(STANDARD_GRAVITY + 0.01 to GRAVITY_DAMAGE_THRESHOLD - 0.01)
+			throw_alert("gravity", /atom/movable/screen/alert/highgravity)
+		if(GRAVITY_DAMAGE_THRESHOLD to INFINITY)
+			throw_alert("gravity", /atom/movable/screen/alert/veryhighgravity)
+
+	// If we had no gravity alert, or the same alert as before, go home
+	if(!gravity_alert || alerts["gravity"] == gravity_alert)
+		return
+	// By this point we know that we do not have the same alert as we used to
+	if(istype(gravity_alert, /atom/movable/screen/alert/weightless))
+		REMOVE_TRAIT(src, TRAIT_MOVE_FLOATING, NO_GRAVITY_TRAIT)
+	if(istype(gravity_alert, /atom/movable/screen/alert/negative))
+		var/matrix/flipped_matrix = transform
+		flipped_matrix.b = -flipped_matrix.b
+		flipped_matrix.e = -flipped_matrix.e
+		animate(src, transform = flipped_matrix, pixel_y = pixel_y-4, time = 0.5 SECONDS, easing = EASE_OUT)
+		base_pixel_y -= 4
 
 // The src mob пытается strip an item from someone
 // Override if a certain type of mob should be behave differently when stripping items (can't, for example)
@@ -1091,8 +1105,8 @@
 	who.visible_message(span_warning("<b>[src]</b> пытается снять <b>[what.name]</b> с <b>[who]</b>.") , \
 					span_userdanger("<b>[src]</b> пытается снять с меня <b>[what.name]</b>.") , null, null, src)
 	to_chat(src, span_danger("Пытаюсь снять <b>[what.name]</b> с <b>[who]</b>..."))
-	who.log_message("[key_name(who)] is being stripped of [what] by [key_name(src)]", LOG_ATTACK, color="red")
-	log_message("[key_name(who)] is being stripped of [what] by [key_name(src)]", LOG_ATTACK, color="red", log_globally=FALSE)
+	log_message("[key_name(who)] is being stripped of [what] by [key_name(src)]", LOG_ATTACK, color="red")
+	who.log_message("[key_name(who)] is being stripped of [what] by [key_name(src)]", LOG_VICTIM, color="red", log_globally = FALSE)
 	what.add_fingerprint(src)
 	if(do_mob(src, who, what.strip_delay, interaction_key = what))
 		if(what && Adjacent(who))
@@ -1100,12 +1114,12 @@
 				var/list/L = where
 				if(what == who.get_item_for_held_index(L[2]))
 					if(what.doStrip(src, who))
-						who.log_message("[key_name(who)] has been stripped of [what] by [key_name(src)]", LOG_ATTACK, color="red")
-						log_message("[key_name(who)] has been stripped of [what] by [key_name(src)]", LOG_ATTACK, color="red", log_globally=FALSE)
+						log_message("[key_name(who)] has been stripped of [what] by [key_name(src)]", LOG_ATTACK, color="red")
+						who.log_message("[key_name(who)] has been stripped of [what] by [key_name(src)]", LOG_VICTIM, color="red", log_globally = FALSE)
 			if(what == who.get_item_by_slot(where))
 				if(what.doStrip(src, who))
-					who.log_message("[key_name(who)] has been stripped of [what] by [key_name(src)]", LOG_ATTACK, color="red")
-					log_message("[key_name(who)] has been stripped of [what] by [key_name(src)]", LOG_ATTACK, color="red", log_globally=FALSE)
+					log_message("[key_name(who)] has been stripped of [what] by [key_name(src)]", LOG_ATTACK, color="red")
+					who.log_message("[key_name(who)] has been stripped of [what] by [key_name(src)]", LOG_VICTIM, color="red", log_globally = FALSE)
 
 // The src mob is trying to place an item on someone
 // Override if a certain mob should be behave differently when placing items (can't, for example)
@@ -1136,8 +1150,8 @@
 				who.visible_message(span_notice("<b>[src]</b> пытается надеть <b>[what]</b> на <b>[who]</b>.") , \
 							span_notice("<b>[src]</b> пытается надеть <b>[what]</b> на меня.") , null, null, src)
 		to_chat(src, span_notice("Пытаюсь надеть <b>[what]</b> на <b>[who]</b>..."))
-		who.log_message("[key_name(who)] is having [what] put on them by [key_name(src)]", LOG_ATTACK, color="red")
-		log_message("[key_name(who)] is having [what] put on them by [key_name(src)]", LOG_ATTACK, color="red", log_globally=FALSE)
+		log_message("[key_name(who)] is having [what] put on them by [key_name(src)]", LOG_ATTACK, color="red")
+		who.log_message("[key_name(who)] is having [what] put on them by [key_name(src)]", LOG_VICTIM, color="red", log_globally=FALSE)
 		if(do_mob(src, who, what.equip_delay_other))
 			if(what && Adjacent(who) && what.mob_can_equip(who, src, final_where, TRUE, TRUE))
 				if(temporarilyRemoveItemFromInventory(what))
@@ -1146,8 +1160,8 @@
 							what.forceMove(get_turf(who))
 					else
 						who.equip_to_slot(what, where, TRUE)
-					who.log_message("[key_name(who)] had [what] put on them by [key_name(src)]", LOG_ATTACK, color="red")
-					log_message("[key_name(who)] had [what] put on them by [key_name(src)]", LOG_ATTACK, color="red", log_globally=FALSE)
+					log_message("[key_name(who)] had [what] put on them by [key_name(src)]", LOG_ATTACK, color="red")
+					who.log_message("[key_name(who)] had [what] put on them by [key_name(src)]", LOG_VICTIM, color="red", log_globally = FALSE)
 
 /mob/living/singularity_pull(S, current_size)
 	..()
@@ -1204,10 +1218,6 @@
 		return FALSE
 	return TRUE
 
-//used in datum/reagents/reaction() proc
-/mob/living/proc/get_permeability_protection(list/target_zones)
-	return 0
-
 /mob/living/proc/harvest(mob/living/user) //used for extra objects etc. in butchering
 	return
 
@@ -1248,34 +1258,6 @@
 
 /mob/living/carbon/alien/update_stamina()
 	return
-
-/mob/living/proc/owns_soul()
-	if(mind)
-		return mind.soulOwner == mind
-	return TRUE
-
-/mob/living/proc/return_soul()
-	hellbound = 0
-	if(mind)
-		var/datum/antagonist/devil/devilInfo = mind.soulOwner.has_antag_datum(/datum/antagonist/devil)
-		if(devilInfo)//Not sure how this could be null, but let's just try anyway.
-			devilInfo.remove_soul(mind)
-		mind.soulOwner = mind
-
-/mob/living/proc/has_bane(banetype)
-	var/datum/antagonist/devil/devilInfo = is_devil(src)
-	return devilInfo && banetype == devilInfo.bane
-
-/mob/living/proc/check_weakness(obj/item/weapon, mob/living/attacker)
-	if(mind && mind.has_antag_datum(/datum/antagonist/devil))
-		return check_devil_bane_multiplier(weapon, attacker)
-	return 1 //This is not a boolean, it's the multiplier for the damage the weapon does.
-
-/mob/living/proc/check_acedia()
-	if(mind && mind.has_objective(/datum/objective/sintouched/acedia))
-		return TRUE
-	return FALSE
-
 
 /mob/living/throw_at(atom/target, range, speed, mob/thrower, spin=1, diagonals_first = 0, datum/callback/callback, force, gentle = FALSE, quickstart = TRUE)
 	stop_pulling()
@@ -1490,24 +1472,6 @@ GLOBAL_LIST_EMPTY(fire_appearances)
 /mob/living/proc/on_fall()
 	return
 
-/mob/living/proc/AddAbility(obj/effect/proc_holder/A)
-	abilities.Add(A)
-	A.on_gain(src)
-	if(A.has_action)
-		A.action.Grant(src)
-
-/mob/living/proc/RemoveAbility(obj/effect/proc_holder/A)
-	abilities.Remove(A)
-	A.on_lose(src)
-	if(A.action)
-		A.action.Remove(src)
-
-/mob/living/proc/add_abilities_to_panel()
-	var/list/L = list()
-	for(var/obj/effect/proc_holder/A in abilities)
-		L[++L.len] = list("[A.panel]",A.get_panel_text(),A.name,"[REF(A)]")
-	return L
-
 /mob/living/lingcheck()
 	if(mind)
 		var/datum/antagonist/changeling/changeling = mind.has_antag_datum(/datum/antagonist/changeling)
@@ -1609,20 +1573,19 @@ GLOBAL_LIST_EMPTY(fire_appearances)
 	return result
 
 /mob/living/reset_perspective(atom/A)
-	if(..())
-		update_sight()
-		if(client.eye && client.eye != src)
-			var/atom/AT = client.eye
-			AT.get_remote_view_fullscreens(src)
-		else
-			clear_fullscreen("remote_view", 0)
-		update_pipe_vision()
+	if(!..())
+		return
+	update_sight()
+	update_fullscreen()
+	update_pipe_vision()
 
-/mob/living/update_mouse_pointer()
-	..()
-	if (client && ranged_ability?.ranged_mousepointer)
-		client.mouse_pointer_icon = ranged_ability.ranged_mousepointer
-
+/// Proc used to handle the fullscreen overlay updates, realistically meant for the reset_perspective() proc.
+/mob/living/proc/update_fullscreen()
+	if(client.eye && client.eye != src)
+		var/atom/client_eye = client.eye
+		client_eye.get_remote_view_fullscreens(src)
+	else
+		clear_fullscreen("remote_view", 0)
 
 /mob/living/vv_edit_var(var_name, var_value)
 	switch(var_name)
@@ -2138,3 +2101,31 @@ GLOBAL_LIST_EMPTY(fire_appearances)
 				return FALSE
 			return style.harm_act(src, target)
 	return style.help_act(src, target)
+
+/mob/living/carbon/proc/draw_custom_races(do_it)
+	for(var/O in bodyparts)
+		var/obj/item/bodypart/B = O
+		B.should_draw_custom_races = do_it
+
+/**
+ * A proc triggered by callback when someone gets slammed by the tram and lands somewhere.
+ *
+ * This proc is used to force people to fall through things like lattice and unplated flooring at the expense of some
+ * extra damage, so jokers can't use half a stack of iron rods to make getting hit by the tram immediately lethal.
+ */
+/mob/living/proc/tram_slam_land()
+	if(!isopenspace(loc) && !isplatingturf(loc))
+		return
+
+	if(isplatingturf(loc))
+		var/turf/open/floor/smashed_plating = loc
+		visible_message(span_danger("[src] is thrown violently into [smashed_plating], smashing through it and punching straight through!"),
+				span_userdanger("You're thrown violently into [smashed_plating], smashing through it and punching straight through!"))
+		apply_damage(rand(5,20), BRUTE, BODY_ZONE_CHEST)
+		smashed_plating.ScrapeAway(1, CHANGETURF_INHERIT_AIR)
+
+	for(var/obj/structure/lattice/lattice in loc)
+		visible_message(span_danger("[src] is thrown violently into [lattice], smashing through it and punching straight through!"),
+			span_userdanger("You're thrown violently into [lattice], smashing through it and punching straight through!"))
+		apply_damage(rand(5,10), BRUTE, BODY_ZONE_CHEST)
+		lattice.deconstruct(FALSE)

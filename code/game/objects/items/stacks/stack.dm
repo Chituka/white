@@ -348,7 +348,8 @@
 		return
 	if(!is_valid_recipe(recipe, recipes)) //href exploit protection
 		return
-	if(!multiplier || (multiplier <= 0)) //href exploit protection
+	if(!multiplier || multiplier < 1 || !isnum(multiplier) || ISNAN(multiplier)) //href exploit protection
+		stack_trace("Invalid multiplier value in stack creation [multiplier], [usr] is likely attempting an exploit")
 		return
 	if(!building_checks(builder, recipe, multiplier))
 		return
@@ -360,9 +361,10 @@
 			span_notice("Начинаю создавать [recipe.title]..."),
 		)
 		if(HAS_TRAIT(builder, recipe.trait_booster))
-			adjusted_time = (recipe.time * recipe.trait_modifier)
+			adjusted_time = (recipe.time * recipe.trait_modifier*builder.mind.get_skill_modifier(/datum/skill/engineering, SKILL_SPEED_MODIFIER))
 		else
-			adjusted_time = recipe.time
+			adjusted_time = recipe.time*builder.mind.get_skill_modifier(/datum/skill/engineering, SKILL_SPEED_MODIFIER)
+		builder.mind.adjust_experience(/datum/skill/engineering, recipe.time)
 		if(!do_after(builder, adjusted_time, target = builder))
 			builder.balloon_alert(builder, "помешали!")
 			return
@@ -594,7 +596,7 @@
 	. = merge_without_del(target_stack, limit)
 	is_zero_amount(delete_if_zero = TRUE)
 
-/obj/item/stack/Moved()
+/obj/item/stack/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	if(!throwing && isturf(loc))
 		for(var/obj/item/stack/item_stack in loc)
@@ -680,9 +682,9 @@
 		. = ..()
 
 /obj/item/stack/proc/copy_evidences(obj/item/stack/from)
-	add_blood_DNA(from.return_blood_DNA())
-	add_fingerprint_list(from.return_fingerprints())
-	add_hiddenprint_list(from.return_hiddenprints())
+	add_blood_DNA(GET_ATOM_BLOOD_DNA(from))
+	add_fingerprint_list(GET_ATOM_FINGERPRINTS(from))
+	add_hiddenprint_list(GET_ATOM_HIDDENPRINTS(from))
 	fingerprintslast  = from.fingerprintslast
 	//TODO bloody overlay
 

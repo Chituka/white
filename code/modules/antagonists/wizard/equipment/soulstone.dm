@@ -1,18 +1,24 @@
 /obj/item/soulstone
-	name = "soulstone shard"
+	name = "осколок камня душ"
 	icon = 'icons/obj/wizard.dmi'
 	icon_state = "soulstone"
 	inhand_icon_state = "electronic"
 	lefthand_file = 'icons/mob/inhands/misc/devices_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/misc/devices_righthand.dmi'
 	layer = HIGH_OBJ_LAYER
-	desc = "A fragment of the legendary treasure known simply as the 'Soul Stone'. The shard still flickers with a fraction of the full artefact's power."
+	desc = "Фрагмент легендарного сокровища, известного как 'Камень душ'. Осолок все ещё мерцает отблеском силы исконного артефакта."
 	w_class = WEIGHT_CLASS_TINY
 	slot_flags = ITEM_SLOT_BELT
+	/// if TRUE, we can only be used once.
 	var/one_use = FALSE
-	var/grab_sleeping = TRUE
+	/// Only used if one_use is TRUE. Whether it's used.
 	var/spent = FALSE
-	/// This controls the color of the soulstone as well as restrictions for who can use it. THEME_CULT is red and is the default of cultist THEME_WIZARD is purple and is the default of wizard and THEME_HOLY is for purified soul stone
+	/// if TRUE, our soulstone will work on mobs which are in crit. if FALSE, the mob must be dead.
+	var/grab_sleeping = TRUE
+	/// This controls the color of the soulstone as well as restrictions for who can use it.
+	/// THEME_CULT is red and is the default of cultist
+	/// THEME_WIZARD is purple and is the default of wizard
+	/// THEME_HOLY is for purified soul stone
 	var/theme = THEME_CULT
 	/// Role check, if any needed
 	var/required_role = /datum/antagonist/cult
@@ -21,6 +27,55 @@
 	. = ..()
 	if(theme != THEME_HOLY)
 		RegisterSignal(src, COMSIG_BIBLE_SMACKED, .proc/on_bible_smacked)
+
+/obj/item/soulstone/update_appearance(updates)
+	. = ..()
+	for(var/mob/living/simple_animal/shade/sharded_shade in src)
+		switch(theme)
+			if(THEME_HOLY)
+				sharded_shade.name = "Очищенный [sharded_shade.real_name]"
+				sharded_shade.icon_state = "shade_holy"
+				sharded_shade.loot = list(/obj/item/ectoplasm/angelic)
+			if(THEME_CULT)
+				sharded_shade.name = sharded_shade.real_name
+				sharded_shade.icon_state = "shade_cult"
+				sharded_shade.loot = list(/obj/item/ectoplasm)
+			if(THEME_WIZARD)
+				sharded_shade.name = sharded_shade.real_name
+				sharded_shade.icon_state = "shade_wizard"
+				sharded_shade.loot = list(/obj/item/ectoplasm/mystic)
+
+/obj/item/soulstone/update_icon_state()
+	. = ..()
+	switch(theme)
+		if(THEME_HOLY)
+			icon_state = "purified_soulstone"
+		if(THEME_CULT)
+			icon_state = "soulstone"
+		if(THEME_WIZARD)
+			icon_state = "mystic_soulstone"
+
+	if(contents.len)
+		icon_state = "[icon_state]2"
+
+/obj/item/soulstone/update_name(updates)
+	. = ..()
+	if(spent)
+		name = "тусклый [name]"
+		return
+
+	var/mob/living/simple_animal/shade/shade = locate() in src
+	if(shade)
+		name = "[name]: [shade.real_name]"
+	else
+		name = initial(name)
+
+/obj/item/soulstone/update_desc(updates)
+	. = ..()
+	if(spent)
+		desc = "Фрагмент легендарного сокровища, известного \
+			как 'Камень душ'. Осколок лежит неподвижно, тусклый и безжизненный; \
+			какая бы искра не вспыхнула в нём когда-то, она давно погасла."
 
 ///signal called whenever a soulstone is smacked by a bible
 /obj/item/soulstone/proc/on_bible_smacked(datum/source, mob/living/user, direction)
@@ -37,23 +92,19 @@
 /obj/item/soulstone/proc/attempt_exorcism(mob/exorcist)
 	if(IS_CULTIST(exorcist) || theme == THEME_HOLY)
 		return
-	balloon_alert(exorcist, span_notice("exorcising [src]..."))
-	playsound(src,'sound/hallucinations/veryfar_noise.ogg',40,TRUE)
+	balloon_alert(exorcist, span_notice("Изгоняю нечистую силу из [src]..."))
+	playsound(src, 'sound/hallucinations/veryfar_noise.ogg', 40, TRUE)
 	if(!do_after(exorcist, 4 SECONDS, target = src))
 		return
-	playsound(src,'sound/effects/pray_chaplain.ogg',60,TRUE)
+	playsound(src, 'sound/effects/pray_chaplain.ogg', 60, TRUE)
 	required_role = null
 	theme = THEME_HOLY
-	icon_state = "purified_soulstone"
-	for(var/mob/mob_cultist in contents)
-		if(!mob_cultist.mind)
-			continue
-		icon_state = "purified_soulstone2"
-		mob_cultist.mind.remove_antag_datum(/datum/antagonist/cult)
-	for(var/mob/living/simple_animal/shade/sharded_shade in src)
-		sharded_shade.icon_state = "ghost1"
-		sharded_shade.name = "Purified [sharded_shade.real_name]"
-	exorcist.visible_message(span_notice("[exorcist] purifies [src]!"))
+
+	update_appearance()
+	for(var/mob/shade_to_deconvert in contents)
+		shade_to_deconvert.mind?.remove_antag_datum(/datum/antagonist/cult)
+
+	exorcist.visible_message(span_notice("[exorcist] очищает [src]!"))
 	UnregisterSignal(src, COMSIG_BIBLE_SMACKED)
 
 /**
@@ -62,81 +113,45 @@
 /obj/item/soulstone/proc/corrupt()
 	if(theme == THEME_CULT)
 		return FALSE
-	required_role = null
+
+	required_role = /datum/antagonist/cult
 	theme = THEME_CULT
-	icon_state = "soulstone"
+	update_appearance()
 	for(var/mob/shade_to_convert in contents)
-		if(!shade_to_convert.mind)
-			continue
-		icon_state = "soulstone2"
 		if(IS_CULTIST(shade_to_convert))
 			continue
-		shade_to_convert.mind.add_antag_datum(/datum/antagonist/cult)
-	for(var/mob/living/simple_animal/shade/sharded_shade in src)
-		sharded_shade.icon_state = "shade_cult"
-		sharded_shade.name = sharded_shade.real_name
+		shade_to_convert.mind?.add_antag_datum(/datum/antagonist/cult)
+
 	RegisterSignal(src, COMSIG_BIBLE_SMACKED)
 	return TRUE
 
+/// Checks if the passed mob has the required antag datum set on the soulstone.
 /obj/item/soulstone/proc/role_check(mob/who)
 	return required_role ? (who.mind && who.mind.has_antag_datum(required_role, TRUE)) : TRUE
 
-/obj/item/soulstone/proc/was_used()
-	if(one_use)
-		spent = TRUE
-		name = "dull [name]"
-		desc = "A fragment of the legendary treasure known simply as \
-			the 'Soul Stone'. The shard lies still, dull and lifeless; \
-			whatever spark it once held long extinguished."
+/// Called whenever the soulstone releases a shade from it.
+/obj/item/soulstone/proc/on_release_spirits()
+	if(!one_use)
+		return
 
-/obj/item/soulstone/anybody
-	required_role = null
-
-/obj/item/soulstone/mystic
-	icon_state = "mystic_soulstone"
-	theme = THEME_WIZARD
-	required_role = /datum/antagonist/wizard
-
-/obj/item/soulstone/anybody/revolver
-	one_use = TRUE
-	grab_sleeping = FALSE
-
-/obj/item/soulstone/anybody/purified
-	icon_state = "purified_soulstone"
-	theme = THEME_HOLY
-
-/obj/item/soulstone/anybody/chaplain
-	name = "mysterious old shard"
-	one_use = TRUE
-	grab_sleeping = FALSE
-
-/obj/item/soulstone/anybody/chaplain/sparring
-	icon_state = "purified_soulstone"
-	theme = THEME_HOLY
-
-/obj/item/soulstone/anybody/chaplain/sparring/Initialize(mapload)
-	. = ..()
-	name = "[GLOB.deity]'s punishment"
-	desc = "A prison for those who lost [GLOB.deity]'s game."
-
-/obj/item/soulstone/anybody/mining
-	grab_sleeping = FALSE
+	spent = TRUE
+	update_appearance()
 
 /obj/item/soulstone/pickup(mob/living/user)
 	..()
 	if(!role_check(user))
-		to_chat(user, span_danger("An overwhelming feeling of dread comes over you as you pick up [src]. It would be wise to be rid of this quickly."))
+		to_chat(user, span_danger("Непреодолимое чувство страха охватывает меня, когда я беру в руку [src]. Лучше бы это выкинуть и поскорее..."))
 
 /obj/item/soulstone/examine(mob/user)
 	. = ..()
 	if(role_check(user) || isobserver(user))
 		if(!grab_sleeping)
-			. += span_cult("A soulstone, used to capture a soul, either from dead humans or from freed shades.")
+			. += span_cult("Камень души, используемый для захвата души, либо у мёртвых, бессознательных или спящих людей, либо у свободных теней.")
 		else
-			. += span_cult("A soulstone, used to capture souls, either from unconscious or sleeping humans or from freed shades.")
-		. += span_cult("The captured soul can be placed into a construct shell to produce a construct, or released from the stone as a shade.")
+			.  += span_cult("Камень душ, используемый для захвата души либо у бессознательного или спящего человека, либо у свободной тени.")
+		.  += span_cult("Захваченная душа может быть помещена в оболочку конструкта для создания конструкта или выпущена из камня в виде тени.")
 		if(spent)
-			. += span_cult("This shard is spent; it is now just a creepy rock.")
+			. += span_cult("Последний отблеск мистической силы покинул этот осколок - теперь это просто жуткий камень.")
 
 /obj/item/soulstone/Destroy() //Stops the shade from being qdel'd immediately and their ghost being sent back to the arrival shuttle.
 	for(var/mob/living/simple_animal/shade/shade in src)
@@ -144,7 +159,7 @@
 	return ..()
 
 /obj/item/soulstone/proc/hot_potato(mob/living/user)
-	to_chat(user, span_userdanger("Holy magics residing in \the [src] burn your hand!"))
+	to_chat(user, span_userdanger("Святая магия, обитающая в [src], обжигает мою руку!"))
 	var/obj/item/bodypart/affecting = user.get_bodypart("[(user.active_hand_index % 2 == 0) ? "r" : "l" ]_arm")
 	affecting.receive_damage( 0, 10 ) // 10 burn damage
 	user.emote("scream")
@@ -155,21 +170,26 @@
 
 /obj/item/soulstone/attack(mob/living/carbon/human/M, mob/living/user)
 	if(!role_check(user))
-		user.Unconscious(100)
-		to_chat(user, span_userdanger("Your body is wracked with debilitating pain!"))
+		user.Unconscious(10 SECONDS)
+		to_chat(user, span_userdanger("Моё тело сотрясается от изнуряющей боли!"))
 		return
 	if(spent)
-		to_chat(user, span_warning("There is no power left in [src]."))
+		to_chat(user, span_warning("В [src] не осталось энергии."))
 		return
 	if(!ishuman(M))//If target is not a human.
 		return ..()
+	if(M == user)
+		return
 	if(IS_CULTIST(M) && IS_CULTIST(user))
-		to_chat(user, span_cultlarge("\"Come now, do not capture your bretheren's soul.\""))
+		to_chat(user, span_cultlarge("\"Даже и не думай захватывать душу своего собрата.\""))
 		return
 	if(theme == THEME_HOLY && IS_CULTIST(user))
 		hot_potato(user)
 		return
-	log_combat(user, M, "captured [M.name]'s soul", src)
+	if(HAS_TRAIT(M, TRAIT_NO_SOUL))
+		to_chat(user, span_warning("В этом теле нет души, которую можно было бы захватить."))
+		return
+	log_combat(user, M, "душа [M.name] захвачена в плен", src)
 	capture_soul(M, user)
 
 ///////////////////Options for using captured souls///////////////////////////////////////
@@ -179,7 +199,7 @@
 		return
 	if(!role_check(user))
 		user.Unconscious(100)
-		to_chat(user, span_userdanger("Your body is wracked with debilitating pain!"))
+		to_chat(user, span_userdanger("Моё тело пронзает изнуряющая боль!"))
 		return
 	if(theme == THEME_HOLY && IS_CULTIST(user))
 		hot_potato(user)
@@ -187,28 +207,21 @@
 	release_shades(user)
 
 /obj/item/soulstone/proc/release_shades(mob/user, silent = FALSE)
-	for(var/mob/living/simple_animal/shade/A in src)
-		A.forceMove(get_turf(user))
-		A.cancel_camera()
-		switch(theme)
-			if(THEME_HOLY)
-				icon_state = "purified_soulstone"
-				A.icon_state = "shade_holy"
-				A.name = "Purified [A.real_name]"
-				A.loot = list(/obj/item/ectoplasm/angelic)
-			if(THEME_WIZARD)
-				icon_state = "mystic_soulstone"
-				A.icon_state = "shade_wizard"
-				A.loot = list(/obj/item/ectoplasm/mystic)
-			if(THEME_CULT)
-				icon_state = "soulstone"
-		name = initial(name)
+	for(var/mob/living/simple_animal/shade/captured_shade in src)
+		captured_shade.forceMove(get_turf(user))
+		captured_shade.cancel_camera()
+		update_appearance()
 		if(!silent)
 			if(IS_CULTIST(user))
-				to_chat(A, "<b>You have been released from your prison, but you are still bound to the cult's will. Help them succeed in their goals at all costs.</b>")
+				to_chat(captured_shade, span_bold("Я был освобожден из своей тюрьмы, \
+					однако я всё так же верен культу! Мы добьёмся успеха в достижении нашей Великой Цели любой ценой!"))
+
 			else if(role_check(user))
-				to_chat(A, "<b>You have been released from your prison, but you are still bound to [user.real_name]'s will. Help [user.p_them()] succeed in [user.p_their()] goals at all costs.</b>")
-		was_used()
+				to_chat(captured_shade, span_bold("Я был освобожден из своей тюрьмы, \
+					но я по-прежнему связан волей [user.real_name]. Обязан помочь [user.real_name] добиться успеха в его целях \
+					любой ценой."))
+
+		on_release_spirits()
 
 /obj/item/soulstone/pre_attack(atom/A, mob/living/user, params)
 	var/mob/living/simple_animal/shade/occupant = (locate() in src)
@@ -221,20 +234,20 @@
 		return
 	if(!role_check(user))
 		user.Unconscious(10 SECONDS)
-		to_chat(user, span_userdanger("Your body is wracked with debilitating pain!"))
+		to_chat(user, span_userdanger("Моё тело сотрясается от изнуряющей боли!"))
 		return
 
-	user.visible_message("<span class='notice'>[user] holds [src] above [user.p_their()] head and forces it into [target_toolbox] with a flash of light!", \
-		span_notice("You hold [src] above your head briefly, then force it into [target_toolbox], transferring the [occupant]'s soul!"), ignored_mobs = occupant)
-	to_chat(occupant, span_userdanger("[user] holds you up briefly, then forces you into [target_toolbox]!"))
-	to_chat(occupant, span_deadsay("<b>Your eternal soul has been sacrificed to restore the soul of a toolbox. Them's the breaks!</b>"))
+	user.visible_message("<span class='notice'>[user] удерживает [src] над своей головой и помещает его в [target_toolbox] со вспышкой света!", \
+		span_notice("Я ненадолго удерживаю [src] над головой, затем помещает его в [target_toolbox], перенося душу [occupant]!"), ignored_mobs = occupant)
+	to_chat(occupant, span_userdanger("[user] ненадолго задерживает вас, а затем помещает в [target_toolbox]!"))
+	to_chat(occupant, span_deadsay("<b>Ваша вечная душа была принесена в жертву, чтобы восстановить душу человека. Это конец!</b>"))
 
 	occupant.client?.give_award(/datum/award/achievement/misc/toolbox_soul, occupant)
-	occupant.deathmessage = "shrieks out in unholy pain as [occupant.p_their()] soul is absorbed into [target_toolbox]!"
+	occupant.death_message = "кричит от нечестивой боли, когда душа [occupant] поглощается [target_toolbox]!"
 	release_shades(user, TRUE)
 	occupant.death()
 
-	target_toolbox.name = "soulful toolbox"
+	target_toolbox.name = "чистилище душ"
 	target_toolbox.icon = 'icons/obj/storage.dmi'
 	target_toolbox.icon_state = "toolbox_blue_old"
 	target_toolbox.has_soul = TRUE
@@ -242,26 +255,28 @@
 
 ///////////////////////////Transferring to constructs/////////////////////////////////////////////////////
 /obj/structure/constructshell
-	name = "empty shell"
+	name = "пустая оболочка"
 	icon = 'icons/obj/wizard.dmi'
 	icon_state = "construct_cult"
-	desc = "A wicked machine used by those skilled in magical arts. It is inactive."
+	desc = "Ужасающий конструкт, используемый теми, кто искусен в магических делах. В данный момент не активен."
 
 /obj/structure/constructshell/examine(mob/user)
 	. = ..()
 	if(IS_CULTIST(user) || IS_WIZARD(user) || user.stat == DEAD)
-		. += {"<span class='cult'>A construct shell, used to house bound souls from a soulstone.\n
-		Placing a soulstone with a soul into this shell allows you to produce your choice of the following:\n
-		An <b>Artificer</b>, which can produce <b>more shells and soulstones</b>, as well as fortifications.\n
-		A <b>Wraith</b>, which does high damage and can jaunt through walls, though it is quite fragile.\n
-		A <b>Juggernaut</b>, which is very hard to kill and can produce temporary walls, but is slow.</span>"}
+		. += {"<span class='cult'>Оболочка конструкта, используемая для размещения пленённых душ из камня души.\n
+		Помещение камня души с душой в эту оболочку позволяет вам производить следующее по вашему выбору:\n
+		<b>Ремесленник</b>, производящий <b> новые оболочки конструктов и камни душ</b>, а также возводящий укрепления.\n
+		<b>Призрак</b>, наносящий высокий урон и способный проходить сквозь стены, однако довольно хрупкий..\n
+		<b>Джагернаут</b>, крайне живучий и способный создавать временные стены, однако весьма медлительный.</span>"}
 
 /obj/structure/constructshell/attackby(obj/item/O, mob/user, params)
 	if(istype(O, /obj/item/soulstone))
 		var/obj/item/soulstone/SS = O
 		if(!IS_CULTIST(user) && !IS_WIZARD(user) && !SS.theme == THEME_HOLY)
-			to_chat(user, span_danger("An overwhelming feeling of dread comes over you as you attempt to place [SS] into the shell. It would be wise to be rid of this quickly."))
-			user.Dizzy(30)
+			to_chat(user, span_danger("Ошеломляющее чувство ужаса охватывает меня, когда я пытаюсь поместить [SS] в оболочку. Лучше бы его выкинуть и поскорее."))
+			if(isliving(user))
+				var/mob/living/living_user = user
+				living_user.dizziness = 60
 			return
 		if(SS.theme == THEME_HOLY && IS_CULTIST(user))
 			SS.hot_potato(user)
@@ -272,56 +287,67 @@
 
 /// Procs for moving soul in and out off stone
 
-/// transfer the mind of a carbon mob (which is then dusted) into a shade mob inside src. If forced, sacrifical and stat checks are skipped.
+/// Transfer the mind of a carbon mob (which is then dusted) into a shade mob inside src.
+/// If forced, sacrifical and stat checks are skipped.
 /obj/item/soulstone/proc/capture_soul(mob/living/carbon/victim, mob/user, forced = FALSE)
 	if(!iscarbon(victim)) //TODO: Add sacrifice stoning for non-organics, just because you have no body doesnt mean you dont have a soul
 		return FALSE
-	if(!forced)
-		var/datum/antagonist/cult/C = user?.mind?.has_antag_datum(/datum/antagonist/cult,TRUE)
-		if(C?.cult_team.is_sacrifice_target(victim.mind))
-			to_chat(user, span_cult("<b>\"This soul is mine.</b></span> <span class='cultlarge'>SACRIFICE THEM!\""))
-			return FALSE
 	if(contents.len)
 		return FALSE
-	if(!forced && (grab_sleeping ? victim.stat == CONSCIOUS : victim.stat != DEAD))
-		to_chat(user, "[span_userdanger("Capture failed!")]: Kill or maim the victim first!")
-		return FALSE
+
+	if(!forced)
+		var/datum/antagonist/cult/cultist = IS_CULTIST(user)
+		if(cultist)
+			var/datum/team/cult/cult_team = cultist.get_team()
+			if(victim.mind && cult_team.is_sacrifice_target(victim.mind))
+				to_chat(user, span_cult("<b>\"Эта душа принадлежит мне.</b></span> <span class='cultlarge'>ЖЕРТВА!\""))
+				return FALSE
+
+		if(grab_sleeping ? victim.stat == CONSCIOUS : victim.stat != DEAD)
+			to_chat(user, "[span_userdanger("Захват не удался!")]: Сначало надо убить или сильно покалечить жертву!")
+			return FALSE
+
+	victim.grab_ghost()
 	if(victim.client)
-		victim.unequip_everything()
 		init_shade(victim, user)
 		return TRUE
-	else
-		to_chat(user, "[span_userdanger("Capture failed!")]: The soul has already fled its mortal frame. You attempt to bring it back...")
-		INVOKE_ASYNC(src, .proc/getCultGhost, victim, user)
-		return TRUE //it'll probably get someone ;)
+
+	to_chat(user, "[span_userdanger("Захват не удался!")]: Душа уже покинула своё смертное тело. Я пытаюсь вернуть её обратно...")
+	INVOKE_ASYNC(src, .proc/get_ghost_to_replace_shade, victim, user)
+	return TRUE //it'll probably get someone ;)
 
 ///captures a shade that was previously released from a soulstone.
-/obj/item/soulstone/proc/capture_shade(mob/living/simple_animal/shade/shade, mob/user)
+/obj/item/soulstone/proc/capture_shade(mob/living/simple_animal/shade/shade, mob/living/user)
+	if(isliving(user) && !role_check(user))
+		user.Unconscious(10 SECONDS)
+		to_chat(user, span_userdanger("Моё тело пронзает изнуряющая боль!"))
+		return
 	if(contents.len)
-		to_chat(user, "[span_userdanger("Capture failed!")]: [src] is full! Free an existing soul to make room.")
+		to_chat(user, "[span_userdanger("Захват не удался!")]: [src] необходимо высвободить заточенную там душу, чтобы освободить место!")
 		return FALSE
 	shade.AddComponent(/datum/component/soulstoned, src)
+	update_appearance()
 	if(theme == THEME_HOLY)
-		icon_state = "purified_soulstone2"
-		shade.mind?.remove_antag_datum(/datum/antagonist/cult)
-	if(theme == THEME_WIZARD)
-		icon_state = "mystic_soulstone2"
-	if(theme == THEME_CULT)
-		icon_state = "soulstone2"
-	name = "soulstone: [shade.real_name]"
-	to_chat(shade, span_notice("Your soul has been captured by [src]. Its arcane energies are reknitting your ethereal form."))
+		for(var/mob/shade_to_deconvert in contents)
+			shade_to_deconvert.mind?.remove_antag_datum(/datum/antagonist/cult)
+
+	to_chat(shade, span_notice("Моя душа была захвачена в [src]. \
+		Его тайная энергия вновь вяжет мою эфирную форму."))
+
 	if(user != shade)
-		to_chat(user, "[span_info("<b>Capture successful!</b>:")] [shade.real_name]'s soul has been captured and stored within [src].")
+		to_chat(user, "[span_info("<b>Захват успешный!</b>:")] Душа [shade.real_name] \
+			был захвачена и сохранена в [src].")
+
 	return TRUE
 
 ///transfer the mind of the shade to a construct mob selected by the user, then deletes both the shade and src.
 /obj/item/soulstone/proc/transfer_to_construct(obj/structure/constructshell/shell, mob/user)
 	var/mob/living/simple_animal/shade/shade = locate() in src
 	if(!shade)
-		to_chat(user, "[span_userdanger("Creation failed!")]: [src] is empty! Go kill someone!")
+		to_chat(user, "[span_userdanger("Создание не удалось!")]: [src] пуст! Надо бы найти кого-нибудь и убить...")
 		return FALSE
 	var/construct_class = show_radial_menu(user, src, GLOB.construct_radial_images, custom_check = CALLBACK(src, .proc/check_menu, user, shell), require_near = TRUE, tooltips = TRUE)
-	if(!shell || !construct_class)
+	if(QDELETED(shell) || !construct_class)
 		return FALSE
 	make_new_construct_from_class(construct_class, theme, shade, user, FALSE, shell.loc)
 	shade.mind?.remove_antag_datum(/datum/antagonist/cult)
@@ -334,6 +360,77 @@
 		return FALSE
 	if(user.incapacitated() || !user.is_holding(src) || !user.CanReach(shell, src))
 		return FALSE
+	return TRUE
+
+/**
+ * Creates a new shade mob to inhabit the stone.
+ *
+ * victim - the body that's being shaded
+ * user - the person doing the shading. Optional.
+ * message_user - if TRUE, we send the user (if present) a message that a shade has been created / captured.
+ * shade_controller - the mob (usually, a ghost) that will take over control of the victim / new shade. Optional, if not passed the victim itself will take control.
+ */
+/obj/item/soulstone/proc/init_shade(mob/living/carbon/human/victim, mob/user, message_user = FALSE, mob/shade_controller)
+	if(!shade_controller)
+		shade_controller = victim
+	victim.stop_sound_channel(CHANNEL_HEARTBEAT)
+	var/mob/living/simple_animal/shade/soulstone_spirit = new /mob/living/simple_animal/shade(src)
+	soulstone_spirit.AddComponent(/datum/component/soulstoned, src)
+	soulstone_spirit.name = "Тень [victim.real_name]"
+	soulstone_spirit.real_name = "Тень [victim.real_name]"
+	soulstone_spirit.key = shade_controller.key
+	soulstone_spirit.copy_languages(victim, LANGUAGE_MIND)//Copies the old mobs languages into the new mob holder.
+	if(user)
+		soulstone_spirit.copy_languages(user, LANGUAGE_MASTER)
+	soulstone_spirit.update_atom_languages()
+	soulstone_spirit.grant_all_languages(FALSE, FALSE, TRUE) //Grants omnitongue
+	if(user)
+		soulstone_spirit.faction |= "[REF(user)]" //Add the master as a faction, allowing inter-mob cooperation
+		if(IS_CULTIST(user))
+			soulstone_spirit.mind.add_antag_datum(/datum/antagonist/cult)
+
+	soulstone_spirit.cancel_camera()
+	update_appearance()
+	if(user)
+		if(IS_CULTIST(user))
+			to_chat(soulstone_spirit, span_bold("Твоя душа была захвачена в плен! \
+				Теперь вы связаны волей культа. Помогите им добиться успеха в достижении своих целей любой ценой."))
+		else if(role_check(user))
+			to_chat(soulstone_spirit, span_bold("Твоя душа была захвачена в плен! Вы привязаны к воле [user.real_name]. \
+				Помогите [user.real_name] добится успеха в достижении его целей, любой ценой."))
+		if(message_user)
+			to_chat(user, "[span_info("<b>Захват успешен!</b>:")] Душа была вырвана \
+из тела [victim.p_their()] и теперь хранится в [src].")
+
+	victim.dust(drop_items = TRUE)
+
+/**
+ * Gets a ghost from dead chat to replace a missing player when a shade is created.
+ *
+ * Gets ran if a soulstone is used on a body that has no client to take over the shade.
+ *
+ * victim - the body that's being shaded
+ * user - the mob shading the body
+ *
+ * Returns FALSE if no ghosts are available or the replacement fails.
+ * Returns TRUE otherwise.
+ */
+/obj/item/soulstone/proc/get_ghost_to_replace_shade(mob/living/carbon/victim, mob/user)
+	var/mob/dead/observer/chosen_ghost
+	var/list/consenting_candidates = poll_ghost_candidates("Хотели бы вы сыграть в роли Тени?", "Культист", ROLE_CULTIST, 5 SECONDS, POLL_IGNORE_SHADE)
+	if(length(consenting_candidates))
+		chosen_ghost = pick(consenting_candidates)
+
+	if(!victim || user.incapacitated() || !user.is_holding(src) || !user.CanReach(victim, src))
+		return FALSE
+	if(!chosen_ghost || !chosen_ghost.client)
+		to_chat(user, span_danger("Нет духов, желающих стать тенью."))
+		return FALSE
+	if(contents.len) //If they used the soulstone on someone else in the meantime
+		return FALSE
+	to_chat(user, "[span_info("<b>Захват успешен!</b>:")] Дух вошел в [src], \
+		принимая на себя личность [victim].")
+	init_shade(victim, user, shade_controller = chosen_ghost)
 	return TRUE
 
 /proc/make_new_construct_from_class(construct_class, theme, mob/target, mob/creator, cultoverride, loc_override)
@@ -390,69 +487,46 @@
 	if(newstruct.mind && ((stoner && IS_CULTIST(stoner)) || cultoverride) && SSticker?.mode)
 		newstruct.mind.add_antag_datum(/datum/antagonist/cult)
 	if(IS_CULTIST(stoner) || cultoverride)
-		to_chat(newstruct, "<b>You are still bound to serve the cult[stoner ? " and [stoner]":""], follow [stoner ? stoner.p_their() : "their"] orders and help [stoner ? stoner.p_them() : "them"] complete [stoner ? stoner.p_their() : "their"] goals at all costs.</b>")
+		to_chat(newstruct, "<b>Вы все еще обязаны служить культу[stoner ? " и [stoner]":""] следовать [stoner ? stoner.p_their() : "их"] приказам и помогать [stoner ? stoner.p_them() : "им"] выполнить [stoner ? stoner.p_their() : "их"] цели любой ценой.</b>")
 	else if(stoner)
-		to_chat(newstruct, "<b>You are still bound to serve your creator, [stoner], follow [stoner.p_their()] orders and help [stoner.p_them()] complete [stoner.p_their()] goals at all costs.</b>")
+		to_chat(newstruct, "<b>Вы все еще обязаны служить своему создателю, [stoner], следовать приказам [stoner.p_their()] и помогать [stoner.p_them()] выполнить [stoner.p_their()] цели любой ценой.</b>")
 	newstruct.clear_alert("bloodsense")
 	BS = newstruct.throw_alert("bloodsense", /atom/movable/screen/alert/bloodsense)
 	if(BS)
 		BS.Cviewer = newstruct
 	newstruct.cancel_camera()
 
+/obj/item/soulstone/anybody
+	required_role = null
 
-/obj/item/soulstone/proc/init_shade(mob/living/carbon/human/victim, mob/user, message_user = FALSE, mob/shade_controller)
-	if(!shade_controller)
-		shade_controller = victim
-	victim.stop_sound_channel(CHANNEL_HEARTBEAT)
-	var/mob/living/simple_animal/shade/soulstone_spirit = new /mob/living/simple_animal/shade(src)
-	soulstone_spirit.AddComponent(/datum/component/soulstoned, src)
-	soulstone_spirit.name = "Shade of [victim.real_name]"
-	soulstone_spirit.real_name = "Shade of [victim.real_name]"
-	soulstone_spirit.key = shade_controller.key
-	soulstone_spirit.copy_languages(victim, LANGUAGE_MIND)//Copies the old mobs languages into the new mob holder.
-	if(user)
-		soulstone_spirit.copy_languages(user, LANGUAGE_MASTER)
-	soulstone_spirit.update_atom_languages()
-	soulstone_spirit.grant_all_languages(FALSE, FALSE, TRUE) //Grants omnitongue
-	if(user)
-		soulstone_spirit.faction |= "[REF(user)]" //Add the master as a faction, allowing inter-mob cooperation
-	if(user && IS_CULTIST(user))
-		soulstone_spirit.mind.add_antag_datum(/datum/antagonist/cult)
-	soulstone_spirit.cancel_camera()
-	name = "soulstone: Shade of [victim.real_name]"
-	switch(theme)
-		if(THEME_HOLY)
-			icon_state = "purified_soulstone2"
-		if(THEME_WIZARD)
-			icon_state = "mystic_soulstone2"
-		if(THEME_CULT)
-			icon_state = "soulstone2"
-	if(user)
-		if(IS_CULTIST(user))
-			to_chat(soulstone_spirit, "Your soul has been captured! You are now bound to the cult's will. Help them succeed in their goals at all costs.")
-		else if(role_check(user))
-			to_chat(soulstone_spirit, "Your soul has been captured! You are now bound to [user.real_name]'s will. Help [user.p_them()] succeed in [user.p_their()] goals at all costs.")
-		if(message_user)
-			to_chat(user, "[span_info("<b>Capture successful!</b>:")] [victim.real_name]'s soul has been ripped from [victim.p_their()] body and stored within [src].")
-	victim.dust()
+/obj/item/soulstone/mystic
+	icon_state = "mystic_soulstone"
+	theme = THEME_WIZARD
+	required_role = /datum/antagonist/wizard
 
+/obj/item/soulstone/anybody/revolver
+	one_use = TRUE
+	grab_sleeping = FALSE
 
-/obj/item/soulstone/proc/getCultGhost(mob/living/carbon/victim, mob/user)
-	var/mob/dead/observer/chosen_ghost
+/obj/item/soulstone/anybody/purified
+	icon_state = "purified_soulstone"
+	theme = THEME_HOLY
 
-	chosen_ghost = victim.get_ghost(TRUE,TRUE) //Try to grab original owner's ghost first
+/obj/item/soulstone/anybody/chaplain
+	name = "таинственный старый осколок"
+	one_use = TRUE
+	grab_sleeping = FALSE
 
-	if(!chosen_ghost || !chosen_ghost.client) //Failing that, we grab a ghosts
-		var/list/consenting_candidates = poll_ghost_candidates("Would you like to play as a Shade?", "Cultist", ROLE_CULTIST, 50, POLL_IGNORE_SHADE)
-		if(consenting_candidates.len)
-			chosen_ghost = pick(consenting_candidates)
-	if(!victim || user.incapacitated() || !user.is_holding(src) || !user.CanReach(victim, src))
-		return FALSE
-	if(!chosen_ghost || !chosen_ghost.client)
-		to_chat(user, span_danger("There were no spirits willing to become a shade."))
-		return FALSE
-	if(contents.len) //If they used the soulstone on someone else in the meantime
-		return FALSE
-	victim.unequip_everything()
-	init_shade(victim, user, shade_controller = chosen_ghost)
-	return TRUE
+/obj/item/soulstone/anybody/chaplain/sparring
+	name = "божественное наказание"
+	desc = "Тюрьма для тех, кто проиграл божественную игру."
+	icon_state = "purified_soulstone"
+	theme = THEME_HOLY
+
+/obj/item/soulstone/anybody/chaplain/sparring/Initialize(mapload)
+	. = ..()
+	name = "Наказание [GLOB.deity]"
+	desc = "Тюрьма для тех, кто проиграл игру [GLOB.deity]."
+
+/obj/item/soulstone/anybody/mining
+	grab_sleeping = FALSE

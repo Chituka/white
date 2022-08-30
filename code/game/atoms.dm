@@ -151,6 +151,8 @@
 	var/atom/orbit_target
 	///AI controller that controls this atom. type on init, then turned into an instance during runtime
 	var/datum/ai_controller/ai_controller
+	/// forensics datum, contains fingerprints, fibres, blood_dna and hiddenprints on this atom
+	var/datum/forensics/forensics
 
 /**
  * Called when an atom is created in byond (built in engine proc)
@@ -284,6 +286,9 @@
 
 	if(reagents)
 		QDEL_NULL(reagents)
+
+	if(forensics)
+		QDEL_NULL(forensics)
 
 	orbiters = null // The component is attached to us normaly and will be deleted elsewhere
 
@@ -895,9 +900,9 @@
 	var/new_blood_dna = L.get_blood_dna_list()
 	if(!new_blood_dna)
 		return FALSE
-	var/old_length = blood_DNA_length()
+	var/old_length = GET_ATOM_BLOOD_DNA_LENGTH(src)
 	add_blood_DNA(new_blood_dna)
-	if(blood_DNA_length() == old_length)
+	if(GET_ATOM_BLOOD_DNA_LENGTH(src) == old_length)
 		return FALSE
 	return TRUE
 
@@ -1593,144 +1598,6 @@
 /atom/proc/connect_to_shuttle(obj/docking_port/mobile/port, obj/docking_port/stationary/dock)
 	return
 
-/// Generic logging helper
-/atom/proc/log_message(message, message_type, color=null, log_globally=TRUE)
-	if(!log_globally)
-		return
-
-	var/log_text = "[key_name(src)] [message] [loc_name(src)]"
-	switch(message_type)
-		if(LOG_ATTACK)
-			log_attack(log_text)
-		if(LOG_SAY)
-			log_say(log_text)
-		if(LOG_WHISPER)
-			log_whisper(log_text)
-		if(LOG_EMOTE)
-			log_emote(log_text)
-		if(LOG_DSAY)
-			log_dsay(log_text)
-		if(LOG_PDA)
-			log_pda(log_text)
-		if(LOG_CHAT)
-			log_chat(log_text)
-		if(LOG_COMMENT)
-			log_comment(log_text)
-		if(LOG_TELECOMMS)
-			log_telecomms(log_text)
-		if(LOG_ECON)
-			log_econ(log_text)
-		if(LOG_OOC)
-			log_ooc(log_text)
-		if(LOG_LOBBY)
-			log_lobby(log_text)
-		if(LOG_LOOC)
-			log_looc(log_text)
-		if(LOG_ADMIN)
-			log_admin(log_text)
-		if(LOG_ADMIN_PRIVATE)
-			log_admin_private(log_text)
-		if(LOG_ASAY)
-			log_adminsay(log_text)
-		if(LOG_OWNERSHIP)
-			log_game(log_text)
-		if(LOG_GAME)
-			log_game(log_text)
-		if(LOG_MECHA)
-			log_mecha(log_text)
-		if(LOG_SHUTTLE)
-			log_shuttle(log_text)
-		if(LOG_SPEECH_INDICATORS)
-			log_speech_indicators(log_text)
-		else
-			stack_trace("Invalid individual logging type: [message_type]. Defaulting to [LOG_GAME] (LOG_GAME).")
-			log_game(log_text)
-
-/// Helper for logging chat messages or other logs with arbitrary inputs (e.g. announcements)
-/atom/proc/log_talk(message, message_type, tag=null, log_globally=TRUE, forced_by=null)
-	var/prefix = tag ? "([tag]) " : ""
-	var/suffix = forced_by ? " FORCED by [forced_by]" : ""
-	log_message("[prefix]\"[message]\"[suffix]", message_type, log_globally=log_globally)
-
-/// Helper for logging of messages with only one sender and receiver
-/proc/log_directed_talk(atom/source, atom/target, message, message_type, tag)
-	if(!tag)
-		stack_trace("Unspecified tag for private message")
-		tag = "UNKNOWN"
-
-	source.log_talk(message, message_type, tag="[tag] to [key_name(target)]")
-	if(source != target)
-		target.log_talk(message, message_type, tag="[tag] from [key_name(source)]", log_globally=FALSE)
-
-/**
- * Log a combat message in the attack log
- *
- * Arguments:
- * * atom/user - argument is the actor performing the action
- * * atom/target - argument is the target of the action
- * * what_done - is a verb describing the action (e.g. punched, throwed, kicked, etc.)
- * * atom/object - is a tool with which the action was made (usually an item)
- * * addition - is any additional text, which will be appended to the rest of the log line
- */
-/proc/log_combat(atom/user, atom/target, what_done, atom/object=null, addition=null)
-	var/ssource = key_name(user)
-	var/starget = key_name(target)
-
-	var/mob/living/living_target = target
-	var/hp = istype(living_target) ? " (NEWHP: [living_target.health]) " : ""
-
-	var/sobject = ""
-	if(object)
-		sobject = " with [object]"
-	var/saddition = ""
-	if(addition)
-		saddition = " [addition]"
-
-	var/postfix = "[sobject][saddition][hp]"
-
-	var/message = "has [what_done] [starget][postfix]"
-	if(user)
-		user.log_message(message, LOG_ATTACK, color="red")
-
-	if(user != target)
-		var/reverse_message = "has been [what_done] by [ssource][postfix]"
-		target.log_message(reverse_message, LOG_ATTACK, color="orange", log_globally=FALSE)
-
-	log_combat_extension(user, target) //фегня для киллкаунтера
-
-/**
- * log_wound() is for when someone is *attacked* and suffers a wound. Note that this only captures wounds from damage, so smites/forced wounds aren't logged, as well as demotions like cuts scabbing over
- *
- * Note that this has no info on the attack that dealt the wound: information about where damage came from isn't passed to the bodypart's damaged proc. When in doubt, check the attack log for attacks at that same time
- * TODO later: Add logging for healed wounds, though that will require some rewriting of healing code to prevent admin heals from spamming the logs. Not high priority
- *
- * Arguments:
- * * victim- The guy who got wounded
- * * suffered_wound- The wound, already applied, that we're logging. It has to already be attached so we can get the limb from it
- * * dealt_damage- How much damage is associated with the attack that dealt with this wound.
- * * dealt_wound_bonus- The wound_bonus, if one was specified, of the wounding attack
- * * dealt_bare_wound_bonus- The bare_wound_bonus, if one was specified *and applied*, of the wounding attack. Not shown if armor was present
- * * base_roll- Base wounding ability of an attack is a random number from 1 to (dealt_damage ** WOUND_DAMAGE_EXPONENT). This is the number that was rolled in there, before mods
- */
-/proc/log_wound(atom/victim, datum/wound/suffered_wound, dealt_damage, dealt_wound_bonus, dealt_bare_wound_bonus, base_roll)
-	if(QDELETED(victim) || !suffered_wound)
-		return
-	var/message = "has suffered: [suffered_wound][suffered_wound.limb ? " to [suffered_wound.limb.name]" : null]"// maybe indicate if it's a promote/demote?
-
-	if(dealt_damage)
-		message += " | Damage: [dealt_damage]"
-		// The base roll is useful since it can show how lucky someone got with the given attack. For example, dealing a cut
-		if(base_roll)
-			message += " (rolled [base_roll]/[dealt_damage ** WOUND_DAMAGE_EXPONENT])"
-
-	if(dealt_wound_bonus)
-		message += " | WB: [dealt_wound_bonus]"
-
-	if(dealt_bare_wound_bonus)
-		message += " | BWB: [dealt_bare_wound_bonus]"
-
-	victim.log_message(message, LOG_ATTACK, color="blue")
-
 /atom/proc/add_filter(name,priority,list/params)
 	LAZYINITLIST(filter_data)
 	var/list/copied_parameters = params.Copy()
@@ -2114,13 +1981,78 @@
 	// Screentips
 	var/datum/hud/active_hud = user?.hud_used
 
-	if(active_hud?.tooltip)
-		// (client?.prefs.w_toggles & TOOLTIP_USER_UP)
-		if(!isnewplayer(user) && !(client?.prefs.w_toggles & TOOLTIP_USER_RETRO))
-			active_hud.tooltip.maptext = "<span class='maptext reallybig yell' style='text-align: center; color: [isliving(src) ? "lime" : "white"];'>[uppertext(name)]</span>"
-		else
-			active_hud.tooltip.maptext = ""
+	if(!active_hud?.tooltip)
+		return
 
+	if(isnewplayer(user) || (client?.prefs.w_toggles & TOOLTIP_USER_RETRO))
+		active_hud.tooltip.maptext = ""
+		return
+
+	active_hud.tooltip.maptext_y = 18
+
+	if(client?.prefs.w_toggles & TOOLTIP_NO_CONTEXT)
+		active_hud.tooltip.maptext = "<span class='maptext reallybig yell' style='text-align: center; color: [isliving(src) ? "lime" : "white"]'>[uppertext(name)]</span>"
+		return
+
+	var/lmb_rmb_line = ""
+	var/ctrl_lmb_alt_lmb_line = ""
+	var/shift_lmb_ctrl_shift_lmb_line = ""
+	var/extra_lines = 0
+	var/extra_context = ""
+
+	if (isliving(user) || isovermind(user) || isaicamera(user))
+		var/obj/item/held_item = user.get_active_held_item()
+
+		if (flags_1 & HAS_CONTEXTUAL_SCREENTIPS_1 || held_item?.item_flags & ITEM_HAS_CONTEXTUAL_SCREENTIPS)
+			var/list/context = list()
+
+			var/contextual_screentip_returns = \
+				SEND_SIGNAL(src, COMSIG_ATOM_REQUESTING_CONTEXT_FROM_ITEM, context, held_item, user) \
+				| (held_item && SEND_SIGNAL(held_item, COMSIG_ITEM_REQUESTING_CONTEXT_FOR_TARGET, context, src, user))
+
+			if (contextual_screentip_returns & CONTEXTUAL_SCREENTIP_SET)
+				// LMB and RMB on one line...
+				var/lmb_text = (SCREENTIP_CONTEXT_LMB in context) ? "[SCREENTIP_CONTEXT_LMB]: [context[SCREENTIP_CONTEXT_LMB]]" : ""
+				var/rmb_text = (SCREENTIP_CONTEXT_RMB in context) ? "[SCREENTIP_CONTEXT_RMB]: [context[SCREENTIP_CONTEXT_RMB]]" : ""
+
+				if (lmb_text)
+					lmb_rmb_line = lmb_text
+					if (rmb_text)
+						lmb_rmb_line += " | [rmb_text]"
+				else if (rmb_text)
+					lmb_rmb_line = rmb_text
+
+				// Ctrl-LMB, Alt-LMB on one line...
+				if (lmb_rmb_line != "")
+					lmb_rmb_line += "<br>"
+					extra_lines++
+				if (SCREENTIP_CONTEXT_CTRL_LMB in context)
+					ctrl_lmb_alt_lmb_line += "[SCREENTIP_CONTEXT_CTRL_LMB]: [context[SCREENTIP_CONTEXT_CTRL_LMB]]"
+				if (SCREENTIP_CONTEXT_ALT_LMB in context)
+					if (ctrl_lmb_alt_lmb_line != "")
+						ctrl_lmb_alt_lmb_line += " | "
+					ctrl_lmb_alt_lmb_line += "[SCREENTIP_CONTEXT_ALT_LMB]: [context[SCREENTIP_CONTEXT_ALT_LMB]]"
+
+				// Shift-LMB, Ctrl-Shift-LMB on one line...
+				if (ctrl_lmb_alt_lmb_line != "")
+					ctrl_lmb_alt_lmb_line += "<br>"
+					extra_lines++
+				if (SCREENTIP_CONTEXT_SHIFT_LMB in context)
+					shift_lmb_ctrl_shift_lmb_line += "[SCREENTIP_CONTEXT_SHIFT_LMB]: [context[SCREENTIP_CONTEXT_SHIFT_LMB]]"
+				if (SCREENTIP_CONTEXT_CTRL_SHIFT_LMB in context)
+					if (shift_lmb_ctrl_shift_lmb_line != "")
+						shift_lmb_ctrl_shift_lmb_line += " | "
+					shift_lmb_ctrl_shift_lmb_line += "[SCREENTIP_CONTEXT_CTRL_SHIFT_LMB]: [context[SCREENTIP_CONTEXT_CTRL_SHIFT_LMB]]"
+
+				if (shift_lmb_ctrl_shift_lmb_line != "")
+					extra_lines++
+
+				if(extra_lines)
+					extra_context = "<br><span style='font-size: 7px'>[lmb_rmb_line][ctrl_lmb_alt_lmb_line][shift_lmb_ctrl_shift_lmb_line]</span>"
+					//first extra line pushes atom name line up 10px, subsequent lines push it up 9px, this offsets that and keeps the first line in the same place
+					active_hud.tooltip.maptext_y = 8 + (extra_lines - 1) * -9
+
+	active_hud.tooltip.maptext = "<span class='maptext reallybig yell' style='text-align: center; color: [isliving(src) ? "lime" : "white"]'>[uppertext(name)][extra_context]</span>"
 
 /// Gets a merger datum representing the connected blob of objects in the allowed_types argument
 /atom/proc/GetMergeGroup(id, list/allowed_types)

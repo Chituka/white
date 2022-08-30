@@ -36,7 +36,8 @@
 	COOLDOWN_DECLARE(say_slowmode)
 	/// The last urgent ahelp that this player sent
 	COOLDOWN_DECLARE(urgent_ahelp_cooldown)
-
+	/// Phoenix respawn delay
+	COOLDOWN_DECLARE(respawn_delay)
 		/////////
 		//OTHER//
 		/////////
@@ -222,6 +223,9 @@
 
 	/// If this client has been fully initialized or not
 	var/fully_created = FALSE
+
+	/// Does this client have typing indicators enabled?
+	var/typing_indicators = FALSE
 
 	/// Whether or not this client has standard hotkeys enabled
 	var/hotkeys = TRUE

@@ -27,6 +27,7 @@
 		"plasmareinforcedglass",
 		"titaniumglass",
 		"plastitaniumglass",
+		"trapdoor_electronics",
 		"plasteel_x10",
 		"plastitanium_x10",
 		"rglass_x10",
@@ -48,6 +49,7 @@
 		"doppler_array",
 		"experi_scanner",
 		"experimentor",
+		"fax",
 		"mechfab",
 		"packagewrap",
 		"plastic_fork",
@@ -180,6 +182,29 @@
 		"mech_hydraulic_clamp",
 	)
 
+/datum/techweb_node/mod_basic
+	id = "mod"
+	starting_node = TRUE
+	display_name = "Basic Modular Suits"
+	description = "Specialized back mounted power suits with various different modules."
+	design_ids = list(
+		"mod_boots",
+		"mod_chestplate",
+		"mod_gauntlets",
+		"mod_helmet",
+		"mod_paint_kit",
+		"mod_shell",
+		"mod_plating_standard",
+		"mod_storage",
+		"mod_welding",
+		"mod_mouthhole",
+		"mod_flashlight",
+		"mod_longfall",
+		"mod_thermal_regulator",
+		"mod_plasma",
+		"mod_sign_radio",
+	)
+
 /datum/techweb_node/mech_tools
 	id = "mech_tools"
 	starting_node = TRUE
@@ -258,27 +283,41 @@
 	description = "Стандартный пакет данных предоставляемый компанией НаноТрейзен всем научно-исследовательским станциям. Стартовый комплект рабочих скриптов и схем."
 	design_ids = list(
 		"circuit_multitool",
+		"comp_access_checker",
 		"comp_arithmetic",
+		"comp_binary_convert",
 		"comp_clock",
 		"comp_comparison",
 		"comp_concat",
 		"comp_concat_list",
+		"comp_decimal_convert",
 		"comp_delay",
 		"comp_direction",
+		"comp_element_find",
 		"comp_filter_list",
 		"comp_foreach",
+		"comp_format",
+		"comp_format_assoc",
 		"comp_get_column",
 		"comp_gps",
 		"comp_health",
 		"comp_hear",
+		"comp_id_access_reader",
+		"comp_id_getter",
+		"comp_id_info_reader",
 		"comp_index",
 		"comp_index_assoc",
 		"comp_index_table",
-		"comp_length",
 		"comp_laserpointer",
+		"comp_length",
 		"comp_light",
+		"comp_list_add",
+		"comp_list_assoc_literal",
+		"comp_list_clear",
 		"comp_list_literal",
+		"comp_list_remove",
 		"comp_logic",
+		"comp_matscanner",
 		"comp_mmi",
 		"comp_module",
 		"comp_multiplexer",
@@ -289,9 +328,11 @@
 		"comp_pressuresensor",
 		"comp_radio",
 		"comp_random",
+		"comp_reagents",
 		"comp_router",
 		"comp_select_query",
 		"comp_self",
+		"comp_set_variable_trigger",
 		"comp_soundemitter",
 		"comp_species",
 		"comp_speech",
@@ -303,8 +344,10 @@
 		"comp_timepiece",
 		"comp_tonumber",
 		"comp_tostring",
+		"comp_trigonometry",
 		"comp_typecast",
 		"comp_typecheck",
+		"comp_view_sensor",
 		"compact_remote_shell",
 		"component_printer",
 		"integrated_circuit",
@@ -860,12 +903,14 @@
 		"engineering",
 	)
 	design_ids = list(
+		"assembly_shell",
 		"bot_shell",
 		"controller_shell",
 		"dispenser_shell",
 		"door_shell",
 		"gun_shell",
 		"money_bot_shell",
+		"scanner_gate_shell",
 		"scanner_shell",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
@@ -882,9 +927,11 @@
 		"bci_shell",
 		"comp_bar_overlay",
 		"comp_bci_action",
-		"comp_target_intercept",
 		"comp_counter_overlay",
 		"comp_object_overlay",
+		"comp_target_intercept",
+		"comp_thought_listener",
+		"comp_vox",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 500)
 
@@ -1737,6 +1784,120 @@
 		"mech_gravcatapult",
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
+//MODsuit tech
+
+/datum/techweb_node/mod_advanced
+	id = "mod_advanced"
+	display_name = "Advanced Modular Suits"
+	description = "More advanced modules, to improve modular suits."
+	prereq_ids = list("robotics")
+	design_ids = list(
+		"mod_visor_diaghud",
+		"mod_gps",
+		"mod_reagent_scanner",
+		"mod_clamp",
+		"mod_drill",
+		"mod_orebag",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
+/datum/techweb_node/mod_engineering
+	id = "mod_engineering"
+	display_name = "Engineering Modular Suits"
+	description = "Engineering suits, for powered engineers."
+	prereq_ids = list("mod_advanced", "engineering")
+	design_ids = list(
+		"mod_plating_engineering",
+		"mod_visor_meson",
+		"mod_t_ray",
+		"mod_magboot",
+		"mod_tether",
+		"mod_constructor",
+		"mod_mister_atmos",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
+/datum/techweb_node/mod_advanced_engineering
+	id = "mod_advanced_engineering"
+	display_name = "Advanced Engineering Modular Suits"
+	description = "Advanced Engineering suits, for advanced powered engineers."
+	prereq_ids = list("mod_engineering", "adv_engi")
+	design_ids = list(
+		"mod_plating_atmospheric",
+		"mod_jetpack",
+		"mod_rad_protection",
+		"mod_emp_shield",
+		"mod_storage_expanded",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 3500)
+
+/datum/techweb_node/mod_medical
+	id = "mod_medical"
+	display_name = "Medical Modular Suits"
+	description = "Medical suits for quick rescue purposes."
+	prereq_ids = list("mod_advanced", "biotech")
+	design_ids = list(
+		"mod_plating_medical",
+		"mod_visor_medhud",
+		"mod_health_analyzer",
+		"mod_quick_carry",
+		"mod_injector",
+		"mod_organ_thrower",
+		"mod_dna_lock",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
+/datum/techweb_node/mod_security
+	id = "mod_security"
+	display_name = "Security Modular Suits"
+	description = "Security suits for space crime handling."
+	prereq_ids = list("mod_advanced", "sec_basic")
+	design_ids = list(
+		"mod_plating_security",
+		"mod_visor_sechud",
+		"mod_stealth",
+		"mod_mag_harness",
+		"mod_pathfinder",
+		"mod_holster",
+		"mod_sonar",
+		"mod_projectile_dampener",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
+/datum/techweb_node/mod_entertainment
+	id = "mod_entertainment"
+	display_name = "Entertainment Modular Suits"
+	description = "Powered suits for protection against low-humor environments."
+	prereq_ids = list("mod_advanced", "clown")
+	design_ids = list(
+		"mod_plating_cosmohonk",
+		"mod_bikehorn",
+		"mod_microwave_beam",
+		"mod_waddle",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
+/datum/techweb_node/mod_anomaly
+	id = "mod_anomaly"
+	display_name = "Anomalock Modular Suits"
+	description = "Modules for modular suits that require anomaly cores to function."
+	prereq_ids = list("mod_advanced", "anomaly_research")
+	design_ids = list(
+		"mod_antigrav",
+		"mod_teleporter",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 2500)
+
+/datum/techweb_node/mod_anomaly_engi
+	id = "mod_anomaly_engi"
+	display_name = "Engineering Anomalock Modular Suits"
+	description = "Advanced modules for modular suits, using anomaly cores to become even better engineers."
+	prereq_ids = list("mod_advanced_engineering", "mod_anomaly")
+	design_ids = list(
+		"mod_kinesis",
+	)
+	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = 1000)
 
 ////////////////////////mech technology////////////////////////
 /datum/techweb_node/adv_mecha
@@ -2615,7 +2776,7 @@
 /////////////////////////shuttle tech/////////////////////////
 /datum/techweb_node/basic_shuttle_tech
 	id = "basic_shuttle"
-	display_name = "Базовое шатлостроение"
+	display_name = "Базовое шаттлостроение"
 	description = "Руководство для самых маленьких или как собрать свой шаттл для чайников."
 	prereq_ids = list(
 		"bluespace_travel",

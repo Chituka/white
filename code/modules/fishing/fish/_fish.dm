@@ -128,7 +128,7 @@
 	var/weight_mod = modifier * average_weight
 	weight = max(1,gaussian(average_weight + weight_mod, weight_deviation))
 
-/obj/item/fish/Moved(atom/OldLoc, Dir)
+/obj/item/fish/Moved(atom/old_loc, movement_dir, forced, list/old_locs, momentum_change = TRUE)
 	. = ..()
 	check_environment_after_movement()
 
@@ -365,4 +365,4 @@
 			if(initial(fish.available_in_random_cases) || !case_fish_only)
 				chance_table[fish] = initial(fish.random_case_rarity)
 		probability_table[argkey] = chance_table
-	return pickweight(probability_table[argkey])
+	return pick_weight(probability_table[argkey])

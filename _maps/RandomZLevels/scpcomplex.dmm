@@ -231,7 +231,7 @@
 /obj/structure/table/reinforced,
 /obj/effect/turf_decal/stripes/full,
 /obj/machinery/light/floor/directional/north,
-/obj/item/book/granter/spell/random,
+/obj/item/book/granter/action/spell/random,
 /turf/open/floor/engine,
 /area/centcom/scp)
 "gy" = (
@@ -572,7 +572,7 @@
 /area/centcom/scp)
 "xW" = (
 /obj/machinery/light/floor,
-/mob/living/simple_animal/hostile/statue{
+/mob/living/simple_animal/hostile/netherworld/statue{
 	move_force = 900
 	},
 /turf/open/floor/engine,

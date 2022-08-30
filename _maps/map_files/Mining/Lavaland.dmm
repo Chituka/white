@@ -971,8 +971,7 @@
 /obj/machinery/power/apc{
 	dir = 8;
 	name = "Mining Station Starboard Wing APC";
-	pixel_x = -25;
-	pixel_y = 2
+	pixel_x = -25
 	},
 /obj/machinery/light{
 	dir = 8
@@ -1035,7 +1034,6 @@
 /obj/machinery/power/apc{
 	dir = 1;
 	name = "Mining Communications APC";
-	pixel_x = 1;
 	pixel_y = 25
 	},
 /obj/structure/cable,
@@ -1469,7 +1467,6 @@
 /obj/machinery/power/apc{
 	dir = 1;
 	name = "Mining Station Port Wing APC";
-	pixel_x = 1;
 	pixel_y = 25
 	},
 /obj/structure/cable,
@@ -3854,7 +3851,7 @@
 /turf/open/floor/plasteel,
 /area/mine/laborcamp)
 "uI" = (
-/obj/machinery/power/apc/auto_name/east,
+/obj/machinery/power/apc/auto_name/directional/east,
 /obj/structure/cable,
 /turf/open/floor/plating,
 /area/mine/laborcamp)

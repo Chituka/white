@@ -28,7 +28,7 @@
 	var/cure_chance = 4
 	var/carrier = FALSE //If our host is only a carrier
 	var/bypasses_immunity = FALSE //Does it skip species virus immunity check? Some things may diseases and not viruses
-	var/permeability_mod = 1
+	var/spreading_modifier = 1
 	var/severity = DISEASE_SEVERITY_NONTHREAT
 	var/list/required_organs = list()
 	var/needs_all_cures = TRUE
@@ -60,11 +60,6 @@
 
 	var/turf/source_turf = get_turf(infectee)
 	log_virus("[key_name(infectee)] was infected by virus: [src.admin_details()] at [loc_name(source_turf)]")
-
-//Return a string for admin logging uses, should describe the disease in detail
-/datum/disease/proc/admin_details()
-	return "[src.name] : [src.type]"
-
 
 ///Proc to process the disease and decide on whether to advance, cure or make the sympthoms appear. Returns a boolean on whether to continue acting on the symptoms or not.
 /datum/disease/proc/stage_act(delta_time, times_fired)
@@ -145,10 +140,31 @@
 
 /datum/disease/proc/Copy()
 	//note that stage is not copied over - the copy starts over at stage 1
-	var/static/list/copy_vars = list("name", "visibility_flags", "disease_flags", "spread_flags", "form", "desc", "agent", "spread_text",
-									"cure_text", "max_stages", "stage_prob", "viable_mobtypes", "cures", "infectivity", "cure_chance",
-									"bypasses_immunity", "permeability_mod", "severity", "required_organs", "needs_all_cures", "strain_data",
-									"infectable_biotypes", "process_dead")
+	var/static/list/copy_vars = list(
+		"name",
+		"visibility_flags",
+		"disease_flags",
+		"spread_flags",
+		"form",
+		"desc",
+		"agent",
+		"spread_text",
+		"cure_text",
+		"max_stages",
+		"stage_prob",
+		"viable_mobtypes",
+		"cures",
+		"infectivity",
+		"cure_chance",
+		"bypasses_immunity",
+		"spreading_modifier",
+		"severity",
+		"required_organs",
+		"needs_all_cures",
+		"strain_data",
+		"infectable_biotypes",
+		"process_dead"
+	)
 
 	var/datum/disease/D = copy_type ? new copy_type() : new type()
 	for(var/V in copy_vars)
@@ -170,6 +186,26 @@
 	LAZYREMOVE(affected_mob.diseases, src)	//remove the datum from the list
 	affected_mob.med_hud_set_status()
 	affected_mob = null
+
+/**
+ * Checks the given typepath against the list of viable mobtypes.
+ *
+ * Returns TRUE if the mob_type path is derived from of any entry in the viable_mobtypes list.
+ * Returns FALSE otherwise.
+ *
+ * Arguments:
+ * * mob_type - Type path to check against the viable_mobtypes list.
+ */
+/datum/disease/proc/is_viable_mobtype(mob_type)
+	for(var/viable_type in viable_mobtypes)
+		if(ispath(mob_type, viable_type))
+			return TRUE
+
+	// Let's only do this check if it fails. Did some genius coder pass in a non-type argument?
+	if(!ispath(mob_type))
+		stack_trace("Non-path argument passed to mob_type variable: [mob_type]")
+
+	return FALSE
 
 //Use this to compare severities
 /proc/get_disease_severity_value(severity)

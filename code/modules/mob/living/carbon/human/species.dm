@@ -159,6 +159,7 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	///What anim to use for gibbing
 	var/gib_anim = "gibbed-h"
 
+	var/draw_robot_hair = FALSE //DAMN ROBOTS STEALING OUR HAIR AND AIR
 
 	//Do NOT remove by setting to null. use OR make a RESPECTIVE TRAIT (removing stomach? add the NOSTOMACH trait to your species)
 	//why does it work this way? because traits also disable the downsides of not having an organ, removing organs but not having the trait will make your species die
@@ -198,6 +199,9 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 
 	///List of visual overlays created by handle_body()
 	var/list/body_vis_overlays = list()
+
+	/// Should we preload this species's organs?
+	var/preload = TRUE
 
 ///////////
 // PROCS //
@@ -430,6 +434,10 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 
 	C.add_or_update_variable_movespeed_modifier(/datum/movespeed_modifier/species, multiplicative_slowdown=speedmod)
 
+	if(draw_robot_hair)
+		for(var/obj/item/bodypart/BP in C.bodyparts)
+			BP.draw_robot_hair = TRUE
+
 	SEND_SIGNAL(C, COMSIG_SPECIES_GAIN, src, old_species)
 
 /**
@@ -482,6 +490,9 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 
 	C.remove_movespeed_modifier(/datum/movespeed_modifier/species)
 
+	for(var/obj/item/bodypart/BP in C.bodyparts)
+		BP.draw_robot_hair = initial(BP.draw_robot_hair)
+
 	SEND_SIGNAL(C, COMSIG_SPECIES_LOSS, src)
 
 /**
@@ -510,7 +521,7 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	var/dynamic_fhair_suffix = ""
 
 	//for augmented heads
-	if(HD.status == BODYPART_ROBOTIC && !yogs_draw_robot_hair)
+	if(HD.status == BODYPART_ROBOTIC && !draw_robot_hair)
 		return
 
 	//we check if our hat or helmet hides our facial hair.
@@ -1602,12 +1613,10 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	if((I.item_flags & SURGICAL_TOOL) && user.a_intent == INTENT_HELP && H.body_position == LYING_DOWN && (LAZYLEN(H.surgeries) > 0))
 		Iwound_bonus = CANT_WOUND
 
-	var/weakness = H.check_weakness(I, user)
-
 	H.send_item_attack_message(I, user, hit_area, affecting)
 
 	var/attack_direction = get_dir(user, H)
-	apply_damage(I.force * weakness, I.damtype, def_zone, armor_block, H, wound_bonus = Iwound_bonus, bare_wound_bonus = I.bare_wound_bonus, sharpness = I.get_sharpness(), attack_direction = attack_direction)
+	apply_damage(I.force, I.damtype, def_zone, armor_block, H, wound_bonus = Iwound_bonus, bare_wound_bonus = I.bare_wound_bonus, sharpness = I.get_sharpness(), attack_direction = attack_direction)
 
 	if(!I.force || GLOB.is_tournament_rules)
 		return FALSE //item force is zero
@@ -2279,3 +2288,18 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 			continue
 
 		current_part.change_bodypart(species_part)
+
+/datum/species/proc/get_types_to_preload()
+	var/list/to_store = list()
+	to_store += mutant_organs
+	//Don't preload brains, cause reuse becomes a horrible headache
+	to_store += mutantheart
+	to_store += mutantlungs
+	to_store += mutanteyes
+	to_store += mutantears
+	to_store += mutanttongue
+	to_store += mutantliver
+	to_store += mutantstomach
+	to_store += mutantappendix
+	//We don't cache mutant hands because it's not constrained enough, too high a potential for failure
+	return to_store

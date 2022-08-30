@@ -97,11 +97,10 @@
 		if(!(I.item_flags & ABSTRACT) && !(I.item_flags & EXAMINE_SKIP))
 			. += "В [get_held_index_name(get_held_index_of_item(I))] он[t_a] держит [I.get_examine_string(user)].\n"
 
-	var/datum/component/forensics/FR = GetComponent(/datum/component/forensics)
 	//gloves
 	if(gloves && !(obscured & ITEM_SLOT_GLOVES) && !(gloves.item_flags & EXAMINE_SKIP))
 		. += "А на руках у н[t_ego] [gloves.get_examine_string(user)].\n"
-	else if(FR && length(FR.blood_DNA))
+	else if(GET_ATOM_BLOOD_DNA_LENGTH(src))
 		if(num_hands)
 			. += "<span class='warning'>[ru_ego(TRUE)] рук[num_hands > 1 ? "и" : "а"] также в крови!</span>\n"
 
@@ -274,7 +273,7 @@
 
 		for(var/i in bodyparts)
 			var/obj/item/bodypart/body_part = i
-			if(body_part.get_bleed_rate())
+			if(body_part.get_part_bleed_rate())
 				bleeding_limbs += body_part
 			if(body_part.grasped_by)
 				grasped_limbs += body_part
@@ -380,7 +379,7 @@
 				msg += "<span class='deadsay'>[t_on] выглядит не очень разумно.</span>\n"
 			if(!key)
 				msg += "<span class='deadsay'>[t_on] кататоник. Стресс от жизни в глубоком космосе сильно повлиял на н[t_ego]. Восстановление маловероятно.</span>\n"
-			else if(!client)
+			else if(!client && !hide_client_absence)
 				msg += "<span class='notice'>[t_on] имеет пустой, рассеянный взгляд и кажется совершенно не реагирующим ни на что. [t_on] может выйти из этого в ближайшее время.</span>\n"
 
 	var/trait_exam = common_trait_examine()

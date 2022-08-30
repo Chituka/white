@@ -104,7 +104,7 @@
 	spread_text = "Укус обезьяны"
 	spread_flags = DISEASE_SPREAD_SPECIAL
 	viable_mobtypes = list(/mob/living/carbon/human)
-	permeability_mod = 1
+	spreading_modifier = 1
 	cure_chance = 0.5
 	disease_flags = CAN_CARRY|CAN_RESIST
 	desc = "Обезьяны, страдающие этим заболеванием, кусают людей, в результате чего люди мутируют в обезьян."
@@ -127,7 +127,6 @@
 	if(affected_mob.mind && !is_monkey(affected_mob.mind))
 		add_monkey(affected_mob.mind)
 		affected_mob.monkeyize()
-		affected_mob.ventcrawler = VENTCRAWLER_ALWAYS
 
 
 /datum/disease/transformation/jungle_fever/stage_act(delta_time, times_fired)
@@ -179,7 +178,7 @@
 	stage5	= list(span_danger("Кожа слетает с меня!"))
 	new_form = /mob/living/silicon/robot
 	infectable_biotypes = MOB_ORGANIC|MOB_UNDEAD|MOB_ROBOTIC
-	bantype = "Cyborg"
+	bantype = JOB_CYBORG
 
 
 /datum/disease/transformation/robot/stage_act(delta_time, times_fired)

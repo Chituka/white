@@ -520,7 +520,6 @@
 	dir = 5;
 	icon_state = "warningline"
 	},
-/obj/structure/tbin,
 /turf/open/floor/partyhard/steel{
 	icon_state = "b-2"
 	},
@@ -964,14 +963,14 @@
 "dI" = (
 /turf/open/floor/plating{
 	heat_capacity = 1e+006;
-	icon_state = "platingdmg1"
 	},
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/bombass)
 "dJ" = (
 /turf/open/floor/plating{
 	heat_capacity = 1e+006;
-	icon_state = "platingdmg3"
 	},
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/bombass)
 "dK" = (
 /turf/open/floor/plating,
@@ -982,14 +981,14 @@
 "dN" = (
 /turf/open/floor/plating{
 	heat_capacity = 1e+006;
-	icon_state = "platingdmg1"
 	},
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/bombass/indoors)
 "dO" = (
 /turf/open/floor/plating{
 	heat_capacity = 1e+006;
-	icon_state = "platingdmg3"
 	},
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/bombass/indoors)
 "dP" = (
 /obj/structure/closet/crate,
@@ -1000,15 +999,15 @@
 /obj/structure/closet/crate,
 /obj/effect/spawner/lootdrop/maintenance/eight,
 /turf/open/floor/plating{
-	heat_capacity = 1e+006;
-	icon_state = "panelscorched"
+	heat_capacity = 1e+006
 	},
+/obj/effect/mapping_helpers/burnt_floor,
 /area/awaymission/bombass/indoors)
 "dR" = (
 /turf/open/floor/plating{
-	heat_capacity = 1e+006;
-	icon_state = "panelscorched"
+	heat_capacity = 1e+006
 	},
+/obj/effect/mapping_helpers/burnt_floor,
 /area/awaymission/bombass/indoors)
 "dS" = (
 /obj/effect/spawner/lootdrop/snowdin/dungeonheavy,
@@ -1124,11 +1123,10 @@
 /obj/item/disk/design_disk/adv/cleric_mace,
 /turf/open/floor/plating{
 	heat_capacity = 1e+006;
-	icon_state = "platingdmg1"
 	},
+/obj/effect/mapping_helpers/broken_floor,
 /area/awaymission/bombass/indoors)
 "ev" = (
-/obj/structure/tbin,
 /turf/open/floor/plating/partyhard,
 /area/awaymission/bombass)
 "ew" = (
@@ -1165,7 +1163,6 @@
 /turf/open/floor/partyhard/stone/tiled,
 /area/awaymission/bombass/indoors)
 "eC" = (
-/obj/structure/tbin,
 /obj/item/disk/design_disk/adv/knight_gear,
 /turf/open/floor/plating,
 /area/awaymission/bombass)

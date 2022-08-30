@@ -1,5 +1,5 @@
 /datum/job/ai
-	title = "AI"
+	title = JOB_AI
 	ru_title = "ИИ"
 	auto_deadmin_role_flags = DEADMIN_POSITION_SILICON
 	faction = "Station"
@@ -15,6 +15,10 @@
 	display_order = JOB_DISPLAY_ORDER_AI
 	allow_bureaucratic_error = FALSE
 	var/do_special_check = TRUE
+
+	departments_list = list(
+		/datum/job_department/silicon,
+	)
 
 /datum/job/ai/equip(mob/living/carbon/human/H, visualsOnly, announce, latejoin, datum/outfit/outfit_override, client/preference_source = null)
 	if(visualsOnly)

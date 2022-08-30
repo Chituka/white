@@ -99,6 +99,28 @@ GENE SCANNER
 	var/advanced = FALSE
 	custom_price = PAYCHECK_HARD
 
+/obj/item/healthanalyzer/Initialize(mapload)
+	. = ..()
+	register_item_context()
+
+/obj/item/healthanalyzer/add_item_context(
+	obj/item/source,
+	list/context,
+	atom/target,
+)
+	if (!isliving(target))
+		return NONE
+
+	switch (scanmode)
+		if (SCANMODE_HEALTH)
+			context[SCREENTIP_CONTEXT_LMB] = "Сканировать состояние"
+		if (SCANMODE_WOUND)
+			context[SCREENTIP_CONTEXT_LMB] = "Сканировать раны"
+		if (SCANMODE_CHEMICAL)
+			context[SCREENTIP_CONTEXT_LMB] = "Сканировать химикаты"
+
+	return CONTEXTUAL_SCREENTIP_SET
+
 /obj/item/healthanalyzer/suicide_act(mob/living/carbon/user)
 	user.visible_message(span_suicide("[user] begins to analyze [user.ru_na()]self with [src]! The display shows that [user.p_theyre()] dead!"))
 	return BRUTELOSS
@@ -176,6 +198,8 @@ GENE SCANNER
 			render_list += "<span class='alert'>У пациента сердечный приступ: срочно требуется дефибриллирование или удар током!</span>\n"
 		if(H.has_reagent(/datum/reagent/inverse/technetium))
 			advanced = TRUE
+
+	SEND_SIGNAL(M, COMSIG_LIVING_HEALTHSCAN, render_list, advanced, user, mode)
 
 	render_list += "<span class='info'>Результаты анализа [M]:</span>\n<span class='info ml-1'>Общий статус: [mob_status]</span>\n"
 

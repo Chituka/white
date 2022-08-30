@@ -70,7 +70,7 @@ GLOBAL_LIST_EMPTY(antagonists)
 /datum/antagonist/proc/on_body_transfer(mob/living/old_body, mob/living/new_body)
 	SHOULD_CALL_PARENT(TRUE)
 	remove_innate_effects(old_body)
-	if(old_body?.stat != DEAD && !LAZYLEN(old_body.mind?.antag_datums))
+	if(old_body?.stat != DEAD && !LAZYLEN(old_body?.mind?.antag_datums))
 		old_body.remove_from_current_living_antags()
 	var/datum/action/antag_info/info_button = info_button_ref?.resolve()
 	if(info_button)
@@ -101,7 +101,7 @@ GLOBAL_LIST_EMPTY(antagonists)
 /// Handles adding and removing the clumsy mutation from clown antags. Gets called in apply/remove_innate_effects
 /datum/antagonist/proc/handle_clown_mutation(mob/living/mob_override, message, removing = TRUE)
 	var/mob/living/carbon/human/H = mob_override
-	if(H && istype(H) && owner.assigned_role == "Clown")
+	if(H && istype(H) && owner.assigned_role == JOB_CLOWN)
 		if(removing) // They're a clown becoming an antag, remove clumsy
 			H.dna.remove_mutation(CLOWNMUT)
 			if(!silent && message)
